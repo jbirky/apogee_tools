@@ -169,7 +169,7 @@ class Spectrum():
 
         elif self.d_type == 'apvisit':
 
-            self.file  = '%s/apstar_data/apVisit-r6-%s.fits' %(AP_PATH, spec_id)
+            self.file  = '%s/apvisit_data/apVisit-%s.fits' %(AP_PATH, spec_id)
 
             """ APVISIT file info:
             HDU0: master header with target information
@@ -249,7 +249,7 @@ class Spectrum():
 
         #Plot spectrum noise
         if 'noise' in items:
-            plt.plot(wave, self.sigmas, color='c', alpha=.6)
+            plt.plot(self.wave, self.sigmas, color='c', alpha=.6)
 
         #Plot continuum
         if ('cont' in items) or ('continuum' in items):
@@ -257,11 +257,11 @@ class Spectrum():
 
         #Plot aspcap model 
         if 'apModel' in items:
-            plt.plot(wave, self.apModel, color='r', alpha=.8, label='ASPCAP Model')
+            plt.plot(self.wave, self.apModel, color='r', alpha=.8, label='ASPCAP Model')
         
         #Plot read in model
         if 'model' in items:
-            plt.plot(wave, self.model, color='r', alpha=.8, label='Model')
+            plt.plot(self.wave, self.model, color='r', alpha=.8, label='Model')
 
         #Plot piece-wise model segments in different colors
         if 'model' in kwargs:
