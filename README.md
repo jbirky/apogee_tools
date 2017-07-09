@@ -42,7 +42,7 @@ Download the apogee_tools code and then set up the following environmental varia
 To download APOGEE spectrum by 2MASS name and data file type (aspcap, apStar, or apVisit):
 
 	import apogee_tools as ap
-	ap.download('2M15141711+0044474', type='aspcap')
+	ap.download(id='2M15141711+0044474', type='aspcap')
 
 For information on APOGEE data files, see the following:
 * [aspcap](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html) - combined, continuum normalized spectra
@@ -62,7 +62,7 @@ Or for single visit spectrum, indicate the index of the visit number at the end:
 
 **Search APOGEE catalog**
 
-Example search:
+Example search--will search the allStar-l30e.2.fits you downloaded:
 
 	params = ['TEFF', 'LOGG', 'M_H']
 	ranges = [[-10000,4000], [0,5], [-2,2]]
