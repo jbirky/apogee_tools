@@ -42,7 +42,7 @@ Download the apogee_tools code and then set up the following environmental varia
 To download APOGEE spectrum by 2MASS name and data file type (aspcap, apStar, or apVisit):
 
 	import apogee_tools as ap
-	ap.download(id='2M15141711+0044474', type='aspcap')
+	ap.download('2M15141711+0044474', type='aspcap')
 
 For information on APOGEE data files, see the following:
 * [aspcap](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html) - combined, continuum normalized spectra
@@ -51,11 +51,11 @@ For information on APOGEE data files, see the following:
 
 Once the data for a source has been downloaded, read aspcap or apStar files by specifying the 2MASS name and data type:
 
-	data = ap.Spectrum('2M03290406+3117075', type='aspcap')
+	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
 
 Or for single visit spectrum, indicate the index of the visit number at the end:
 
-	data = ap.Spectrum('2M03290406+3117075-0', type='apvisit')
+	data = ap.Spectrum(id='2M03290406+3117075-0', type='apvisit')
 
 
 ## Tools
@@ -83,7 +83,7 @@ Grid types:
 
 Specify which items you want to plot; `spectrum`, `apModel` (the aspcap pipeline model), and `noise` are options.
 
-	data = ap.Spectrum(id'2M03290406+3117075', type='aspcap')
+	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
 	data.plot(items=['spectrum', 'apModel', 'noise'], save=True)
 
 Compare two spectra and return chi-squared value:
@@ -98,7 +98,7 @@ Scale one spectrum to another, where `sp1` and `sp2` are spectrum objects:
 
 Perform velocity shift the wavelength of a spectrum:
 
-	data = ap.Spectrum('2M03290406+3117075', type='aspcap')
+	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
 	rv = -80 # Radial velocity in km/s
 	rv_wave = ap._rvShift(data.wave, rv=rv)
 
@@ -111,7 +111,7 @@ Calculate radial velocity by cross correlating with a template:
 	wave_rng = [15200,15700]
 
 	# Read in data
-	data = ap.Spectrum('2M03290406+3117075', type='aspcap')
+	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
 
 	# Read in a model template to cross-correlate to
 	mdl = ap.getModel(params=[3000, 5.0, 0.0], grid='BTSETTLb', xrange=wave_rng, subCont=True)
