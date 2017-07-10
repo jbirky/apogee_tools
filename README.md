@@ -49,6 +49,8 @@ For information on APOGEE data files, see the following:
 * [apStar](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/TELESCOPE/LOCATION_ID/apStar.html) - combined spectra
 * [apVisit](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html) - individual raw spectra
 
+Also infomation about the allStar file (such as parameters and photometry for all of the sources), see: [allStar](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/allStar.html)
+
 Once the data for a source has been downloaded, read aspcap or apStar files by specifying the 2MASS name and data type:
 
 	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
