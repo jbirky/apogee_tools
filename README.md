@@ -39,7 +39,7 @@ Download the apogee_tools code and then set up the following environmental varia
 
 ## Downloading and reading APOGEE data files
 
-To download APOGEE spectrum by 2MASS name and data file type (aspcap, apStar, or apVisit):
+To download APOGEE spectrum by 2MASS name and data file type (aspcap, apStar):
 
 	import apogee_tools as ap
 	ap.download('2M15141711+0044474', type='aspcap')
@@ -55,9 +55,9 @@ Once the data for a source has been downloaded, read aspcap or apStar files by s
 
 	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
 
-Or for single visit spectrum, indicate the index of the visit number at the end:
+<!-- Or for single visit spectrum, indicate the index of the visit number at the end:
 
-	data = ap.Spectrum(id='2M03290406+3117075-0', type='apvisit')
+	data = ap.Spectrum(id='2M03290406+3117075-0', type='apvisit') -->
 
 
 ## Tools
