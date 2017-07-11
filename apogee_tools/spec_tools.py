@@ -38,7 +38,7 @@ def HDF5Convert(filename, **kwargs):
             hf.create_dataset('masks', data=kwargs.get('masks'))
 
 
-class HDF5Interface1(object):
+class HDF5Interface(object):
 
     """
     class HDF5Interface(object) has been taken from the Starfish code by Ian Czekala
@@ -148,9 +148,6 @@ def loadGrid(**kwargs):
             'wave'   : wavelength 
             'flux'   : flux 
     """
-
-    import Starfish
-    from Starfish.grid_tools import HDF5Interface
 
     gridPath = kwargs.get('gridPath')
 
