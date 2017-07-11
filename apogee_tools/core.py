@@ -279,7 +279,8 @@ class Spectrum():
         ax.set_xticks(major_ticks)                                                       
         ax.set_xticks(minor_ticks, minor=True) 
         
-        plt.xlim(xrange)     
+        plt.xlim(xrange) 
+        plt.ylim([0.65, 1.25])    
     
         plt.xlabel(r'$\lambda$ [$\mathring{A}$]')
         plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]')
