@@ -233,6 +233,7 @@ class Spectrum():
     def plot(self, **kwargs):
 
         xrange = kwargs.get('xrange', [self.wave[0],self.wave[-1]])
+        yrange = kwargs.get('yrange', [.65, 1.15])
         rv     = kwargs.get('rv', 0)
         items  = kwargs.get('items', ['spec'])
         save   = kwargs.get('save', False)
@@ -279,8 +280,8 @@ class Spectrum():
         ax.set_xticks(major_ticks)                                                       
         ax.set_xticks(minor_ticks, minor=True) 
         
-        plt.xlim(xrange) 
-        plt.ylim([0.65, 1.1])    
+        plt.xlim(xrange)
+        plt.ylim(yrange)    
     
         plt.xlabel(r'$\lambda$ [$\mathring{A}$]')
         plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]')
