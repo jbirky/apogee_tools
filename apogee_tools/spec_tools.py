@@ -7,6 +7,8 @@ import h5py
 
 # from apogee_tools.core import *
 import apogee_tools as ap
+# import apogee_tools
+# from apogee_tools import Spectrum
 
 #Get the path of apogee_tools file
 FULL_PATH  = os.path.realpath(__file__)
@@ -53,8 +55,8 @@ class HDF5Interface(object):
         :param ranges: optionally select a smaller part of the grid to use.
         :type ranges: dict
         '''
-        filename = kwargs.get('hdf5_path')
-        key_name = kwargs.get('key_name')
+        filename = kwargs.get('hdf5_path', BASE + '/libraries/BTSETTLb_APOGEE.hdf5')
+        key_name = kwargs.get('key_name', "t{0:.0f}g{1:.1f}z{2:.1f}")
 
         self.filename = os.path.expandvars(filename)
         self.key_name = key_name
@@ -91,7 +93,7 @@ class HDF5Interface(object):
 
         :returns: flux array
         '''
-
+        print(parameters)
         key = self.key_name.format(*parameters)
         with h5py.File(self.filename, "r") as hdf5:
             try:
@@ -149,13 +151,18 @@ def loadGrid(**kwargs):
             'flux'   : flux 
     """
 
-    gridPath = kwargs.get('gridPath')
+    # import Starfish
+    # from Starfish.grid_tools import HDF5Interface
 
+    # optional key word arguments:
+    grid_lib = BASE + '/libraries/BTSETTLb_APOGEE.hdf5'
+
+    gridPath = kwargs.get('gridPath', grid_lib)
     myHDF5 = HDF5Interface(hdf5_path=gridPath)
 
     if 'params' in kwargs:
         params = kwargs.get('params')
-        
+
     elif ('teff' in kwargs) and ('logg' in kwargs) and ('fe_h' in kwargs):
         teff = kwargs.get('teff')
         logg = kwargs.get('logg')
@@ -235,8 +242,8 @@ def compareSpectra(sp1, sp2, **kwargs):
     """
 
     fit_range = kwargs.get('fit_range', [sp1.wave[0], sp1.wave[-1]])
-    fit_scale = kwargs.get('fit_scale', False)
-    normalize = kwargs.get('norm', False)
+    fit_scale = kwargs.get('fit_scale', True)
+    normalize = kwargs.get('norm', True)
 
     from scipy.interpolate import interp1d
 
@@ -314,7 +321,7 @@ def subtractContinuum(spec, **kwargs):
         plt.show()
         plt.close()
 
-    sub_spec = Spectrum(wave=wave, flux=sub_flux, params=spec.params)
+    sub_spec = ap.Spectrum(wave=wave, flux=sub_flux, params=spec.params)
 
     return sub_spec, continuum
 
@@ -353,7 +360,7 @@ def readModels(**kwargs):
             new_flux = flux[mask]
 
             #Create spectrum object for the model spectrum
-            sp = Spectrum(wave=new_wave, flux=new_flux, params=grid)
+            sp = ap.Spectrum(wave=new_wave, flux=new_flux, params=grid)
             
             #Subtract continuum and store in new spectrum object
             norm_sp, cont = subtractContinuum(sp, plot=False)
@@ -369,7 +376,7 @@ def readModels(**kwargs):
             new_wave = wave[mask]
             new_flux = flux[mask]
 
-            sp = Spectrum(wave=new_wave, flux=new_flux, params=grid)
+            sp = ap.Spectrum(wave=new_wave, flux=new_flux, params=grid)
             specs.append(sp)
 
     return specs
@@ -377,7 +384,9 @@ def readModels(**kwargs):
 
 def getModel(**kwargs):
 
-    #Obtain just one model, given parameters
+    """
+    Obtain just one model, given parameters. Make sure they are in order [Teff, logg, [Fe/H]]
+    """
 
     grid     = kwargs.get('grid', 'BTSETTLb') 
     grid_lib = BASE + '/libraries/' + grid + '_APOGEE.hdf5'
@@ -394,7 +403,7 @@ def getModel(**kwargs):
     m_flux = m_flux[mask]
 
     print(grid+': '+str(params))
-    model_spec = Spectrum(wave=m_wave, flux=m_flux, params=params, name=grid+': '+str(params))
+    model_spec = ap.Spectrum(wave=m_wave, flux=m_flux, params=params, name=grid+': '+str(params))
 
     #Subtract continuum from the model
     if subCont == True:
@@ -487,13 +496,13 @@ def optimizeChi(spec, **kwargs):
     new_wave = spec.wave[mask]
     new_flux = spec.flux[mask]
     new_sigm = spec.sigmas[mask]
-    spec = Spectrum(wave=new_wave, flux=new_flux, sigmas=new_sigm, name=spec.name)
+    spec = ap.Spectrum(wave=new_wave, flux=new_flux, sigmas=new_sigm, name=spec.name)
 
     chi_vals = {}
 
     #Compute chi values for each grid spectrum; append together to dictionary
     for sp in grid_specs:
-        mspec = Spectrum(wave=sp.wave, flux=sp.flux, params=sp.params)
+        mspec = ap.Spectrum(wave=sp.wave, flux=sp.flux, params=sp.params)
 
         chi, sp1, sp2 = compareSpectra(spec, mspec)
         chi_vals[sp2] = chi
