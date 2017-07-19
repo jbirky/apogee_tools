@@ -167,7 +167,7 @@ def multiParamSearch(**kwargs):
     # default save directory is in your APOGEE_DATA environmental variable folder
     if not os.path.exists(AP_PATH + '/tables'):
         os.makedirs(AP_PATH + '/tables')
-    save_dir   = kwargs.get('dir', AP_PATH + '/tables')
+    output_dir = kwargs.get('dir', AP_PATH + '/tables')
 
     data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
     'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits'}
@@ -192,10 +192,15 @@ def multiParamSearch(**kwargs):
     data_table = pd.DataFrame(data=data_dict)
 
     # Save data frame to csv file and save to the 'output' directory specified by keyword argument
-    fname = str(select) + '.csv'
+    tmin, tmax = select[0][0], select[0][1]
+    lmin, lmax = select[1][0], select[1][1]
+    mmin, mmax = select[2][0], select[2][1]
+
+    fname = 'teff_%s_%s_logg_%s_%s_feh_%s_%s.csv'%(tmin, tmax, lmin, lmax, mmin, mmax)
     if save == True:
-        data_table.to_csv(save_dir + fname)
-        print('Table saved to ', save_dir + fname)
+        save_dir = '%s/%s' %(output_dir, fname)
+        data_table.to_csv(save_dir)
+        print('Table saved to ', save_dir)
 
     return data
 
