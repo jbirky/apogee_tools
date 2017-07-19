@@ -167,53 +167,53 @@ class Spectrum():
             self.sigmas  = np.delete(self.sigmas, list(mask))
             self.noise   = self.sigmas
 
-        elif self.d_type == 'apvisit':
+        # elif self.d_type == 'apvisit':
 
-            self.file  = '%s/apvisit_data/apVisit-%s.fits' %(AP_PATH, spec_id)
+        #     self.file  = '%s/apvisit_data/apVisit-%s.fits' %(AP_PATH, spec_id)
 
-            """ APVISIT file info:
-            HDU0: master header with target information
-            HDU1: spectra: combined and individual
-            HDU2: error
-            HDU3: mask
-            HDU4: wavelength array
-            HDU5: sky
-            HDU6: sky error
-            HDU7: telluric
-            HDU8: telluric error
-            HDU9: wavelength coeficients
-            HDU10: LSF coeficients
-            Information found at: https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html
-            """
+        #     """ APVISIT file info:
+        #     HDU0: master header with target information
+        #     HDU1: spectra: combined and individual
+        #     HDU2: error
+        #     HDU3: mask
+        #     HDU4: wavelength array
+        #     HDU5: sky
+        #     HDU6: sky error
+        #     HDU7: telluric
+        #     HDU8: telluric error
+        #     HDU9: wavelength coeficients
+        #     HDU10: LSF coeficients
+        #     Information found at: https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html
+        #     """
 
-            openFile = fits.open(self.file)
+        #     openFile = fits.open(self.file)
             
-            self.HDU0  = openFile[0]
-            self.HDU1  = openFile[1]
-            self.HDU2  = openFile[2]
-            self.HDU3  = openFile[3]
-            self.HDU4  = openFile[4]
-            self.HDU5  = openFile[5]
-            self.HDU6  = openFile[6]
-            self.HDU7  = openFile[7]
-            self.HDU8  = openFile[8]
-            self.HDU9  = openFile[9]
-            self.HDU10 = openFile[10]
+        #     self.HDU0  = openFile[0]
+        #     self.HDU1  = openFile[1]
+        #     self.HDU2  = openFile[2]
+        #     self.HDU3  = openFile[3]
+        #     self.HDU4  = openFile[4]
+        #     self.HDU5  = openFile[5]
+        #     self.HDU6  = openFile[6]
+        #     self.HDU7  = openFile[7]
+        #     self.HDU8  = openFile[8]
+        #     self.HDU9  = openFile[9]
+        #     self.HDU10 = openFile[10]
 
-            hdu     = self.HDU0
-            flux    = self.HDU1
-            error   = self.HDU2
-            wave    = self.HDU3
-            sky     = self.HDU5
-            sky_err = self.HDU6
+        #     hdu     = self.HDU0
+        #     flux    = self.HDU1
+        #     error   = self.HDU2
+        #     wave    = self.HDU3
+        #     sky     = self.HDU5
+        #     sky_err = self.HDU6
 
-            #Combine the data from the three chips into one list
-            self.wave = np.array(list(wave[0]) + list(wave[1]) + list(wave[2]))
-            self.flux = np.array(list(flux[0]) + list(flux[1]) + list(flux[2]))
+        #     #Combine the data from the three chips into one list
+        #     self.wave = np.array(list(wave[0]) + list(wave[1]) + list(wave[2]))
+        #     self.flux = np.array(list(flux[0]) + list(flux[1]) + list(flux[2]))
 
-            self.sigmas = np.array(error.data)
-            self.noise  = self.sigmas
-            self.sky    = np.array(sky.data)
+        #     self.sigmas = np.array(error.data)
+        #     self.noise  = self.sigmas
+        #     self.sky    = np.array(sky.data)
 
         
         else:
@@ -236,7 +236,7 @@ class Spectrum():
         rv     = kwargs.get('rv', 0)
         items  = kwargs.get('items', ['spec'])
         save   = kwargs.get('save', False)
-        output = kwargs.get('output', self.name + '.pdf')
+        output = kwargs.get('output', str(self.name) + '.pdf')
         
         rv_wave = _rvShift(self.wave, rv=rv)
         
@@ -280,7 +280,7 @@ class Spectrum():
         ax.set_xticks(minor_ticks, minor=True) 
         
         plt.xlim(xrange) 
-        plt.ylim([0.65, 1.25])    
+        plt.ylim([0.65, 1.1])    
     
         plt.xlabel(r'$\lambda$ [$\mathring{A}$]')
         plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]')
@@ -294,7 +294,7 @@ class Spectrum():
 
     # Add more functions here to easily manipulate spectrum object (like splat):
 
-    def shift_rv(self):
+    def shift_rv(self, **kwargs):
 
         """
         Shift wavelenth of spectrum object by specific rv.
@@ -304,10 +304,10 @@ class Spectrum():
         """
 
         rv = kwargs.get('rv', -80) 
-        self.wave = _rvShift(wave, rv=rv)
+        self.wave = _rvShift(self.wave, rv=rv)
 
 
-    def broaden(self):
+    def broaden(self, **kwargs):
 
         """
         Add vsini to spectrum using PyAstronomy.
