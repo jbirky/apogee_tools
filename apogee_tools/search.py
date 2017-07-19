@@ -24,44 +24,24 @@ def searchStars(**kwargs):
     """
 
     searchval = kwargs.get('id_name')
-    release   = kwargs.get('rel', ['dr13'])
+    # release   = kwargs.get('rel', ['dr13'])
 
-    data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
-        'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits'}
-    
-    for dr in release:
+    # data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
+    #     'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits'}
 
-        print('Searching for ' + searchval + ' in ' + dr + '...')
+    #Read the database file
+    hdu        = fits.open(AP_PATH + '/allStar-l30e.2.fits')
+    keys       = hdu[1].header
+    search_par = kwargs.get('SearchPar', 'APOGEE_ID')
+    t          = hdu[1].data[search_par]
+    condition  = np.where(t==searchval)[0]
+    ap_id      = hdu[1].data['APOGEE_ID'][condition]
+    asp_id     = hdu[1].data['ASPCAP_ID'][condition]
+    loc_id     = hdu[1].data['LOCATION_ID'][condition]
 
-        #Read the database file
-        hdu        = fits.open(AP_PATH + '/' + data_releases[dr])
-        keys       = hdu[1].header
-        search_par = kwargs.get('SearchPar', 'APOGEE_ID')
-        t          = hdu[1].data[search_par]
-        condition  = np.where(t==searchval)[0]
-        ap_id      = hdu[1].data['APOGEE_ID'][condition]
-        asp_id     = hdu[1].data['ASPCAP_ID'][condition]
-        loc_id     = hdu[1].data['LOCATION_ID'][condition]
+    print(ap_id, loc_id)
 
-        print(ap_id, loc_id)
-        if len(ap_id) != 0:
-            apogee_id   = ap_id
-            location_id = loc_id[0]
-
-            print('Spectrum found in ' + dr + '!\n')
-
-            release_found = dr
-
-            break
-      
-        else:
-            print('Source ' + searchval + ' not found in ' + dr + '.\n')
-            apogee_id   = []
-            location_id = []
-
-            release_found = ''
-
-    return apogee_id, location_id
+    return ap_id, loc_id[0]
 
 
 def searchVisits(**kwargs):
@@ -174,17 +154,25 @@ def multiParamSearch(**kwargs):
 
     Input:  'par'    : names of parameters to filter by (ex: 'TEFF', 'LOGG', 'M_H'...)
             'select' : range of values for each parameter (must be in same order as 'par')
+            'dir'    : directory where you want to save search table
 
     Output: data table of stars matching search criteria; printed and saved as csv
     """
 
-    search_par = kwargs.get('par', ['TEFF', 'LOGG'])
-    select     = kwargs.get('select', [[3000, 4000], [3, 5]])
+    search_par = kwargs.get('par', ['TEFF'])
+    select     = kwargs.get('select', [[3000, 4500]])
     save       = kwargs.get('save', True)
-    output     = kwargs.get('out', str(select) + '.csv')
+    release    = kwargs.get('rel', ['dr13'])
 
-    database = db_path + '/' + 'allStar-l30e.2.fits'
+    # default save directory is in your APOGEE_DATA environmental variable folder
+    if not os.path.exists(AP_PATH + '/tables'):
+        os.makedirs(AP_PATH + '/tables')
+    save_dir   = kwargs.get('dir', AP_PATH + '/tables')
 
+    data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
+    'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits'}
+
+    database = db_path + '/allStar-l30e.2.fits'
     data = Table(fits.open(database)[1].data)
 
     for i in range(len(search_par)):
@@ -200,10 +188,14 @@ def multiParamSearch(**kwargs):
 
     # Put only interesting values into the data table: 2MASS name and aspcap parameters
     data_dict  = {'2MASS_ID':data['APOGEE_ID'], 'TEFF':data['TEFF'], 'LOGG':data['LOGG'], 'M_H':data['M_H']}
+    # data_dict = {'2MASS_ID':data['APOGEE_ID'], 'RA':data['RA'], 'DEC':data['DEC']}
+    data_table = pd.DataFrame(data=data_dict)
 
-    # Concatenate frames of all data release searches and save
+    # Save data frame to csv file and save to the 'output' directory specified by keyword argument
+    fname = str(select) + '.csv'
     if save == True:
-        data_table.to_csv('tables/'+output)
+        data_table.to_csv(save_dir + fname)
+        print('Table saved to ', save_dir + fname)
 
     return data
 
