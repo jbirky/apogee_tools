@@ -15,6 +15,7 @@ This code also borrows from two other sources, see:
 
 Dependencies:
 * astropy
+* astroquery
 * numpy 
 * pandas
 * scipy
@@ -78,7 +79,7 @@ Read in a model, specifying the parameters `[Teff, logg, [Fe/H]]`, grid type (li
 
 Grid types:
 * [PHOENIX](http://phoenix.astro.physik.uni-goettingen.de/) (Husser et. al. 2013)
-* [BTSETTL](https://phoenix.ens-lyon.fr/Grids/BT-Settl/CIFIST2011_2015/) (Allard et. al. 2010) - CIFIST 2015
+<!-- * [BTSETTL](https://phoenix.ens-lyon.fr/Grids/BT-Settl/CIFIST2011_2015/) (Allard et. al. 2010) - CIFIST 2015 -->
 * [BTSETTLb](https://phoenix.ens-lyon.fr/Grids/BT-Settl/CIFIST2011b/)  (Allard et. al. 2010) - CIFIST 2011b
 
 **Plot data**
@@ -87,6 +88,9 @@ Specify which items you want to plot; `spectrum`, `apModel` (the aspcap pipeline
 
 	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
 	data.plot(items=['spectrum', 'apModel', 'noise'], save=True)
+
+	# or plot over specific ranges, for example:
+	data.plot(xrange=[15200,16940], yrange=[.65,1.15])
 
 Compare two spectra; return `chi` (chi-squared value between data and mdl), `norm_data` (`data` spectrum normalized), and `scaled_mdl` (`mdl` which has been scaled to `data`):
 
