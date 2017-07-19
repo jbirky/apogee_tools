@@ -68,7 +68,7 @@ Example search--will search the allStar-l30e.2.fits you downloaded:
 
 	params = ['TEFF', 'LOGG', 'M_H']
 	ranges = [[-10000,4000], [0,5], [-2,2]]
-	source_table = multiParamSearch(par=params, select=ranges)
+	source_table = ap.multiParamSearch(par=params, select=ranges)
 
 **Read in a model grid**
 
@@ -96,7 +96,7 @@ Scale one spectrum to another, where `sp1` and `sp2` are spectrum objects:
 
 	scale = ap.calcScale(sp1, sp2)
 
-**Radial Velocity shift**
+<!-- **Radial Velocity shift**
 
 Perform velocity shift the wavelength of a spectrum:
 
@@ -129,3 +129,4 @@ Add rotational broadening to a model using the [PyAstronomy](http://www.hs.uni-h
 	rot_mdl = ap.smoothVSINI(mdl, vsini=15, xlim=[15200,15500], plot=True)
 
 
+ -->
