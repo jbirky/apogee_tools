@@ -68,7 +68,7 @@ Example search--will search the allStar-l30e.2.fits you downloaded:
 
 	params = ['TEFF', 'LOGG', 'M_H']
 	ranges = [[-10000,4000], [0,5], [-2,2]]
-	source_table = ap.multiParamSearch(par=params, select=ranges)
+	source_table = ap.multiParamSearch(par=params, select=ranges, save_dir='/path_to/')
 
 **Read in a model grid**
 
