@@ -42,7 +42,7 @@ Download the apogee_tools code and then set up the following environmental varia
 To download APOGEE spectrum by 2MASS name and data file type (aspcap, apStar):
 
 	import apogee_tools as ap
-	ap.download('2M15141711+0044474', type='aspcap')
+	ap.download('2M03290406+3117075', type='aspcap')
 
 For information on APOGEE data files, see the following:
 * [aspcap](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html) - combined, continuum normalized spectra
@@ -88,15 +88,15 @@ Specify which items you want to plot; `spectrum`, `apModel` (the aspcap pipeline
 	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
 	data.plot(items=['spectrum', 'apModel', 'noise'], save=True)
 
-Compare two spectra and return chi-squared value:
+Compare two spectra; return `chi` (chi-squared value between data and mdl), `norm_data` (`data` spectrum normalized), and `scaled_mdl` (`mdl` which has been scaled to `data`):
 
-	chi, spec, mdl = ap.compareSpectra(data, mdl)
+	chi, norm_data, scaled_mdl = ap.compareSpectra(data, mdl)
 
-Scale one spectrum to another, where `sp1` and `sp2` are spectrum objects:
+<!-- Scale one spectrum to another, where `sp1` and `sp2` are spectrum objects:
 
 	scale = ap.calcScale(sp1, sp2)
 
-<!-- **Radial Velocity shift**
+**Radial Velocity shift**
 
 Perform velocity shift the wavelength of a spectrum:
 
@@ -127,6 +127,5 @@ Add rotational broadening to a model using the [PyAstronomy](http://www.hs.uni-h
 
 	mdl = ap.getModel(params=[3000, 5.0, 0.0], grid='BTSETTLb', xrange=wave_rng)
 	rot_mdl = ap.smoothVSINI(mdl, vsini=15, xlim=[15200,15500], plot=True)
-
-
  -->
+
