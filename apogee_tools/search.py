@@ -87,7 +87,8 @@ def download(star_id, **kwargs):
     d_type = kwargs.get('type','aspcap').lower()
 
     # Get download directory; create if it doesn't already exist
-    dl_dir  =  AP_PATH + '/%s_data/' %(d_type)
+    default_dir = AP_PATH + '/%s_data/' %(d_type)
+    dl_dir = kwargs.get('dir', default_dir)
 
     if not os.path.exists(dl_dir):
         os.makedirs(dl_dir)
