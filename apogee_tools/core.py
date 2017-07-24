@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib import rc
+rc('font', family='serif')
 from operator import itemgetter
 import itertools
 from itertools import groupby, chain
@@ -15,6 +17,7 @@ from astropy.io import fits, ascii
 from astropy import units as u
 
 from apogee_tools.spec_tools import _rvShift
+from libraries import features
 
 #Get the path of apogee_tools file
 FULL_PATH  = os.path.realpath(__file__)
@@ -241,12 +244,12 @@ class Spectrum():
         
         rv_wave = _rvShift(self.wave, rv=rv)
         
-        fig = plt.figure(figsize=(12,5))                                                               
+        fig = plt.figure(figsize=(16,4))                                                               
         ax  = fig.add_subplot(1,1,1) 
 
         #Plot masked spectrum
         if ('spectrum' in items) or ('spec' in items):
-            plt.plot(rv_wave, self.flux, color='k', alpha=.9, label=self.name)
+            plt.plot(rv_wave, self.flux, color='k', alpha=.8, label=self.name)
 
         #Plot spectrum noise
         if 'noise' in items:
@@ -264,6 +267,28 @@ class Spectrum():
         if 'model' in items:
             plt.plot(self.wave, self.model, color='r', alpha=.8, label='Model')
 
+        #Plot and label atomic lines
+        if 'lines' in items:
+            line_list = features.lines
+            line_names = line_list.keys()
+
+            for lines in line_names:
+                for feature in line_list[lines]:
+
+                    if (feature <= xrange[1]) & (feature >= xrange[0]):
+                        # determine position of the line and label based on pixel of the spectrum
+                        xpos = min(self.wave, key=lambda x:abs(x - feature))
+                        index = list(self.wave).index(xpos)
+                        ypos = self.flux[index]
+                        plot_ypos_min = (ypos - yrange[0] -.15)/(yrange[1] - yrange[0])
+                        plot_ypos_max = (ypos - yrange[0] -.1)/(yrange[1] - yrange[0])
+
+                        plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color = 'g')
+                        plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='b', fontsize=8)
+
+        #Plot and highlight molecular bands
+        # if 'bands' in items:
+
         #Plot piece-wise model segments in different colors
         if 'model' in kwargs:
             colors = ['m', 'b', 'g', 'y', '#ffa500', 'r']
@@ -273,7 +298,7 @@ class Spectrum():
             for i in range(len(model)):
                 plt.plot(model[i]['wl'], model[i]['model'], label=labels[i],color=colors[i], alpha=.8)
         
-        plt.legend(loc='upper right')
+        plt.legend(loc='upper right', fontsize=12)
         
         major_ticks = np.arange(15100, 17000, 200)
         minor_ticks = np.arange(15100, 17000, 50)
@@ -283,8 +308,8 @@ class Spectrum():
         plt.xlim(xrange)
         plt.ylim(yrange)    
     
-        plt.xlabel(r'$\lambda$ [$\mathring{A}$]')
-        plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]')
+        plt.xlabel(r'$\lambda$ [$\mathring{A}$]', fontsize=18)
+        plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]', fontsize=18)
         plt.tight_layout()
 
         if save == True:

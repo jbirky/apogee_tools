@@ -84,13 +84,18 @@ Grid types:
 
 **Plot data**
 
-Specify which items you want to plot; `spectrum`, `apModel` (the aspcap pipeline model), and `noise` are options.
+Some plotting examples:
 
 	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
-	data.plot(items=['spectrum', 'apModel', 'noise'], save=True)
 
-	# or plot over specific ranges, for example:
-	data.plot(xrange=[15200,16940], yrange=[.65,1.15])
+	# plot spectrum
+	data.plot()
+
+	# plot aspcap model and noise:
+	data.plot(items=['spec', 'apModel', 'noise'], save=True)
+
+	# plot indentified lines (from Souto 2016):
+	data.plot(items=['spec', 'lines'], xrange=[15200,15500], yrange=[.6,1.2])
 
 Compare two spectra; return `chi` (chi-squared value between data and mdl), `norm_data` (`data` spectrum normalized), and `scaled_mdl` (`mdl` which has been scaled to `data`):
 
