@@ -30,8 +30,8 @@ Then download the APOGEE data info file for DR14:
 
 	$ cd apogee_data/
 
-	$ https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allStar-l31c.2.fits
-	$ https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allVisit-l31c.2.fits
+	$ https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allStar-l31c.2.fits --no-check-certificate
+	$ https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allVisit-l31c.2.fits --no-check-certificate
 
 Or if you don't have access, download the files for DR13:
 
