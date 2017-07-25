@@ -107,18 +107,18 @@ def broaden(wave, flux, vbroad, rotate=False, gaussian=True):
 	cvel = 3.e5
 	vres = cvel*np.median( abs((wave - np.roll(wave,1)) / wave))
 
- 	if rotate: 
-  		kern = lsf_rotate(vres, vbroad)
+	if rotate: 
+		kern = lsf_rotate(vres, vbroad)
  
- 	elif gaussian: 
- 		x    = np.arange(np.ceil(20.*vbroad/vres)+1)
-  		x    = (x / np.max(x)-0.5)*20.
-  		kern = np.exp(-0.5*x**2)
+	elif gaussian: 
+		x    = np.arange(np.ceil(20.*vbroad/vres)+1)
+		x    = (x / np.max(x)-0.5)*20.
+		kern = np.exp(-0.5*x**2)
  
- 	else: 
-  		x    = np.arange(np.ceil(20.*vbroad/vres)+1)*10.
-  		kern = np.exp(-0.5*x**2)
+	else: 
+		x    = np.arange(np.ceil(20.*vbroad/vres)+1)*10.
+		kern = np.exp(-0.5*x**2)
 
-  	kern     = kern/np.sum(kern)
+	kern     = kern/np.sum(kern)
 
 	return np.convolve(flux, kern, 'same')

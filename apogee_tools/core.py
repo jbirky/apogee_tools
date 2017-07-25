@@ -17,7 +17,7 @@ from astropy.io import fits, ascii
 from astropy import units as u
 
 from apogee_tools.spec_tools import _rvShift
-from libraries import features
+#from libraries import features
 
 #Get the path of apogee_tools file
 FULL_PATH  = os.path.realpath(__file__)
@@ -306,11 +306,11 @@ class Spectrum():
         ax.set_xticks(minor_ticks, minor=True) 
         
         plt.xlim(xrange)
-        plt.ylim(yrange)    
+        #plt.ylim(yrange)    
     
         plt.xlabel(r'$\lambda$ [$\mathring{A}$]', fontsize=18)
         plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]', fontsize=18)
-        plt.tight_layout()
+        #plt.tight_layout()
 
         if save == True:
             plt.savefig(output)
