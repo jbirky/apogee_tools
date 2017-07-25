@@ -188,7 +188,7 @@ class Spectrum(object):
             HDU10: LSF coeficients
             Information found at: https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html
             """
-            
+
             hdu   = fits.open(self.file)
             flux  = hdu[1].data
             error = hdu[2].data
@@ -219,7 +219,7 @@ class Spectrum(object):
     def plot(self, **kwargs):
 
         xrange = kwargs.get('xrange', [self.wave[0],self.wave[-1]])
-        yrange = kwargs.get('yrange')
+        yrange = kwargs.get('yrange', [min(self.flux), max(self.flux)])
         rv     = kwargs.get('rv', 0)
         items  = kwargs.get('items', ['spec'])
         save   = kwargs.get('save', False)
