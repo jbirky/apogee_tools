@@ -61,9 +61,9 @@ Once the data for a source has been downloaded, read aspcap or apStar files by s
 
 	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
 
-<!-- Or for single visit spectrum, indicate the index of the visit number at the end:
+Or for single visit spectrum, indicate the index of the visit number at the end:
 
-	data = ap.Spectrum(id='2M03290406+3117075-0', type='apvisit') -->
+	data = ap.Spectrum(id='2M03290406+3117075-0', type='apvisit')
 
 
 ## Tools
