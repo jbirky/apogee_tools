@@ -17,7 +17,7 @@ from astropy.io import fits, ascii
 from astropy import units as u
 
 from apogee_tools.spec_tools import _rvShift
-from libraries import features
+from .info import features
 
 #Get the path of apogee_tools file
 FULL_PATH  = os.path.realpath(__file__)
@@ -25,7 +25,7 @@ BASE, NAME = os.path.split(FULL_PATH)
 
 AP_PATH = os.environ['APOGEE_DATA']
 
-class Spectrum():
+class Spectrum(object):
 
     """ 
     Spectrum class for reading in apogee fits files; includes features for aspcap, apStar, and apVisit.
@@ -169,56 +169,39 @@ class Spectrum():
             self.flux    = np.delete(self.flux,list(mask))
             self.sigmas  = np.delete(self.sigmas, list(mask))
             self.noise   = self.sigmas
-
-        # elif self.d_type == 'apvisit':
-
-        #     self.file  = '%s/apvisit_data/apVisit-%s.fits' %(AP_PATH, spec_id)
-
-        #     """ APVISIT file info:
-        #     HDU0: master header with target information
-        #     HDU1: spectra: combined and individual
-        #     HDU2: error
-        #     HDU3: mask
-        #     HDU4: wavelength array
-        #     HDU5: sky
-        #     HDU6: sky error
-        #     HDU7: telluric
-        #     HDU8: telluric error
-        #     HDU9: wavelength coeficients
-        #     HDU10: LSF coeficients
-        #     Information found at: https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html
-        #     """
-
-        #     openFile = fits.open(self.file)
-            
-        #     self.HDU0  = openFile[0]
-        #     self.HDU1  = openFile[1]
-        #     self.HDU2  = openFile[2]
-        #     self.HDU3  = openFile[3]
-        #     self.HDU4  = openFile[4]
-        #     self.HDU5  = openFile[5]
-        #     self.HDU6  = openFile[6]
-        #     self.HDU7  = openFile[7]
-        #     self.HDU8  = openFile[8]
-        #     self.HDU9  = openFile[9]
-        #     self.HDU10 = openFile[10]
-
-        #     hdu     = self.HDU0
-        #     flux    = self.HDU1
-        #     error   = self.HDU2
-        #     wave    = self.HDU3
-        #     sky     = self.HDU5
-        #     sky_err = self.HDU6
-
-        #     #Combine the data from the three chips into one list
-        #     self.wave = np.array(list(wave[0]) + list(wave[1]) + list(wave[2]))
-        #     self.flux = np.array(list(flux[0]) + list(flux[1]) + list(flux[2]))
-
-        #     self.sigmas = np.array(error.data)
-        #     self.noise  = self.sigmas
-        #     self.sky    = np.array(sky.data)
-
         
+        elif self.d_type == 'apvisit':
+
+            self.file  = '%s/apvisit_data/apVisit-%s.fits' %(AP_PATH, spec_id)
+
+            """ APVISIT file info:
+            HDU0: master header with target information
+            HDU1: spectra: combined and individual
+            HDU2: error
+            HDU3: mask
+            HDU4: wavelength array
+            HDU5: sky
+            HDU6: sky error
+            HDU7: telluric
+            HDU8: telluric error
+            HDU9: wavelength coeficients
+            HDU10: LSF coeficients
+            Information found at: https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html
+            """
+            
+            hdu   = fits.open(self.file)
+            flux  = hdu[1].data
+            error = hdu[2].data
+            wave  = hdu[4].data
+
+            #Combine the data from the three chips into one list
+            self.wave = np.array(list(wave[0]) + list(wave[1]) + list(wave[2]))
+            self.flux = np.array(list(flux[0]) + list(flux[1]) + list(flux[2]))
+
+            self.sigmas = np.array(error.data)
+            self.noise  = self.sigmas
+            # self.sky    = np.array(sky.data)
+
         else:
             #Save spectrum values into the spectrum object class
             self.wave   = kwargs.get('wave', [])
@@ -231,18 +214,23 @@ class Spectrum():
             self.params = kwargs.get('params', [])   
             self.vsini  = kwargs.get('vsini', []) 
             self.type   = 'input'   
-        
+
         
     def plot(self, **kwargs):
 
         xrange = kwargs.get('xrange', [self.wave[0],self.wave[-1]])
-        yrange = kwargs.get('yrange', [.65, 1.15])
+        yrange = kwargs.get('yrange')
         rv     = kwargs.get('rv', 0)
         items  = kwargs.get('items', ['spec'])
         save   = kwargs.get('save', False)
         output = kwargs.get('output', str(self.name) + '.pdf')
+        title  = kwargs.get('title')
+        norm   = kwargs.get('norm', False)
         
         rv_wave = _rvShift(self.wave, rv=rv)
+
+        if norm == True:
+            self.flux = self.flux/max(self.flux)
         
         fig = plt.figure(figsize=(16,4))                                                               
         ax  = fig.add_subplot(1,1,1) 
@@ -286,9 +274,6 @@ class Spectrum():
                         plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color = 'g')
                         plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='b', fontsize=8)
 
-        #Plot and highlight molecular bands
-        # if 'bands' in items:
-
         #Plot piece-wise model segments in different colors
         if 'model' in kwargs:
             colors = ['m', 'b', 'g', 'y', '#ffa500', 'r']
@@ -310,6 +295,8 @@ class Spectrum():
     
         plt.xlabel(r'$\lambda$ [$\mathring{A}$]', fontsize=18)
         plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]', fontsize=18)
+        if title != None:
+            plt.title(title, fontsize=20)
         plt.tight_layout()
 
         if save == True:
@@ -355,4 +342,6 @@ class Spectrum():
 
         self.wave = broad_spec.wave
         self.flux = broad_spec.flux
+
+
 
