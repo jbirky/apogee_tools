@@ -26,12 +26,17 @@ Create a new directory to store your data files:
 
 	$ mkdir apogee_data/
 
-Then download the APOGEE data info file for DR13:
+Then download the APOGEE data info file for DR14:
 
 	$ cd apogee_data/
 
-	$ wget https://data.sdss.org/sas/dr13/apogee/spectro/redux/r6/allStar-l30e.2.fits
-	$ wget https://data.sdss.org/sas/dr13/apogee/spectro/redux/r6/allVisit-l30e.2.fits
+	$ https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allStar-l31c.2.fits --no-check-certificate
+	$ https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allVisit-l31c.2.fits --no-check-certificate
+
+Or if you don't have access, download the files for DR13:
+
+	$ wget https://data.sdss.org/sas/dr13/apogee/spectro/redux/r6/allStar-l30e.2.fits --no-check-certificate
+	$ wget https://data.sdss.org/sas/dr13/apogee/spectro/redux/r6/allVisit-l30e.2.fits --no-check-certificate
 
 Download the apogee_tools code and then set up the following environmental variables in your `.bash_profile` or `.bashrc`:
 
@@ -56,9 +61,9 @@ Once the data for a source has been downloaded, read aspcap or apStar files by s
 
 	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
 
-<!-- Or for single visit spectrum, indicate the index of the visit number at the end:
+Or for single visit spectrum, indicate the index of the visit number at the end:
 
-	data = ap.Spectrum(id='2M03290406+3117075-0', type='apvisit') -->
+	data = ap.Spectrum(id='2M03290406+3117075-0', type='apvisit')
 
 
 ## Tools
@@ -137,4 +142,11 @@ Add rotational broadening to a model using the [PyAstronomy](http://www.hs.uni-h
 	mdl = ap.getModel(params=[3000, 5.0, 0.0], grid='BTSETTLb', xrange=wave_rng)
 	rot_mdl = ap.smoothVSINI(mdl, vsini=15, xlim=[15200,15500], plot=True)
  -->
+
+<!--  Remove large file from git:
+ git filter-branch --force --index-filter 'git rm --cached -r --ignore-unmatch oops.iso' --prune-empty --tag-name-filter cat -- --all
+rm -rf .git/refs/original/
+git reflog expire --expire=now --all
+git gc --prune=now
+git gc --aggressive --prune=now -->
 

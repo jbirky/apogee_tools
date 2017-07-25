@@ -4,4 +4,4 @@ from .core import *
 from .spec_tools import *
 #from .lsf import *
 from .search import *
-from .features import *
+from .info import *
