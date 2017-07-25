@@ -394,7 +394,7 @@ def getModel(**kwargs):
     params   = kwargs.get('params', [3000, 5.0, 0.0])
     gridPath = kwargs.get('gridPath', grid_lib)
     xrange   = kwargs.get('xrange', [15200,16940])
-    subCont  = kwargs.get('subCont', True)
+    subCont  = kwargs.get('subCont', False)
 
     params, m_wave, m_flux = loadGrid(params=params, gridPath=gridPath)
 
