@@ -633,7 +633,7 @@ def smoothVSINI(mspec, **kwargs):
     from scipy.interpolate import interp1d
 
     #Input limb-darkening coefficient, vsini, plotting x range
-    limb  = kwargs.get('limb', 0)
+    limb  = kwargs.get('limb', 0.6)
     vsini = kwargs.get('vsini', 0)
     xlim  = kwargs.get('xlim')
 
