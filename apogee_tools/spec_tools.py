@@ -634,7 +634,7 @@ def smoothVSINI(mspec, **kwargs):
 
     #Input limb-darkening coefficient, vsini, plotting x range
     limb  = kwargs.get('limb', 0.6)
-    vsini = kwargs.get('vsini', 0)
+    vsini = kwargs.get('vsini', 1)
     xlim  = kwargs.get('xlim')
 
     #Read in wavelength and flux from model spectrum object
