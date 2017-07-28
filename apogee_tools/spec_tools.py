@@ -7,7 +7,7 @@ import h5py
 
 # from apogee_tools.core import *
 import apogee_tools as ap
-from .core import *
+#from .core import *
 # import apogee_tools
 # from apogee_tools import Spectrum
 
