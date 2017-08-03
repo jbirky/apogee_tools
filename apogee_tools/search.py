@@ -8,6 +8,8 @@ from astroquery.simbad import Simbad
 db_path = os.environ['APOGEE_DATA'] 
 AP_PATH = db_path
 
+data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
+    'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits', 'dr14':'allStar-l31c.2.fits'} 
 
 def searchStars(**kwargs):
 
@@ -24,13 +26,10 @@ def searchStars(**kwargs):
     """
 
     searchval = kwargs.get('id_name')
-    # release   = kwargs.get('rel', ['dr13'])
-
-    # data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
-    #     'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits'}
+    release   = kwargs.get('rel', 'dr14')
 
     #Read the database file
-    hdu        = fits.open(AP_PATH + '/allStar-l30e.2.fits')
+    hdu        = fits.open(AP_PATH + '/' + data_releases[release])
     keys       = hdu[1].header
     search_par = kwargs.get('SearchPar', 'APOGEE_ID')
     t          = hdu[1].data[search_par]
@@ -83,6 +82,8 @@ def download(star_id, **kwargs):
             'type'    : aspcap, apstar, or apvisit
     """
 
+    dr = kwargs.get('rel', 'dr14')
+
     # Datatypes to download
     d_type = kwargs.get('type','aspcap').lower()
 
@@ -93,26 +94,29 @@ def download(star_id, **kwargs):
     if not os.path.exists(dl_dir):
         os.makedirs(dl_dir)
 
-    data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
-        'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits'} 
+    key = {'dr13': ['r6','l30e','l30e.2'], 'dr14': ['r8','l31c','l31c.2']}
 
     if d_type == 'aspcap':
 
-        fname = 'aspcapStar-r6-l30e.2-' + star_id + '.fits'
+        fname = 'aspcapStar-%s-%s-%s.fits'%(key[dr][0], key[dr][2], star_id)
 
         if fname not in os.listdir(dl_dir):
 
             #Look up location id from allStar-l30e.2.fits file
-            ap_id, loc_id = searchStars(id_name=star_id, rel=['dr13'])
+            ap_id, loc_id = searchStars(id_name=star_id, rel=dr)
 
-            if len(ap_id) != 0:       
-                os.system("wget https://data.sdss.org/sas/dr13/apogee/spectro/redux/r6/stars/l30e/l30e.2/%s/%s -P %s" %(loc_id, fname, dl_dir))          
+            if len(ap_id) != 0:  
+
+                print('Downloading %s from %s'%(ap_id, dr))
+                os.system("wget https://data.sdss.org/sas/%s/apogee/spectro/redux/%s/stars/%s/%s/%s/%s -P %s" %(dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname, dl_dir)) 
+
             else:
-                print(star_id + ' does not exist in DR10, DR12, or DR13.')
+                print(star_id + ' does not exist in ' + dr)
         else:
             print('Already have file for ' + star_id)
 
     if d_type == 'apstar': 
+
         #Look up location id from allStar-l30e.2.fits file
         ap_id, loc_id = searchStars(id_name=star_id)
 
@@ -120,9 +124,9 @@ def download(star_id, **kwargs):
         
         if len(ap_id) != 0:
             if fname not in os.listdir(dl_dir):
-                os.system("wget https://data.sdss.org/sas/dr13/apogee/spectro/redux/r6/stars/apo25m/%s/%s -P %s" %(loc_id, fname, dl_dir))
+                os.system("wget https://data.sdss.org/sas/%s/apogee/spectro/redux/%s/stars/apo25m/%s/%s -P %s" %(dr, key[dr][0], loc_id, fname, dl_dir))
         else:
-            print(star_id + ' does not exist in DR10, DR12, or DR13.\n')
+            print(star_id + ' does not exist in ' + dr)
 
     if d_type == 'apvisit': #Can only download DR13 now
 
@@ -142,9 +146,9 @@ def download(star_id, **kwargs):
                 fname = 'apVisit-r6-%s-%s-%s.fits' %(plate, mjd, fiber)
 
                 if fname not in os.listdir(dl_dir):
-                    os.system("wget -O %sapVisit-%s-%s.fits https://data.sdss.org/sas/dr13/apogee/spectro/redux/r6/apo25m/%s/%s/%s" %(dl_dir, ap_id, v, plate, mjd, fname))
+                    os.system("wget -O %sapVisit-%s-%s.fits https://data.sdss.org/sas/%s/apogee/spectro/redux/%s/apo25m/%s/%s/%s" %(dr, key[dr][0], dl_dir, ap_id, v, plate, mjd, fname))
         else:
-            print(star_id + ' does not exist in DR10, DR12, or DR13.')
+            print(star_id + ' does not exist in ' + dr)
 
 
 def multiParamSearch(**kwargs):
@@ -163,7 +167,7 @@ def multiParamSearch(**kwargs):
     search_par = kwargs.get('par', ['TEFF'])
     select     = kwargs.get('select', [[3000, 4500]])
     save       = kwargs.get('save', True)
-    release    = kwargs.get('rel', ['dr13'])
+    release    = kwargs.get('rel', ['dr14'])
 
     # default save directory is in your APOGEE_DATA environmental variable folder
     if not os.path.exists(AP_PATH + '/tables'):

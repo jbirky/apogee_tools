@@ -33,11 +33,6 @@ Then download the APOGEE data info file for DR14:
 	$ https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allStar-l31c.2.fits --no-check-certificate
 	$ https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allVisit-l31c.2.fits --no-check-certificate
 
-Or if you don't have access, download the files for DR13:
-
-	$ wget https://data.sdss.org/sas/dr13/apogee/spectro/redux/r6/allStar-l30e.2.fits --no-check-certificate
-	$ wget https://data.sdss.org/sas/dr13/apogee/spectro/redux/r6/allVisit-l30e.2.fits --no-check-certificate
-
 Download the apogee_tools code and then set up the following environmental variables in your `.bash_profile` or `.bashrc`:
 
 	export PATH=$PATH:'/Users/path_to/apogee_tools'
