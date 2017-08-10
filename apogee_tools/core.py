@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.ticker import AutoMinorLocator
 from matplotlib import rc
 rc('font', family='serif')
 from operator import itemgetter
@@ -48,7 +49,8 @@ class Spectrum():
 
         if self.d_type == 'aspcap':
 
-            file = '%s/aspcap_data/aspcapStar-r6-l30e.2-%s.fits' %(AP_PATH, spec_id)
+            file_dr13 = '%s/aspcap_data/aspcapStar-r6-l30e.2-%s.fits' %(AP_PATH, spec_id)
+            file_dr14 = '%s/aspcap_data/aspcapStar-r8-l31c.2-%s.fits' %(AP_PATH, spec_id)
 
             """ ASPCAP file info:
             HDU0: The Primary Header
@@ -59,7 +61,10 @@ class Spectrum():
             Information found at https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html 
             """
 
-            openFile = fits.open(file)
+            try:
+                openFile = fits.open(file_dr14)
+            except:
+                openFile = fits.open(file_dr13)
 
             self.HDU0 = openFile[0]
             self.HDU1 = openFile[1]
@@ -107,7 +112,8 @@ class Spectrum():
 
         elif self.d_type == 'apstar':
 
-            file = '%s/apstar_data/apStar-r6-%s.fits' %(AP_PATH, spec_id)
+            file_dr13 = '%s/apstar_data/apStar-r6-%s.fits' %(AP_PATH, spec_id)
+            file_dr14 = '%s/apstar_data/apStar-r8-%s.fits' %(AP_PATH, spec_id)
 
             """ APSTAR file info:
             HDU0: master header with target information
@@ -123,7 +129,10 @@ class Spectrum():
             Information found at https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/TELESCOPE/LOCATION_ID/apStar.html 
             """
 
-            openFile = fits.open(file)
+            try:
+                openFile = fits.open(file_dr14)
+            except:
+                openFile = fits.open(file_dr13)
 
             self.HDU0 = openFile[0]
             self.HDU1 = openFile[1]
@@ -170,54 +179,37 @@ class Spectrum():
             self.sigmas  = np.delete(self.sigmas, list(mask))
             self.noise   = self.sigmas
 
-        # elif self.d_type == 'apvisit':
+        elif self.d_type == 'apvisit':
 
-        #     self.file  = '%s/apvisit_data/apVisit-%s.fits' %(AP_PATH, spec_id)
+            self.file  = '%s/apvisit_data/apVisit-%s.fits' %(AP_PATH, spec_id)
 
-        #     """ APVISIT file info:
-        #     HDU0: master header with target information
-        #     HDU1: spectra: combined and individual
-        #     HDU2: error
-        #     HDU3: mask
-        #     HDU4: wavelength array
-        #     HDU5: sky
-        #     HDU6: sky error
-        #     HDU7: telluric
-        #     HDU8: telluric error
-        #     HDU9: wavelength coeficients
-        #     HDU10: LSF coeficients
-        #     Information found at: https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html
-        #     """
+            """ APVISIT file info:
+            HDU0: master header with target information
+            HDU1: spectra: combined and individual
+            HDU2: error
+            HDU3: mask
+            HDU4: wavelength array
+            HDU5: sky
+            HDU6: sky error
+            HDU7: telluric
+            HDU8: telluric error
+            HDU9: wavelength coeficients
+            HDU10: LSF coeficients
+            Information found at: https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html
+            """
 
-        #     openFile = fits.open(self.file)
-            
-        #     self.HDU0  = openFile[0]
-        #     self.HDU1  = openFile[1]
-        #     self.HDU2  = openFile[2]
-        #     self.HDU3  = openFile[3]
-        #     self.HDU4  = openFile[4]
-        #     self.HDU5  = openFile[5]
-        #     self.HDU6  = openFile[6]
-        #     self.HDU7  = openFile[7]
-        #     self.HDU8  = openFile[8]
-        #     self.HDU9  = openFile[9]
-        #     self.HDU10 = openFile[10]
+            hdu   = fits.open(self.file)
+            flux  = hdu[1].data
+            error = hdu[2].data
+            wave  = hdu[4].data
 
-        #     hdu     = self.HDU0
-        #     flux    = self.HDU1
-        #     error   = self.HDU2
-        #     wave    = self.HDU3
-        #     sky     = self.HDU5
-        #     sky_err = self.HDU6
+            #Combine the data from the three chips into one list
+            self.wave = np.array(list(wave[0]) + list(wave[1]) + list(wave[2]))
+            self.flux = np.array(list(flux[0]) + list(flux[1]) + list(flux[2]))
 
-        #     #Combine the data from the three chips into one list
-        #     self.wave = np.array(list(wave[0]) + list(wave[1]) + list(wave[2]))
-        #     self.flux = np.array(list(flux[0]) + list(flux[1]) + list(flux[2]))
-
-        #     self.sigmas = np.array(error.data)
-        #     self.noise  = self.sigmas
-        #     self.sky    = np.array(sky.data)
-
+            self.sigmas = np.array(error.data)
+            self.noise  = self.sigmas
+            # self.sky    = np.array(sky.data)
         
         else:
             #Save spectrum values into the spectrum object class
@@ -236,9 +228,10 @@ class Spectrum():
     def plot(self, **kwargs):
 
         xrange = kwargs.get('xrange', [self.wave[0],self.wave[-1]])
-        yrange = kwargs.get('yrange', [.65, 1.15])
+        yrange = kwargs.get('yrange', [min(self.flux)-.2, max(self.flux)+.2])
         rv     = kwargs.get('rv', 0)
         items  = kwargs.get('items', ['spec'])
+        title  = kwargs.get('title')
         save   = kwargs.get('save', False)
         output = kwargs.get('output', str(self.name) + '.pdf')
         
@@ -300,17 +293,19 @@ class Spectrum():
         
         plt.legend(loc='upper right', fontsize=12)
         
-        major_ticks = np.arange(15100, 17000, 200)
-        minor_ticks = np.arange(15100, 17000, 50)
-        ax.set_xticks(major_ticks)                                                       
-        ax.set_xticks(minor_ticks, minor=True) 
         
         plt.xlim(xrange)
-        #plt.ylim(yrange)    
+        plt.ylim(yrange)    
+    
+        minor_locator = AutoMinorLocator(5)
+        ax.xaxis.set_minor_locator(minor_locator)
+        # plt.grid(which='minor') 
     
         plt.xlabel(r'$\lambda$ [$\mathring{A}$]', fontsize=18)
         plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]', fontsize=18)
-        #plt.tight_layout()
+        if title != None:
+            plt.title(title, fontsize=20)
+        plt.tight_layout()
 
         if save == True:
             plt.savefig(output)
