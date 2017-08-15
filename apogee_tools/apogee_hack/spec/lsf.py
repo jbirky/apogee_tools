@@ -9,10 +9,10 @@ import numpy
 from scipy import special, interpolate, sparse, ndimage
 import scipy.sparse.linalg
 import fitsio
-import apogee_hack.tools.read as apread
-import apogee_hack.tools.path as appath
-from apogee_hack.tools.download import _download_file
-from apogee_hack.spec.plot import apStarWavegrid
+import apogee_tools.apogee_hack.tools.read as apread
+import apogee_tools.apogee_hack.tools.path as appath
+from apogee_tools.apogee_hack.tools.download import _download_file
+from apogee_tools.apogee_hack.spec.plot import apStarWavegrid
 
 _SQRTTWO= numpy.sqrt(2.)
 # Load wavelength solutions

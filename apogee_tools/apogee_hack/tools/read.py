@@ -30,7 +30,7 @@ except ImportError:
     _ESUTIL_LOADED= False
 import fitsio
 import tqdm
-from apogee_hack.tools import path, paramIndx, download
+from apogee_tools.apogee_hack.tools import path, paramIndx, download
 _ERASESTR= "                                                                                "
 def modelspecOnApStarWavegrid(func):
     """Decorator to put a model spectrum onto the apStar wavelength grid"""

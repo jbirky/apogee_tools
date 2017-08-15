@@ -8,9 +8,9 @@ from matplotlib import pyplot
 import matplotlib.ticker as ticker
 from matplotlib.ticker import NullFormatter
 from matplotlib.backends.backend_pdf import PdfPages
-import apogee.spec.window as apwindow
-import apogee.tools.read as apread
-from apogee.tools import air2vac, atomic_number,apStarWavegrid
+import apogee_tools.apogee_hack.spec.window as apwindow
+import apogee_tools.apogee_hack.tools.read as apread
+from apogee_tools.apogee_hack.tools import air2vac, atomic_number,apStarWavegrid
 
 _LAMBDASUB= 15000
 _STARTENDSKIP= 30
