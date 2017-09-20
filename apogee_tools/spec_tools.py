@@ -189,8 +189,11 @@ def _rvShift(wave, **kwargs):
     
     rv = kwargs.get('rv', -80) 
 
-    shift   = 1 + rv/299792
+    shift   = 1. + rv/299792.
     rv_wave = wave*shift
+    print rv
+    print wave
+    print rv_wave
     
     if 'orders' in kwargs:
         
