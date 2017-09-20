@@ -6,6 +6,8 @@
 # Aug 14, 2017 Dino Chih-Chun Hsu first built
 # Aug 16, 2017 added warning
 
+import numpy as np
+
 def lsf_rotate(deltaV, Vsini, epsilon = False, velgrid = False):
 	"""Create a 1-d convolution kernel to broaden a spectrum from a rotating star
 	Can be used to derive the broadening effect (line spread function; LSF) 
@@ -80,3 +82,46 @@ def lsf_rotate(deltaV, Vsini, epsilon = False, velgrid = False):
 		return (e1*np.sqrt(x1) + e2*x1)/e3
 
 
+
+def broaden(wave, flux, vbroad, rotate=False, gaussian=True):
+	"""Broaden a spectrum with either a rotational or Gassuain kernel
+
+	Written,           A. Burgasser         Deslember 20XX
+	Ported to Python,  C. Theissen          June 2017
+
+	Args:
+	    wave (float array):   Array with the wavelengths. 
+
+	    flux (float array):   Array with the flux values corredponsing to the wavelengths.
+
+	    vbroad (float): Broadening value in km/s
+
+	    rotate (bool; optional): Compute the rotational broadening kernel
+
+	    gaussian (bool; optional): Compute the Gaussian broadening kernel
+
+
+	Returns:
+	    The spectrum convolved with the broadening kernel.
+	    This will have the same length as the input flux array.
+
+	"""
+
+	cvel = 3.e5
+	vres = cvel*np.median( abs((wave - np.roll(wave,1)) / wave))
+
+	if rotate: 
+		kern = lsf_rotate(vres, vbroad)
+ 
+	elif gaussian: 
+		x    = np.arange(np.ceil(20.*vbroad/vres)+1)
+		x    = (x / np.max(x)-0.5)*20.
+		kern = np.exp(-0.5*x**2)
+ 
+	else: 
+		x    = np.arange(np.ceil(20.*vbroad/vres)+1)*10.
+		kern = np.exp(-0.5*x**2)
+
+	kern     = kern/np.sum(kern)
+
+	return np.convolve(flux, kern, 'same')
