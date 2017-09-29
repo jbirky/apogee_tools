@@ -12,11 +12,8 @@ PLOT = True # Set this to True if you want to plot the results
 
 #### Need something here to pull a 1-d spectrum
 
+
 ### Work on the model
-
-# I just picked an APOGEE fiber. In principle this will come from the 1-d spectrum
-fiber    = 40 # APOGEE Fiber
-
 # Get a model
 mdl      = ap.getModel(params=[3200, 5.0, 0.0], grid='BTSETTLb', xrange=[15200,16940])
 
@@ -27,6 +24,7 @@ rv_wave  = ap.spec_tools._rvShift(mdl.wave, rv=10)
 newspec1 = rot.broaden(rv_wave, mdl.flux, vbroad=10)
 
 # Apply the LSF (This is borrowed from Jo Bovy's code)
+fiber    = 40 # APOGEE Fiber. I just picked an APOGEE fiber. In principle this will come from the 1-d spectrum
 xlsf     = numpy.linspace(-7.,7.,43)
 lsf1     = lsf.eval(xlsf, fiber=fiber)
 newspec2 = lsf.convolve(rv_wave, newspec1, xlsf=xlsf, lsf=lsf1, vmacro=None)
