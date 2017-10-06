@@ -191,9 +191,6 @@ def _rvShift(wave, **kwargs):
 
     shift   = 1. + rv/299792.
     rv_wave = wave*shift
-    print rv
-    print wave
-    print rv_wave
     
     if 'orders' in kwargs:
         
