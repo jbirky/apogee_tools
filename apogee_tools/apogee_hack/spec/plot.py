@@ -3,7 +3,6 @@
 ###############################################################################
 from functools import wraps
 import numpy
-from galpy.util import bovy_plot
 from matplotlib import pyplot
 import matplotlib.ticker as ticker
 from matplotlib.ticker import NullFormatter
