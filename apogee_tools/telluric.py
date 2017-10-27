@@ -1,9 +1,13 @@
 import pandas as pd
 import numpy as np
+import os
 import apogee_tools as ap
 import splat
 
+FULL_PATH  = os.path.realpath(__file__)
+BASE = os.path.split(os.path.split(FULL_PATH)[0])[0]
 AP_PATH = os.environ['APOGEE_DATA'] 
+
 
 def applyTelluric(mdl, **kwargs):
 
@@ -14,7 +18,7 @@ def applyTelluric(mdl, **kwargs):
 
     mdl = kwargs.get('mdl')
 
-    tellurics = pd.read_csv(AP_PATH + '/libraries/lw_solartrans_apogee.csv')
+    tellurics = pd.read_csv(BASE + '/libraries/lw_solartrans_apogee.csv')
 
     WaveLow  = mdl.wave
     FluxLow  = mdl.flux
