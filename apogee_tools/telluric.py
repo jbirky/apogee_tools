@@ -9,28 +9,23 @@ BASE = os.path.split(os.path.split(FULL_PATH)[0])[0]
 AP_PATH = os.environ['APOGEE_DATA'] 
 
 
-def applyTelluric(mdl, **kwargs):
+def applyTelluric(wave, flux, **kwargs):
 
     """
     Apply telluric model to PHOENIX model (or whatever grid you're using)
     @ Elizabeth Moreno
     """
 
-    mdl = kwargs.get('mdl')
-
     tellurics = pd.read_csv(BASE + '/libraries/lw_solartrans_apogee.csv')
 
-    WaveLow  = mdl.wave
-    FluxLow  = mdl.flux
-
-    WaveHigh = np.asarray(tellurics['wave'] * 10000.0)
+    WaveHigh  = np.asarray(tellurics['wave'] * 10000.0)
     TransHigh = np.asarray(tellurics['trans'])
 
     #Resampling
-    TransLow = splat.integralResample(WaveHigh, TransHigh, WaveLow)
+    TransLow  = splat.integralResample(WaveHigh, TransHigh, wave)
 
     #Getting the flux with the transmission 
-    FluxWithTrans = TransLow * FluxLow
+    FluxWithTrans = TransLow * flux
 
     telluric_flux = FluxWithTrans
     
