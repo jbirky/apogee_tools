@@ -40,7 +40,7 @@ if _APOGEE_DATA is None:
 
 # Fix for environment variables
 os.environ["RESULTS_VERS"] = "l30e.2"
-#os.environ["APOGEE_APOKASC_REDUX"] = "v6.2a"
+os.environ["APOGEE_APOKASC_REDUX"] = "v6.2a"
 # Fix for environment variables
 
 _APOGEE_REDUX= os.getenv('RESULTS_VERS')
