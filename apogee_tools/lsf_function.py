@@ -17,9 +17,9 @@ def convolveLsf(spec, **kwargs):
 	fiber = kwargs.get('fiber', 40)
 
 	xlsf = np.linspace(-7., 7., 43)
-	lsf  = lsf.eval(xlsf, fiber=fiber)
+	lsf1 = lsf.eval(xlsf, fiber=fiber)
 
-	lsf_flux = lsf.convolve(spec.wave, spec.flux, xlsf=xlsf, lsf=lsf, vmacro=None)
-	lsf_spec = ap.Spectrum(wave=spec.wave, flux=lsf_flux, name=spec.name)
+	lsf_flux = lsf.convolve(spec.wave, spec.flux, xlsf=xlsf, lsf=lsf1, vmacro=None)
+	lsf_spec = ap.Spectrum(wave=np.array(apStarWavegrid()), flux=np.array(lsf_flux[0]), name=spec.name)
 
 	return lsf_spec
