@@ -71,7 +71,7 @@ def searchVisits(**kwargs):
 
     return ap_id, plates, mjds, fibers
 
-    
+
 def download(star_id, **kwargs):
 
     """
@@ -128,27 +128,49 @@ def download(star_id, **kwargs):
         else:
             print(star_id + ' does not exist in ' + dr)
 
-    if d_type == 'apvisit': #Can only download DR13 now
+    if d_type == 'apvisit': 
 
-        #This will download the data in two formats: 
-            #(1) An hdf5 file which stores all visits
-            #(2) The individual fits files for every visit
+        """
+        Name format for the file: apVisit-APOGEE_ID_-nvisit.fits
+        """
 
         ap_id, plates, mjds, fibers = searchVisits(id_name=star_id)
         nVisits = len(plates)
 
         if len(ap_id) != 0:
+
             #Download individual visit .fits files
             for v in range(nVisits):
+
                 #Look up plate, mjd and fiber numbers from allVisit-l30e.2.fits file
-                plate, mjd, fiber = plates[v], mjds[v], fibers[v]
+                plate, mjd, fiber = str(plates[v]), str(mjds[v]), str(fibers[v])
 
-                fname = 'apVisit-r6-%s-%s-%s.fits' %(plate, mjd, fiber)
+                #make sure fiber string has proper number of zeros 
+                fiber = fiber.zfill(3)
 
-                if fname not in os.listdir(dl_dir):
-                    os.system("wget -O %sapVisit-%s-%s.fits https://data.sdss.org/sas/%s/apogee/spectro/redux/%s/apo25m/%s/%s/%s" %(dr, key[dr][0], dl_dir, ap_id, v, plate, mjd, fname))
+                dl_name   = 'apVisit-%s-%s-%s-%s.fits' %(key[dr][0], plate, mjd, fiber)
+                save_name = 'apVisit-%s-%s.fits' %(star_id, str(v))
+                
+                if save_name not in os.listdir(dl_dir):
+
+                    os.system("wget https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{} -O {}/{}" .format(str(dr), key[dr][0], plate, mjd, dl_name, dl_dir, save_name))
         else:
             print(star_id + ' does not exist in ' + dr)
+
+    # if d_type == 'ap1d':
+
+    #     #Look up url for the APOGEE ID
+    #     nvisit = kwargs.get('nvisit', 1)
+    #     frame_id = kwargs.get('frame_id', 1)
+
+    #     url_dict = get_1dspec_urls(star_id, nvisit=nvisit, frame_id=frame_id)
+
+    #     url_list = url_dict.values()
+
+    #     #finish download stuff !!
+    #     dl_dest = os.environ['APOGEE_DATA']+'/ap1d_data/'
+    #     for url in url_list:
+    #         os.system("wget {} -P {}".format(str(url), str(destination)))
 
 
 def multiParamSearch(**kwargs):

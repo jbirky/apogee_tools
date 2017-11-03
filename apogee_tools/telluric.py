@@ -16,8 +16,6 @@ def applyTelluric(mdl, **kwargs):
     @ Elizabeth Moreno
     """
 
-    mdl = kwargs.get('mdl')
-
     tellurics = pd.read_csv(BASE + '/libraries/lw_solartrans_apogee.csv')
 
     WaveLow  = mdl.wave
@@ -33,5 +31,6 @@ def applyTelluric(mdl, **kwargs):
     FluxWithTrans = TransLow * FluxLow
 
     telluric_flux = FluxWithTrans
+    telluric_spec = ap.Spectrum(wave=mdl.wave, flux=telluric_flux)
     
-    return telluric_flux
+    return telluric_spec
