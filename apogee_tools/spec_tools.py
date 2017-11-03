@@ -191,21 +191,27 @@ def _rvShift(wave, **kwargs):
 
     shift   = 1. + rv/299792.
     rv_wave = wave*shift
-    
-    if 'orders' in kwargs:
-        
-        orders       = kwargs.get('orders')
-        lambda_shift = rv_wave[0] - wave[0]
-        new_orders   = orders + lambda_shift
-
-        print('\nRadial Velocity',rv,' km/s')
-        print('\n----Orders----')
-        print(orders)
-        print('\nShift',lambda_shift)
-        print('\n----Shifted Orders----')
-        print(new_orders)
 
     return rv_wave
+
+
+def rvShiftSpec(sp, **kwargs): 
+
+    """
+    Rv shift, given spectrum object, return spectrum object
+    @Jessica Birky
+
+    Input: 'rv' : radial velocity (km/s)
+
+    """
+    
+    rv = kwargs.get('rv', -80) 
+
+    shift   = 1. + rv/299792.
+    rv_wave = sp.wave*shift
+    rv_spec = ap.Spectrum(wave=rv_wave, flux=sp.flux)
+
+    return rv_spec
 
 
 def calcScale(sp1, sp2):
