@@ -122,3 +122,20 @@ def broaden(wave, flux, vbroad, rotate=False, gaussian=True):
 	kern     = kern/np.sum(kern)
 
 	return np.convolve(flux, kern, 'same')
+
+
+
+def applyVsini(sp, **kwargs):
+
+	"""
+	Input spectrum object, apply broadening function, output spectrum object
+	"""
+
+	vsini = kwargs.get('vsini', 0)
+
+	rot_flux = broaden(sp.wave, sp.flux, vbroad=vsini)
+	rot_spec = ap.Spectrum(sp.wave, rot_flux)
+
+	return rot_spec
+
+	
