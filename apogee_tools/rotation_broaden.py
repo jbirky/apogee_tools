@@ -135,7 +135,7 @@ def applyVsini(sp, **kwargs):
 	vsini = kwargs.get('vsini', 0)
 
 	rot_flux = broaden(sp.wave, sp.flux, vbroad=vsini)
-	rot_spec = ap.Spectrum(sp.wave, rot_flux)
+	rot_spec = ap.Spectrum(wave=sp.wave, flux=rot_flux)
 
 	return rot_spec
 
