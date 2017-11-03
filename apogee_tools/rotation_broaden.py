@@ -1,4 +1,5 @@
 import numpy as np
+import apogee_tools as ap
 
 def lsf_rotate(deltaV, Vsini, epsilon = False, velgrid = False):
 	"""Create a 1-d convolution kernel to broaden a spectrum from a rotating star
