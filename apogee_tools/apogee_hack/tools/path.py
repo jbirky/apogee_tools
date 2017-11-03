@@ -37,6 +37,12 @@ if _APOGEE_DATA is None:
         raise RuntimeError("SDSS_LOCAL_SAS_MIRROR environment variable needs to be set to use the 'apogee' module")
     else:
         warnings.warn("APOGEE_DATA environment variable is deprecated in favor of SDSS_LOCAL_SAS_MIRROR; please update your environment",DeprecationWarning)
+
+# Fix for environment variables
+os.environ["RESULTS_VERS"] = "l30e.2"
+os.environ["APOGEE_APOKASC_REDUX"] = "v6.2a"
+# Fix for environment variables
+
 _APOGEE_REDUX= os.getenv('RESULTS_VERS')
 if _APOGEE_REDUX is None:
     _APOGEE_REDUX= os.getenv('APOGEE_REDUX')
