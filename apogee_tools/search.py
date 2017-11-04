@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+import apogee_tools as ap
 from astropy.table import Table
 from astropy.io import fits, ascii
 from astroquery.simbad import Simbad
@@ -10,6 +11,7 @@ AP_PATH = db_path
 
 data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
     'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits', 'dr14':'allStar-l31c.2.fits'} 
+
 
 def searchStars(**kwargs):
 
@@ -106,7 +108,6 @@ def download(star_id, **kwargs):
             ap_id, loc_id = searchStars(id_name=star_id, rel=dr)
 
             if len(ap_id) != 0:  
-
                 print('Downloading %s from %s'%(ap_id, dr))
                 os.system("wget https://data.sdss.org/sas/%s/apogee/spectro/redux/%s/stars/%s/%s/%s/%s -P %s" %(dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname, dl_dir)) 
 
@@ -131,7 +132,7 @@ def download(star_id, **kwargs):
     if d_type == 'apvisit': 
 
         """
-        Name format for the file: apVisit-APOGEE_ID_-nvisit.fits
+        Name format for the file: apVisit-APOGEE_ID-NVISIT.fits
         """
 
         ap_id, plates, mjds, fibers = searchVisits(id_name=star_id)
@@ -149,7 +150,7 @@ def download(star_id, **kwargs):
                 fiber = fiber.zfill(3)
 
                 dl_name   = 'apVisit-%s-%s-%s-%s.fits' %(key[dr][0], plate, mjd, fiber)
-                save_name = 'apVisit-%s-%s.fits' %(star_id, str(v))
+                save_name = 'apVisit-%s-%s.fits' %(star_id, str(v+1))
                 
                 if save_name not in os.listdir(dl_dir):
 
@@ -157,20 +158,43 @@ def download(star_id, **kwargs):
         else:
             print(star_id + ' does not exist in ' + dr)
 
-    # if d_type == 'ap1d':
+    if d_type == 'ap1d':
 
-    #     #Look up url for the APOGEE ID
-    #     nvisit = kwargs.get('nvisit', 1)
-    #     frame_id = kwargs.get('frame_id', 1)
+        """
+        Name format for the file: ap1d-APOGEE_ID-NVISIT-CHIP.fits
+        """
+        
+        visit = kwargs.get('visit', 1)
+        frame = kwargs.get('frame', 1)
+        index = 1
 
-    #     url_dict = get_1dspec_urls(star_id, nvisit=nvisit, frame_id=frame_id)
+        d_type = 'ap1d'
+        default_dir = AP_PATH + '/{}_data/' .format(d_type)
+        dl_dir = kwargs.get('dir', default_dir)
+        
+        print('Retrieving files for {}, VISIT{}, FRAME{}... \n'.format(star_id, visit, frame))
+        urls = ap.get_1dspec_urls(star_id, nvisit=visit, frame_id=frame)
+        chips = ['a', 'b', 'c']
 
-    #     url_list = url_dict.values()
+        try:
+            url_list = urls['visit%s'%(visit)]['FRAME%s'%(frame)]
+            
+            for i in range(len(url_list)):
+                dl_name = 'ap1D' + url_list[i].split('ap1D')[1]
+                save_name = 'ap1d-{}-{}-{}.fits' .format(star_id, visit, chips[i])
 
-    #     #finish download stuff !!
-    #     dl_dest = os.environ['APOGEE_DATA']+'/ap1d_data/'
-    #     for url in url_list:
-    #         os.system("wget {} -P {}".format(str(url), str(destination)))
+                if save_name in os.listdir(dl_dir):
+                    print('Already have file {}'.format(dl_name))
+                elif save_name not in os.listdir(dl_dir):
+                    print('Downloading {} to apogee_data/ap1d_data/{}'.format(url_list[i], save_name))
+                    print("{}/{}".format(dl_dir, save_name))
+                    os.system("wget {} -O {}/{}".format(url_list[i], dl_dir, save_name))
+                else:
+                    print('Unable to download file {}'.format(dl_fname))
+                
+        except:
+            print('Unable to retrieve file from urls: {}'.format(urls))
+            print('May be due to improperly specified visit or frame number.')
 
 
 def multiParamSearch(**kwargs):
