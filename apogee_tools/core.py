@@ -242,8 +242,8 @@ class Spectrum():
             err2  = hdu_b[2].data[fiber]
             
             hdu_c = fits.open(ChipC)
-            t3    = hdu_b[1].data[fiber] # assuming the first extension is a table
-            wave3 = hdu_b[4].data[fiber]
+            t3    = hdu_c[1].data[fiber] # assuming the first extension is a table
+            wave3 = hdu_c[4].data[fiber]
             flux3 = t3*1e-17
             err3  = hdu_c[2].data[fiber]
             
