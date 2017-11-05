@@ -166,7 +166,6 @@ def download(star_id, **kwargs):
         
         visit = kwargs.get('visit', 1)
         frame = kwargs.get('frame', 1)
-        index = 1
 
         d_type = 'ap1d'
         default_dir = AP_PATH + '/{}_data/' .format(d_type)
@@ -256,6 +255,40 @@ def multiParamSearch(**kwargs):
     return data
 
 
+def returnAspcapTable(tm_ids, **kwargs):
+
+    """
+    Return a table of parameters (in csv format) for a list of APOGEE spectra by 2MASS name
+    """
+
+    default_params = [  'APOGEE_ID', 'TEFF', 'LOGG', 'M_H', \
+                        'J', 'J_ERR', 'H', 'H_ERR', 'K', 'K_ERR', \
+                        'WASH_M', 'WASH_M_ERR', 'WASH_T2', 'WASH_T2_ERR', \
+                        'DDO51', 'DDO51_ERR', \
+                        'WASH_DDO51_GIANT_FLAG', 'WASH_DDO51_STAR_FLAG', \
+                        'RA', 'DEC', 'SNR' ]
+
+    # optional
+    params = kwargs.get('par', default_params)
+    save   = kwargs.get('save', True)
+    output = kwargs.get('out', 'aspcap_table.fits')
+
+    database = db_path + '/allStar-l31c.2.fits'
+    data = Table(fits.open(database)[1].data)
+
+    index = [np.where(data['APOGEE_ID'] == TMID)[0][0] for TMID in tm_ids]
+
+    data_dict  = {params[i]: data[params[i]][index] for i in range(len(params))}
+    # data_table = pd.DataFrame(data=data_dict)
+
+    if save == True:
+        # data_table.to_csv('tables/'+output)
+        t = Table(list(data_dict.values()), names=tuple(data_dict.keys()))
+        t.write('tables/'+str(output), format='fits')
+
+    return data_dict
+
+    
 def returnSimbadParams(id_list):
 
     """
