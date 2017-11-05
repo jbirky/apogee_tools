@@ -10,6 +10,7 @@ from .telluric import applyTelluric
 from .synthesize_grid import interpolateGrid
 from .lsf_function import convolveLsf
 from .rotation_broaden import broaden, applyVsini
+from .continuum import continuum
 
 # import .apogee_hack.spec.lsf as lsf
 # from .apogee_hack.spec.plot import apStarWavegrid
