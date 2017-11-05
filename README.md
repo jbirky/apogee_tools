@@ -54,7 +54,7 @@ For data type 'apvisit' or 'ap1d':
 	ap.download('2M03425325+2326495', type='apvisit')
 	ap.download('2M03425325+2326495', type='ap1d', visit=1, frame=1)
 
-note: type='apvisit' will download the spectra for all visits observed, while type='ap1d' will download only the visit specified (and if not specified, will default to visit=1, frame=1).
+note: `type='apvisit'` will download the spectra for all visits observed, while `type='ap1d'` will download only the visit specified (and if not specified, will default to visit=1, frame=1).
 
 For information on APOGEE data files, see the following:
 * [aspcap](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html) - combined, continuum normalized spectra
@@ -62,22 +62,22 @@ For information on APOGEE data files, see the following:
 * [apVisit](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html) - individual raw visit spectra with telluric correction
 * [ap1D](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/red/MJD5/ap1D.html) - individual raw visit spectra with NO telluric correction
 
-Also infomation about the allStar file (such as parameters and photometry for all of the sources), see: [allStar](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/allStar.html)
+Also for info about the allStar file (such as aspcap pipeline parameters and photometry for all of the sources), see: [allStar](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/allStar.html)
 
 Once the data for a source has been downloaded, read aspcap or apStar files by specifying the 2MASS name and data type:
 
-	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
+	data = ap.Spectrum(id='2M03425325+2326495', type='aspcap')
 
 Or for single visit spectrum, indicate the index of the visit number at the end:
 
-	data = ap.Spectrum(id='2M03290406+3117075', type='apvisit', visit=1)
+	data = ap.Spectrum(id='2M03425325+2326495', type='apvisit', visit=1)
 
 
-## Tools
+## Basic Tools
 
 **Search APOGEE catalog**
 
-Example search--will search the allStar-l30e.2.fits you downloaded:
+Example search--will search the `allStar-l30e.2.fits` you downloaded:
 
 	params = ['TEFF', 'LOGG', 'M_H']
 	ranges = [[-10000,4000], [0,5], [-2,2]]
@@ -113,47 +113,25 @@ Compare two spectra; return `chi` (chi-squared value between data and mdl), `nor
 
 	chi, norm_data, scaled_mdl = ap.compareSpectra(data, mdl)
 
-<!-- Scale one spectrum to another, where `sp1` and `sp2` are spectrum objects:
 
-	scale = ap.calcScale(sp1, sp2)
+## Modeling Tools
 
-**Radial Velocity shift**
+**Synthesize a model**
 
-Perform velocity shift the wavelength of a spectrum:
+First specify a dictionary of stellar parameters:
 
-	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
-	rv = -80 # Radial velocity in km/s
-	rv_wave = ap._rvShift(data.wave, rv=rv)
+	params = {'teff': 3051, 'logg': 5.2, 'z': -0.25, 'vsini': 10., 'rv': -12, 'alpha': 0.2}
 
-	# Create spectrum object with rv shift
-	spec = ap.Spectrum(wave=rv_shift, flux=data.flux, sigmas=data.sigmas, name=data.name)
-	spec.plot()
+Read in some data you are creating a model for:
 
-Calculate radial velocity by cross correlating with a template:
+	ap.download('2M01195227+8409327', type='ap1d', visit=1, frame=1)
+	data = ap.Spectrum(id='2M01195227+8409327', type='ap1d', visit=1)
 
-	wave_rng = [15200,15700]
+Look up the spectrum's fiber number:
 
-	# Read in data
-	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
+	ap_id, plates, mjds, fibers = ap.searchVisits(id_name='2M01195227+8409327')
 
-	# Read in a model template to cross-correlate to
-	mdl = ap.getModel(params=[3000, 5.0, 0.0], grid='BTSETTLb', xrange=wave_rng, subCont=True)
+Synthesize a model:
 
-	# Return radial velocity
-	rv, sp1, sp2 = ap.optimizeRV(data, mdl, xrange=wave_rng)
-
-**Rotational Broadening**
-
-Add rotational broadening to a model using the [PyAstronomy](http://www.hs.uni-hamburg.de/DE/Ins/Per/Czesla/PyA/PyA/pyaslDoc/aslDoc/rotBroad.html) routine:
-
-	mdl = ap.getModel(params=[3000, 5.0, 0.0], grid='BTSETTLb', xrange=wave_rng)
-	rot_mdl = ap.smoothVSINI(mdl, vsini=15, xlim=[15200,15500], plot=True)
- -->
-
-<!--  Remove large file from git:
- git filter-branch --force --index-filter 'git rm --cached -r --ignore-unmatch oops.iso' --prune-empty --tag-name-filter cat -- --all
-rm -rf .git/refs/original/
-git reflog expire --expire=now --all
-git gc --prune=now
-git gc --aggressive --prune=now -->
+	mdl = ap.makeModel(params=params, fiber=fibers[0], plot=True, xrange=[15678,15694])
 
