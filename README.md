@@ -1,10 +1,13 @@
 # apogee_tools
 
-Forward modeling [APOGEE](http://www.sdss.org/dr13/irspec/) spectra.
+Forward modeling pipeline for [APOGEE](http://www.sdss.org/dr13/irspec/) VLM star spectra.
 
 Authors:
+* Christian Aganze (UCSD)
 * Jessica Birky (UCSD)
-* Adam Burgasser (UCSD)
+* Adam Burgasser, PI (UCSD)
+* Dino Chih-Chun Hsu (UCSD)
+* Elizabeth Moreno (Guanajuato)
 * Chris Theissen (BU)
 
 This code also borrows from two other sources, see:
@@ -40,15 +43,24 @@ Download the apogee_tools code and then set up the following environmental varia
 
 ## Downloading and reading APOGEE data files
 
-To download APOGEE spectrum by 2MASS name and data file type (aspcap, apStar):
+To download APOGEE spectrum by 2MASS name and data type 'aspcap', or 'apstar':
 
 	import apogee_tools as ap
-	ap.download('2M03290406+3117075', type='aspcap')
+	ap.download('2M03425325+2326495', type='aspcap')
+	ap.download('2M03425325+2326495', type='apstar')
+
+For data type 'apvisit' or 'ap1d': 
+
+	ap.download('2M03425325+2326495', type='apvisit')
+	ap.download('2M03425325+2326495', type='ap1d', visit=1, frame=1)
+
+note: type='apvisit' will download the spectra for all visits observed, while type='ap1d' will download only the visit specified (and if not specified, will default to visit=1, frame=1).
 
 For information on APOGEE data files, see the following:
 * [aspcap](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html) - combined, continuum normalized spectra
 * [apStar](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/TELESCOPE/LOCATION_ID/apStar.html) - combined spectra
-* [apVisit](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html) - individual raw spectra
+* [apVisit](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html) - individual raw visit spectra with telluric correction
+* [ap1D](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/red/MJD5/ap1D.html) - individual raw visit spectra with NO telluric correction
 
 Also infomation about the allStar file (such as parameters and photometry for all of the sources), see: [allStar](https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/allStar.html)
 
@@ -58,7 +70,7 @@ Once the data for a source has been downloaded, read aspcap or apStar files by s
 
 Or for single visit spectrum, indicate the index of the visit number at the end:
 
-	data = ap.Spectrum(id='2M03290406+3117075-0', type='apvisit')
+	data = ap.Spectrum(id='2M03290406+3117075', type='apvisit', visit=1)
 
 
 ## Tools
