@@ -1,7 +1,6 @@
 import numpy as np
 import apogee_tools as ap
 import apogee_tools.apogee_hack.spec.lsf as lsf
-import apogee_tools.rotbroaden as rot
 from apogee_tools.apogee_hack.spec.plot import apStarWavegrid
 
 
