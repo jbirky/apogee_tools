@@ -83,6 +83,11 @@ Example search--will search the `allStar-l30e.2.fits` you downloaded:
 	ranges = [[-10000,4000], [0,5], [-2,2]]
 	source_table = ap.multiParamSearch(par=params, select=ranges, save_dir='/path_to/')
 
+Look up aspcap parameters in `allStar-l30e.2.fits` for specific list of 2MASS IDs:
+
+	tm_ids = ['2M01195227+8409327']
+	ap_dict = ap.returnAspcapTable(tm_ids, params=['TEFF', 'LOGG', 'M_H', 'SNR'], save=False)
+
 **Read in a model grid**
 
 Read in a model, specifying the parameters `[Teff, logg, [Fe/H]]`, grid type (listed below), and wavelength range `xrange`. Models sampled to APOGEE resolution are contained in the libraries folder of this package, and span the following parameter ranges: `PHOENIX: [[2500, 5500], [0.0, 5.5], [-1.0, 1.0]]`, `BTSETTL (CIFIST 2011b & 2015): [[2200, 3200], [2.5, 5.5], [-0.5, 0.0]]`. To use grids outside of these ranges, download the libraries from the links below, create an `.hdf5` file using Starfish, and add it to the `libraries` folder.
