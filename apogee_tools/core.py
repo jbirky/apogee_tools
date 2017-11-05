@@ -215,6 +215,16 @@ class Spectrum():
         
         elif self.d_type == 'ap1d':
 
+            """ AP1D file info:
+            HDU0: master header
+            HDU1: image (ADU) [FLOAT]
+            HDU2: error (ADU) [FLOAT]
+            HDU3: flag mask [INT*2]
+            HDU4: wavelength array
+            HDU5: wavelength coefficients array
+            Information found at: https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/red/MJD5/ap1D.html
+            """
+
             visit = kwargs.get('visit', 1)
     
             ap1d_dir = AP_PATH + '/{}_data/' .format(self.d_type)
