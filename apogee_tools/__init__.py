@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from .core import Spectrum
 from .spec_tools import loadGrid, _rvShift, calcScale, compareSpectra, subtractContinuum, readModels, getModel, plotModel
-from .search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams
+from .search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
 from .ap1d import get_1dspec_urls
 from .info.features import lines
 from .model import makeModel, returnModelFit
