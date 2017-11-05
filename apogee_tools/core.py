@@ -17,6 +17,7 @@ from astropy.table import Table
 from astropy.io import fits, ascii
 from astropy import units as u
 
+import apogee_tools as ap
 from apogee_tools.spec_tools import _rvShift
 #from libraries import features
 
@@ -181,7 +182,8 @@ class Spectrum():
 
         elif self.d_type == 'apvisit':
 
-            self.file  = '%s/apvisit_data/apVisit-%s.fits' %(AP_PATH, spec_id)
+            visit = kwargs.get('visit', 1)
+            self.file  = '%s/apvisit_data/apVisit-%s-%s.fits' %(AP_PATH, spec_id, visit)
 
             """ APVISIT file info:
             HDU0: master header with target information
@@ -211,6 +213,45 @@ class Spectrum():
             self.noise  = self.sigmas
             # self.sky    = np.array(sky.data)
         
+        elif self.d_type == 'ap1d':
+
+            visit = kwargs.get('visit', 1)
+    
+            ap1d_dir = AP_PATH + '/{}_data/' .format(self.d_type)
+            
+            #look up fiber number for given 2MASS name and its visit number
+            ap_id, plates, mjds, fibers = ap.searchVisits(id_name=self.name)
+            fiber = fibers[visit-1] #-1 for python zero indexing
+            
+            #get names of files for each chip
+            ChipA = ap1d_dir + 'ap1d-{}-{}-a.fits'.format(self.name, visit)
+            ChipB = ap1d_dir + 'ap1d-{}-{}-b.fits'.format(self.name, visit)
+            ChipC = ap1d_dir + 'ap1d-{}-{}-c.fits'.format(self.name, visit)
+            
+            #get wavelength, flux, and error arrays of spectrum
+            hdu_a = fits.open(ChipA)
+            t1    = hdu_a[1].data[fiber] # assuming the first extension is a table
+            wave1 = hdu_a[4].data[fiber]
+            flux1 = t1*1e-17
+            err1  = hdu_a[2].data[fiber]
+            
+            hdu_b = fits.open(ChipB)
+            t2    = hdu_b[1].data[fiber] # assuming the first extension is a table
+            wave2 = hdu_b[4].data[fiber]
+            flux2 = t2*1e-17
+            err2  = hdu_b[2].data[fiber]
+            
+            hdu_c = fits.open(ChipC)
+            t3    = hdu_b[1].data[fiber] # assuming the first extension is a table
+            wave3 = hdu_b[4].data[fiber]
+            flux3 = t3*1e-17
+            err3  = hdu_c[2].data[fiber]
+            
+            self.wave = np.concatenate([wave1, wave2, wave3])
+            self.flux = np.concatenate([flux1, flux2, flux3])
+            self.sigmas = np.concatenate([err1, err2, err3])
+            self.noise  = self.sigmas
+
         else:
             #Save spectrum values into the spectrum object class
             self.wave   = kwargs.get('wave', [])
@@ -219,7 +260,7 @@ class Spectrum():
             self.sigmas = kwargs.get('sigmas', [0 for i in range(len(self.wave))])
             self.noise  = self.sigmas
             self.model  = kwargs.get('model', [])
-            self.name   = kwargs.get('name', Spectrum)  
+            self.name   = kwargs.get('name', 'spectrum')  
             self.params = kwargs.get('params', [])   
             self.vsini  = kwargs.get('vsini', []) 
             self.type   = 'input'   
@@ -227,7 +268,7 @@ class Spectrum():
         
     def plot(self, **kwargs):
 
-        xrange = kwargs.get('xrange', [self.wave[0],self.wave[-1]])
+        xrange = kwargs.get('xrange', [self.wave[0], self.wave[-1]])
         yrange = kwargs.get('yrange', [min(self.flux)-.2, max(self.flux)+.2])
         rv     = kwargs.get('rv', 0)
         items  = kwargs.get('items', ['spec'])
@@ -242,23 +283,23 @@ class Spectrum():
 
         #Plot masked spectrum
         if ('spectrum' in items) or ('spec' in items):
-            plt.plot(rv_wave, self.flux, color='k', alpha=.8, label=self.name)
+            plt.plot(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
 
         #Plot spectrum noise
         if 'noise' in items:
-            plt.plot(self.wave, self.sigmas, color='c', alpha=.6)
+            plt.plot(self.wave, self.sigmas, color='c', linewidth=1, alpha=.6)
 
         #Plot continuum
         if ('cont' in items) or ('continuum' in items):
-            plt.plot(rv_wave, self.cont, color='m', alpha=.8)
+            plt.plot(rv_wave, self.cont, color='m', linewidth=1, alpha=.8)
 
         #Plot aspcap model 
         if 'apModel' in items:
-            plt.plot(self.wave, self.apModel, color='r', alpha=.8, label='ASPCAP Model')
+            plt.plot(self.wave, self.apModel, color='r', alpha=.8, linewidth=1, label='ASPCAP Model')
         
         #Plot read in model
         if 'model' in items:
-            plt.plot(self.wave, self.model, color='r', alpha=.8, label='Model')
+            plt.plot(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model')
 
         #Plot and label atomic lines
         if 'lines' in items:
