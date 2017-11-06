@@ -24,7 +24,7 @@ def applyTelluric(mdl, **kwargs):
     FluxLow  = mdl.flux
 
     WaveHigh = np.asarray(tellurics['wave'] * 10000.0)
-    TransHigh = np.asarray(tellurics['trans'])
+    TransHigh = np.asarray(tellurics['trans'])**(alpha)
 
     #Resampling
     TransLow = splat.integralResample(WaveHigh, TransHigh, WaveLow)
@@ -34,6 +34,6 @@ def applyTelluric(mdl, **kwargs):
 
     telluric_flux = FluxWithTrans
     telluric_spec = ap.Spectrum(wave=mdl.wave, flux=telluric_flux)
-    telluric_spec.flux = telluric_spec.flux**(alpha)
+    # telluric_spec.flux = telluric_spec.flux**(alpha)
     
     return telluric_spec
