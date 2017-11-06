@@ -1,9 +1,8 @@
-import numpy
-import apogee_tools as ap
+import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-def continuum(data, mdl, contfitdeg=5):
+def continuum(data, mdl, **kwargs):
 
 	"""
 	This function returns a continuum corrected model.
@@ -14,15 +13,14 @@ def continuum(data, mdl, contfitdeg=5):
 	contfitdeg: the degree of the fitting polynomial. The default vaule is 5.
 	"""
 	
-	if contfitdeg is None:
-		contfitdeg = 5
+	deg = kwargs.get('deg', 5)
 
 	# interpolate the shape of the data to be the same as that of the model
-	data_int = numpy.interp(mdl.wave, data.wave, data.flux)
+	data_int = np.interp(mdl.wave, data.wave, data.flux)
 
 	mdlcont = copy.deepcopy(mdl)
-	mdldiv = data_int/mdl.flux
-	pcont = numpy.polyfit(mdl.wave, mdldiv, contfitdeg)
-	mdlcont.flux *= numpy.polyval(pcont, mdlcont.wave)
+	mdldiv  = data_int/mdl.flux
+	pcont   = np.polyfit(mdl.wave, mdldiv, deg)
+	mdlcont.flux *= np.polyval(pcont, mdlcont.wave)
 
 	return mdlcont
