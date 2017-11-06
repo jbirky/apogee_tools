@@ -11,6 +11,7 @@ def makeModel(**kwargs):
 
 	"""
 	Input:  'params' : dictionary of parameters specified like {'teff': 3051, 'logg': 5.2, 'z': -0.25, 'vsini': 10., 'rv': -12, 'alpha': 0.8}
+			'fiber'  : APOGEE fiber for particular ap1D visit spectrum you are fitting model to
 
 	Output: 'synth_model' : spectrum object synthesized to input paramters
 	"""
@@ -43,15 +44,17 @@ def makeModel(**kwargs):
 		xrange = kwargs.get('xrange', [interp_sp.wave[0], interp_sp.wave[-1]])
 		yrange = kwargs.get('yrange', [0.7, 1.1])
 
-		plt.figure(1, figsize=(10,6))  
-		plt.plot(interp_sp.wave, interp_sp.flux, label=r'Teff = %s, logg = %s, Fe/H = %s'%(params['teff'], params['logg'], params['z']))
-		plt.plot(rv_sp.wave, rv_sp.flux, label=r'RV (%s km/s)'%(params['rv']))
-		plt.plot(rot_sp.wave, rot_sp.flux, label=r'RV + rot (%s km/s)'%(params['vsini']))
-		plt.plot(lsf_sp.wave, lsf_sp.flux, label=r'RV + rot + lsf')
-		plt.plot(tell_sp.wave, tell_sp.flux, label=r'RV + rot + lsf + telluric ($\alpha$ = %s)'%(params['alpha']))
+		plt.figure(1, figsize=(16,6))  
+		plt.plot(interp_sp.wave, interp_sp.flux, alpha=.7, linewidth=1, label=r'Teff = %s, logg = %s, Fe/H = %s'%(params['teff'], params['logg'], params['z']))
+		plt.plot(rv_sp.wave, rv_sp.flux-.15, label=r'RV (%s km/s)'%(params['rv']), alpha=.7, linewidth=1)
+		plt.plot(rot_sp.wave, rot_sp.flux-.3, label=r'RV + rot (%s km/s)'%(params['vsini']), alpha=.7, linewidth=1)
+		plt.plot(lsf_sp.wave, lsf_sp.flux-.45, label=r'RV + rot + lsf', alpha=.7, linewidth=1)
+		plt.plot(tell_sp.wave, tell_sp.flux-.6, label=r'RV + rot + lsf + telluric ($\alpha$ = %s)'%(params['alpha']), alpha=.7, linewidth=1)
 		plt.xlim(xrange)
 		plt.ylim(yrange)
-		plt.legend(frameon=False)
+		plt.legend(loc='lower left', frameon=False, fontsize=12)
+		plt.ylabel(r'$F_{\lambda}$ + offset', fontsize=15)
+		plt.xlabel(r'$\lambda$', fontsize=15)
 		plt.show()
 
 	return synth_model
