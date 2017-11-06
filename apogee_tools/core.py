@@ -366,6 +366,32 @@ class Spectrum():
 
     # Add more functions here to easily manipulate spectrum object (like splat):
 
+    def mask(self, **kwargs):
+
+        """
+        Mask all pixels that are out of the specified sigma cutoff range specified.
+
+        Input: 'sigma' : [lower cuttoff, upper cutoff]
+        """
+
+        sigma = kwargs.get('sigma', [3,3])
+
+        fmean = np.mean(self.flux)
+        fstd  = np.std(self.flux)
+
+        #Find outlier flux and bad pixels 
+        mask_flux = self.flux    
+        mask_flux[mask_flux <= fmean - sigma[0]*fstd] = 0
+        mask_flux[mask_flux >= fmean + sigma[1]*fstd] = 0
+
+        #Mask outliers
+        mask = np.where(mask_flux == 0)
+
+        self.wave    = np.delete(self.wave, list(mask))
+        self.flux    = np.delete(self.flux,list(mask))
+        self.sigmas  = np.delete(self.sigmas, list(mask))
+
+
     def shift_rv(self, **kwargs):
 
         """
