@@ -19,12 +19,14 @@ def makeModel(**kwargs):
 	params = kwargs.get('params')
 	fiber  = kwargs.get('fiber', 40)
 	plot   = kwargs.get('plot', False)
+	res    = kwargs.get('res', '23k')
+	grid   = kwargs.get('grid', 'phoenix').lower()
 
 	mdl_name = r'Teff = {}, logg = {}, Fe/H = {}, vsini = {}, rv = {}, $\alpha$ = {}'.format(params['teff'], params['logg'], params['z'], params['vsini'], params['rv'], params['alpha'])
 	labels = [params['teff'], params['logg'], params['z']]
 
 	#Interpolate model grids at give teff, logg, fe/h
-	interp_sp = ap.interpolateGrid(labels=labels)
+	interp_sp = ap.interpolateGrid(labels=labels, res=res, grid=grid)
 
 	#Apply radial velocity
 	rv_sp   = ap.spec_tools.rvShiftSpec(interp_sp, rv=params['rv'])
