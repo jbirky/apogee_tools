@@ -24,15 +24,16 @@ def interpolateGrid(**kwargs):
 	"""
 
 	labels  = kwargs.get('labels')
+	resolution = kwargs.get('res', '23k') #23k or 50k
 
 	#stack list into matrix
 	labels  = np.array([labels])
 	nlabels = labels.shape[1]
 
-	pivots = np.load(BASE+'/libraries/cannon_phoenix/phn_cannon_pivots.npy')
-	scales = np.load(BASE+'/libraries/cannon_phoenix/phn_cannon_scales.npy')
-	coeffs = np.load(BASE+'/libraries/cannon_phoenix/phn_cannon_coeffs.npy')
-	wave   = np.load(BASE+'/libraries/cannon_phoenix/phn_cannon_wl.npy')
+	pivots = np.load(BASE+'/libraries/cannon_phoenix/phn_%s_pivots.npy'%(resolution))
+	scales = np.load(BASE+'/libraries/cannon_phoenix/phn_%s_scales.npy'%(resolution))
+	coeffs = np.load(BASE+'/libraries/cannon_phoenix/phn_%s_coeffs.npy'%(resolution))
+	wave   = np.load(BASE+'/libraries/cannon_phoenix/phn_%s_wl.npy'%(resolution))
 
 	scaled_labels = [(lbl - pivots) / scales for lbl in labels]
 
