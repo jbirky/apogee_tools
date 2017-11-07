@@ -32,24 +32,24 @@ def makeModel(**kwargs):
 	#Apply rotational velocity broadening
 	rot_sp  = ap.applyVsini(rv_sp, vsini=params['vsini'])
 
-	#Apply APOGEE LSF function
-	lsf_sp  = ap.convolveLsf(rot_sp, fiber=fiber)
-
 	#Apply telluric spectrum
-	tell_sp = ap.applyTelluric(lsf_sp, alpha=params['alpha'])
+	tell_sp = ap.applyTelluric(rot_sp, alpha=params['alpha'])
 
-	synth_model = ap.Spectrum(wave=tell_sp.wave, flux=tell_sp.flux, name=mdl_name)
+	#Apply APOGEE LSF function
+	lsf_sp  = ap.convolveLsf(tell_sp, fiber=fiber)
+
+	synth_model = ap.Spectrum(wave=lsf_sp.wave, flux=lsf_sp.flux, name=mdl_name)
 
 	if plot == True:
 		xrange = kwargs.get('xrange', [interp_sp.wave[0], interp_sp.wave[-1]])
-		yrange = kwargs.get('yrange', [0.7, 1.1])
+		yrange = kwargs.get('yrange', [-.4, 1.1])
 
 		plt.figure(1, figsize=(16,6))  
 		plt.plot(interp_sp.wave, interp_sp.flux, alpha=.7, linewidth=1, label=r'Teff = %s, logg = %s, Fe/H = %s'%(params['teff'], params['logg'], params['z']))
 		plt.plot(rv_sp.wave, rv_sp.flux-.15, label=r'RV (%s km/s)'%(params['rv']), alpha=.7, linewidth=1)
 		plt.plot(rot_sp.wave, rot_sp.flux-.3, label=r'RV + rot (%s km/s)'%(params['vsini']), alpha=.7, linewidth=1)
-		plt.plot(lsf_sp.wave, lsf_sp.flux-.45, label=r'RV + rot + lsf', alpha=.7, linewidth=1)
-		plt.plot(tell_sp.wave, tell_sp.flux-.6, label=r'RV + rot + lsf + telluric ($\alpha$ = %s)'%(params['alpha']), alpha=.7, linewidth=1)
+		plt.plot(tell_sp.wave, tell_sp.flux-.45, label=r'RV + rot + telluric ($\alpha$ = %s)'%(params['alpha']), alpha=.7, linewidth=1)
+		plt.plot(lsf_sp.wave, lsf_sp.flux-.8, label=r'RV + rot + telluric + lsf', alpha=.7, linewidth=1)
 		plt.xlim(xrange)
 		plt.ylim(yrange)
 		plt.legend(loc='lower left', frameon=False, fontsize=12)
