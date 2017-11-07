@@ -313,7 +313,7 @@ class Spectrum():
 
         #Plot and label atomic lines
         if 'lines' in items:
-            line_list = features.lines
+            line_list = ap.lines
             line_names = line_list.keys()
 
             for lines in line_names:
@@ -381,15 +381,10 @@ class Spectrum():
 
         #Find outlier flux and bad pixels 
         mask_flux = self.flux    
-        mask_flux[mask_flux <= fmean - sigma[0]*fstd] = 0
-        mask_flux[mask_flux >= fmean + sigma[1]*fstd] = 0
+        mask_flux[mask_flux <= fmean - sigma[0]*fstd] = np.nan
+        mask_flux[mask_flux >= fmean + sigma[1]*fstd] = np.nan
 
-        #Mask outliers
-        mask = np.where(mask_flux == 0)
-
-        self.wave    = np.delete(self.wave, list(mask))
-        self.flux    = np.delete(self.flux,list(mask))
-        self.sigmas  = np.delete(self.sigmas, list(mask))
+        self.flux = mask_flux
 
 
     def shift_rv(self, **kwargs):
