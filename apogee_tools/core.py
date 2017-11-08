@@ -62,6 +62,9 @@ class Spectrum():
             Information found at https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html 
             """
 
+            if (os.path.exists(file_dr13) == False) & (os.path.exists(file_dr14) == False):
+                ap.download(self.name, type='aspcap')
+
             try:
                 openFile = fits.open(file_dr14)
             except:
@@ -129,6 +132,9 @@ class Spectrum():
             HDU9: table with RV/binary information
             Information found at https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/TELESCOPE/LOCATION_ID/apStar.html 
             """
+
+            if (os.path.exists(file_dr13) == False) & (os.path.exists(file_dr14) == False):
+                ap.download(self.name, type='apstar')
 
             try:
                 openFile = fits.open(file_dr14)
@@ -200,6 +206,9 @@ class Spectrum():
             Information found at: https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html
             """
 
+            if os.path.exists(self.file) == False:
+                ap.download(self.name, type='apvisit')
+
             hdu   = fits.open(self.file)
             flux  = hdu[1].data
             error = hdu[2].data
@@ -238,6 +247,9 @@ class Spectrum():
             ChipB = ap1d_dir + 'ap1d-{}-{}-b.fits'.format(self.name, visit)
             ChipC = ap1d_dir + 'ap1d-{}-{}-c.fits'.format(self.name, visit)
             
+            if (os.path.exists(ChipA) == False) or (os.path.exists(ChipB) == False) or (os.path.exists(ChipC) == False) :
+                ap.download(self.name, type='ap1d', visit=visit, frame=1)
+
             #get wavelength, flux, and error arrays of spectrum
             hdu_a = fits.open(ChipA)
             t1    = hdu_a[1].data[fiber] # assuming the first extension is a table
