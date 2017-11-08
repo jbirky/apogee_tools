@@ -20,20 +20,27 @@ def applyTelluric(mdl, **kwargs):
 
     tellurics = pd.read_csv(BASE + '/libraries/lw_solartrans_apogee.csv')
 
-    WaveLow  = mdl.wave
-    FluxLow  = mdl.flux
+    mdl_wave  = mdl.wave
+    mdl_flux  = mdl.flux
 
-    WaveHigh = np.asarray(tellurics['wave'] * 10000.0)
-    TransHigh = np.asarray(tellurics['trans'])**(alpha)
+    tell_wave = np.asarray(tellurics['wave'] * 10000.0)
+    tell_flux = np.asarray(tellurics['trans'])**(alpha)
 
-    #Resampling
-    TransLow = splat.integralResample(WaveHigh, TransHigh, WaveLow)
+    #Resample higher res spectrum to lower res spectrum
+    try: 
+        #if res tell > res mdl, resample tell to mdl
+        tell_rs = splat.integralResample(tell_wave, tell_flux, mdl_wave)
 
-    #Getting the flux with the transmission 
-    FluxWithTrans = TransLow * FluxLow
+        #Convolve model and telluric spectrum
+        conv_flux = tell_rs * mdl_flux
 
-    telluric_flux = FluxWithTrans
-    telluric_spec = ap.Spectrum(wave=mdl.wave, flux=telluric_flux)
-    # telluric_spec.flux = telluric_spec.flux**(alpha)
+    except: 
+        #if res mdl > res tell, resample mdl to tell 
+        mdl_rs  = splat.integralResample(mdl_wave, mfl_flux, tell_wave)
+
+        #Convolve model and telluric spectrum
+        conv_flux = mdl_rs * tell_flux
+        
+    telluric_spec = ap.Spectrum(wave=mdl_wave, flux=conv_flux)
     
     return telluric_spec
