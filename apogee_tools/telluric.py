@@ -13,7 +13,7 @@ def applyTelluric(mdl, **kwargs):
 
     """
     Apply telluric model to PHOENIX model (or whatever grid you're using)
-    @ Elizabeth Moreno
+    @Elizabeth Moreno, Jessica Birky
     """
 
     alpha = kwargs.get('alpha', 1)
@@ -21,15 +21,18 @@ def applyTelluric(mdl, **kwargs):
 
     am_key = {'1.0':'10', '1.5':'15'}
 
-    tellurics = pd.read_csv(BASE + '/libraries/lw_solartrans_apogee.csv')
-    # tfile = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(airmass, am_key[airmass])
-    # tellurics = fits.open(BASE + '/libraries/' + tfile)
-
     mdl_wave  = mdl.wave
     mdl_flux  = mdl.flux
 
-    tell_wave = np.asarray(tellurics['wave'] * 10000.0)
-    tell_flux = np.asarray(tellurics['trans'])**(alpha)
+    # tellurics = pd.read_csv(BASE + '/libraries/lw_solartrans_apogee.csv')
+    # tell_wave = np.asarray(tellurics['wave'] * 10000.0)
+    # tell_flux = np.asarray(tellurics['trans'])**(alpha)
+
+    tfile = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(airmass, am_key[airmass])
+    tellurics = fits.open(BASE + '/libraries/' + tfile)
+
+    tell_wave = np.array(tellurics[1].data['lam'] * 10000)
+    tell_flux = np.array(tellurics[1].data['trans'])**(alpha)
 
     #Resample higher res spectrum to lower res spectrum
     try: #if res tell > res mdl, resample tell to mdl
