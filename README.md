@@ -24,6 +24,7 @@ Dependencies:
 * scipy
 * matplotlib
 * PyAstronomy
+* [splat](https://github.com/aburgasser/splat)
 
 Create a new directory to store your data files:
 
@@ -113,6 +114,14 @@ Some plotting examples:
 
 	# plot indentified lines (from Souto 2016):
 	data.plot(items=['spec', 'lines'], xrange=[15200,15500], yrange=[.6,1.2])
+
+**Mask outlying flux**
+
+Specify number of standard deviations above and below the mean of the flux to cut (`sigma = [lower cuttoff, upper cutoff]`), and the number pixels to buffer each side of the cut (`pixel_buffer = [lower mask pixel buffer, upper mask pixel buffer]`):
+
+	data.mask(sigma=[3,2], pixel_buffer=[0,3])
+
+**Chi-squared comparison**
 
 Compare two spectra; return `chi` (chi-squared value between data and mdl), `norm_data` (`data` spectrum normalized), and `scaled_mdl` (`mdl` which has been scaled to `data`):
 
