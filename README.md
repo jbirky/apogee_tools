@@ -24,7 +24,6 @@ Dependencies:
 * scipy
 * matplotlib
 * PyAstronomy
-* [splat](https://github.com/aburgasser/splat)
 
 Create a new directory to store your data files:
 
