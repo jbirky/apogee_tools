@@ -4,12 +4,9 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import os
 import h5py
-
-# from apogee_tools.core import *
+from scipy.interpolate import interp1d
+from scipy.integrate import trapz
 import apogee_tools as ap
-#from .core import *
-# import apogee_tools
-# from apogee_tools import Spectrum
 
 #Get the path of apogee_tools file
 FULL_PATH  = os.path.realpath(__file__)
@@ -94,7 +91,7 @@ class HDF5Interface(object):
 
         :returns: flux array
         '''
-        print(parameters)
+        # print(parameters)
         key = self.key_name.format(*parameters)
         with h5py.File(self.filename, "r") as hdf5:
             try:
@@ -419,320 +416,56 @@ def getModel(**kwargs):
     return model_spec
 
 
-def plotModel(spec, **kwargs):
+def integralResample(xh, yh, xl, nsamp=100):
 
-    #Plot specific grid against spectrum
+    '''
+    Function from SPLAT. See: https://github.com/aburgasser/splat
 
-    #Retrieve grid library from the 'libraries' folder inside apogee_tools
-    grid     = kwargs.get('grid', 'BTSETTLb')
-    grid_lib = BASE + '/libraries/' + grid + '_APOGEE.hdf5'
+    :Purpose: A 1D integral smoothing and resampling function that attempts to preserve total flux. Usese
+    scipy.interpolate.interp1d and scipy.integrate.trapz to perform piece-wise integration
 
-    params   = kwargs.get('params')
-    gridPath = kwargs.get('gridPath', grid_lib)
-    save     = kwargs.get('save', False)
-    output   = kwargs.get('output', spec.name+'.pdf')
-    xrange   = kwargs.get('xrange', [spec.wave[0],spec.wave[-1]])
+    Required Inputs:
 
-    # params, m_wave, m_flux = loadGrid(params=params, gridPath=gridPath)
-    m_spec = getModel(params=params, xrange=xrange)
-    m_wave, m_flux = m_spec.wave, m_spec.flux
+    :param xh: x-axis values for "high resolution" data
+    :param yh: y-axis values for "high resolution" data
+    :param xl: x-axis values for resulting "low resolution" data, must be contained within high resolution and have fewer values
 
-    mask = np.where((spec.wave>xrange[0]) & (spec.wave<xrange[1]))
-    wave = spec.wave[mask]
-    flux = spec.flux[mask]
-    mask2  = np.where((m_wave>xrange[0]) & (m_wave<xrange[1]))
-    m_wave = m_wave[mask2]
-    m_flux = m_flux[mask2]/max(m_flux[mask2])
+    Optional Inputs:
 
-    fig = plt.figure(figsize=(24,8))                                                               
-    ax  = fig.add_subplot(1,1,1) 
+    :param nsamp: Number of samples for stepwise integration
 
-    plt.plot(wave, flux, label=spec.name, color='k', alpha=.9)
-    plt.plot(m_wave, m_flux, label=grid+': '+str(params), color='r', alpha=.8)
-    plt.xlim(xrange)
-    plt.tight_layout()
-    plt.legend(loc='lower left')
-    plt.xlabel(r"$\lambda [AA]$")
-    plt.ylabel(r"$f_\lambda$")
-    if save == True:
-            plt.savefig(output)
-    plt.show()
-    plt.close()
+    Output:
 
+    y-axis values for resulting "low resolution" data
 
-def optimizeChi(spec, **kwargs):
+    :Example:
+    >>> # a coarse way of downsampling spectrum
+    >>> import splat, numpy
+    >>> sp = splat.Spectrum(file='high_resolution_spectrum.fits')
+    >>> w_low = numpy.linspace(numpy.min(sp.wave.value),numpy.max(sp.wave.value),len(sp.wave.value)/10.)
+    >>> f_low = splat.integralResample(sp.wave.value,sp.flux.value,w_low)
+    >>> n_low = splat.integralResample(sp.wave.value,sp.noise.value,w_low)
+    >>> sp.wave = w_low*sp.wave.unit
+    >>> sp.flux = f_low*sp.flux.unit
+    >>> sp.noise = n_low*sp.noise.unit
+    '''
 
-    """
-    Find the best chi-square fitting model, for a particular grid type and between particular parameter range.
-    @Jessica Birky 
+    # check inputs
+    if xl[0] < xh[0] or xl[-1] > xh[-1]: raise ValueError('\nLow resolution x range {} to {} must be within high resolution x range {} to {}'.format(xl[0],xl[-1],xh[0],xh[-1]))
+    if len(xl) > len(xh): raise ValueError('\nTarget x-axis must be lower resolution than original x-axis')
 
-    Input:  'grid'     : type of model; right now BTSETTLb or PHOENIX
-            'parrange' : parameter range to search between. Possible ranges specified in documentation.
-            'gridPath' : default: apogee_tools libraries folder
-            ...more: see kwargs list
+    # set up samples
+    xs = [np.max([xh[0],xl[0]-0.5*(xl[1]-xl[0])])]
+    for i in range(len(xl)-1): xs.append(xl[i]+0.5*(xl[i+1]-xl[i]))
+    xs.append(np.min([xl[-1]+0.5*(xl[-1]-xl[-2]),xh[-1]]))
 
-    Output: Spectrum objects with best chi-squareds
-            'best_fits', 'best_chis', 'best_pars'
-    """
+    f = interp1d(xh,yh)
 
-    #Retrieve grid library from the 'libraries' folder inside apogee_tools
-    grid     = kwargs.get('grid', 'BTSETTLb')
-    grid_lib = BASE + '/libraries/' + grid + '_APOGEE.hdf5'
+    # integral loop
+    ys = []
+    for i in range(len(xl)):
+        dx = np.linspace(xs[i],xs[i+1],nsamp)
+        ys.append(trapz(f(dx),x=dx)/trapz(np.ones(nsamp),x=dx))
 
-    #default parameter ranges depending on grid type
-    if grid == 'PHOENIX':
-        prange = [[2300, 3500], [2.5, 5.5], [-0.5, 0.5]]
-    elif grid == 'BTSETTLb':
-        prange = [[2200, 3200], [2.5, 5.5], [-0.5, 0.0]]
-    else: 
-        prange = [[2200, 3200], [2.5, 5.5], [-0.5, 0.0]]
-
-    parrange = kwargs.get('parrange', prange)
-    gridPath = kwargs.get('gridPath', grid_lib)
-    xrange   = kwargs.get('xrange', [spec.wave[0],spec.wave[-1]])
-    numBest  = kwargs.get('numBest', 5)
-    plot     = kwargs.get('plot', True)
-    save     = kwargs.get('save', False)
-    output   = kwargs.get('output', 'best_fits.pdf')
-    subCont  = kwargs.get('subCont', True) #Continuum will be subtracted from the model grids
-
-    grid_specs = readModels(parrange=parrange, gridPath=gridPath, subCont=subCont, xrange=xrange)
-
-    #Cut input spectrum to the specified xrange
-    mask = np.where((spec.wave > xrange[0]) & (spec.wave < xrange[1]))
-    new_wave = spec.wave[mask]
-    new_flux = spec.flux[mask]
-    new_sigm = spec.sigmas[mask]
-    spec = ap.Spectrum(wave=new_wave, flux=new_flux, sigmas=new_sigm, name=spec.name)
-
-    chi_vals = {}
-
-    #Compute chi values for each grid spectrum; append together to dictionary
-    for sp in grid_specs:
-        mspec = ap.Spectrum(wave=sp.wave, flux=sp.flux, params=sp.params)
-
-        chi, sp1, sp2 = compareSpectra(spec, mspec)
-        chi_vals[sp2] = chi
-
-    #Sort grids in dictionary by lowest chi-squared value
-    ranked = []
-    values = []
-    for w in sorted(chi_vals, key=chi_vals.get):
-        ranked.append(w)
-        values.append(chi_vals[w])
-
-    best_fits = ranked[0:numBest]
-    best_chis = values[0:numBest]
-    best_pars = [fit.params for fit in best_fits]
-
-    #Plot and save best fits
-    if plot == True:
-        nplots = numBest
-        fig_dim = [12, 3*nplots]
-
-        fig, axs = plt.subplots(nplots, 1, figsize=fig_dim)
-        fig.subplots_adjust(hspace=.2)
-        axs = axs.ravel()
-
-        for n in range(nplots):
-            axs[n].plot(spec.wave, spec.flux, color='k', alpha=.9, label='chi-squared = '+str(best_chis[n]))
-            axs[n].plot(best_fits[n].wave, best_fits[n].flux, color='r', alpha=.7, label=best_fits[n].params)
-            
-            axs[n].set_xlim(xrange)
-            axs[n].set_ylim([.5, 1.4])
-
-            axs[n].legend()
-            axs[n].set_ylabel(r"$f_\lambda$")
-
-        # plt.title(spec.name, fontsize=12)
-        plt.xlabel(r"$\lambda [AA]$")
-
-        if save == True:
-            plt.savefig(output)
-        plt.show()
-        plt.close()
-
-    return best_fits, best_chis, best_pars
-
-
-def optimizeRV(sp1, sp2, **kwargs):
-
-    """
-    Radial velocity computed by cross correlation with a template spectrum
-    Radial velocity of sp1 will be shifted to align with sp2
-    @Jessica Birky
-
-    Input:  'sp1': data spectrum object
-            'sp2': model/template spectrum object
-    
-    Output: 'rv'     : cross-correlated radial velocity  
-            'cc_sp1' : rv shifted spectrum 1
-            'sp2'    : same as input
-    """
-
-    from PyAstronomy import pyasl
-
-    rv_lim = kwargs.get('rv_lim', [-150, 150])
-    xrange = kwargs.get('xrange', [15200,15700])
-
-    #Scale template sp2 to the data sp1
-    chi, sp1, sp2 = compareSpectra(sp1, sp2)
-
-    #Cut spectrum to calculate rv from specific region
-    mask = np.where((sp1.wave > xrange[0]) & (sp1.wave < xrange[-1]))
-
-    #Read in wavelength and flux from data and model spectrum objects
-    wave1, flux1 = sp1.wave[mask], sp1.flux[mask]
-    wave2, flux2 = sp2.wave[mask], sp2.flux[mask]
-
-    #Cross correlate sp1 (data) to sp2 (model/template); 
-    #Return radial velocity and cross-correlated spectrum
-    rvs, ccs = pyasl.crosscorrRV(wave1, flux1, wave2, flux2, rv_lim[0], rv_lim[1], 30./50., skipedge=300)
-
-    maxind = np.argmax(ccs)
-    rv = rvs[maxind]
-
-    #Shift wavelength of first spectrum by calculated radial velocity
-    shift_wave = _rvShift(wave1, rv=-rv)
-
-    # fig = plt.figure(figsize=(24,8))
-    plt.subplot(2,1,1)
-    plt.plot(wave2, flux2, color='k', label='template')
-    if rv >= 0:
-        plt.plot(wave1, flux1-.3, color='r', label='data rv = '+str(rv))
-    else: 
-        plt.plot(wave1, flux1-.3, color='b', label='data rv = '+str(rv))
-    plt.plot(shift_wave, flux1, color='m', label='data rest frame')
-
-    plt.xlim(xrange)
-    plt.ylim([.2, 1.8])
-    plt.legend(loc='upper left')
-    plt.tight_layout()
-
-    plt.subplot(2,1,2)
-    plt.plot(rvs, ccs, label='Cross-correlation function')
-
-    plt.legend(loc='upper left')
-    plt.show()
-    plt.close()
-
-    #Turn cross-correlated spectrum into spectrum object
-    cc_sp1 = Spectrum(wave=shift_wave, flux=flux1, sigmas=sp1.sigmas, name=sp1.name)
-
-    return rv, cc_sp1, sp2
-
-
-def smoothVSINI(mspec, **kwargs):
-
-    """
-    Add vsini to spectrum using PyAstronomy.
-    @Jessica Birky
-
-    Input:  'limb'  : limb darkening coefficient
-            'vsini' : rotational velocity (km/s)
-            'xlim'  : specify a wavelength region to perform over
-            'plot'  : plot broadened spectrum
-
-    Output: 'rot_spec' : broadened spectrum object
-    """
-
-    from PyAstronomy import pyasl
-    from scipy.interpolate import interp1d
-
-    #Input limb-darkening coefficient, vsini, plotting x range
-    limb  = kwargs.get('limb', 0.6)
-    vsini = kwargs.get('vsini', 1)
-    xlim  = kwargs.get('xlim')
-
-    #Read in wavelength and flux from model spectrum object
-    m_wave, m_flux, params = mspec.wave, mspec.flux, mspec.params
-
-    #Create evenly spaced wavelength array
-    bounds = [m_wave[0], m_wave[-1]]
-    npts   = len(m_wave)
-    n_wave = np.linspace(bounds[0], bounds[1], npts)
-    f = interp1d(m_wave, m_flux, bounds_error=False, fill_value=0.)
-    n_flux = f(n_wave)
-
-    #Perform rotational broadening using PyAstronomy; return flux
-    rflux = pyasl.rotBroad(n_wave, n_flux, limb, vsini)
-
-    #Save broadened spectrum to new spectrum object
-    rot_spec = Spectrum(wave=n_wave, flux=rflux, params=params)
-
-    if kwargs.get('plot', False) == True:
-        plt.plot(m_wave, m_flux, color='k', label=params, alpha=.9)
-        plt.plot(m_wave, rflux-.4, color='g', label='vsini = '+str(vsini), alpha=.8)
-        plt.legend(loc='lower left')
-        plt.xlabel(r"$\lambda [AA]$")
-        plt.ylabel(r"$f_\lambda$")
-        if 'xlim' in kwargs:
-            plt.xlim(xlim)
-        plt.show()
-        plt.close()
-
-    return rot_spec
-
-
-def optimizeVSINI(spec, mspec, **kwargs):
-
-    #Find best visini fit
-    #I don't remember if this actually works
-
-    step   = kwargs.get('step', 1)
-    limits = kwargs.get('limits', [1, 50])
-    iter_vals = np.arange(limits[0], limits[1], step)
-    xrange = kwargs.get('xrange', [15200,16940])
-
-    #Read in wavelength and flux from model spectrum object
-    m_wave, m_flux, params = mspec.wave, mspec.flux, mspec.params
-
-    #Cut model spectrum to range of data spectrum
-    mask = np.where((m_wave > xrange[0]) & (m_wave < xrange[1]))
-    m_wave, m_flux = m_wave[mask], m_flux[mask]
-    mspec = Spectrum(wave=m_wave, flux=m_flux, params=params)
-
-    chi_vals = {}
-
-    #Test each vsini value, evaluate by chi-square
-    for vsini in iter_vals:
-        rot_spec = smoothVSINI(mspec, vsini=vsini)
-        rot_spec = Spectrum(wave=rot_spec.wave, flux=rot_spec.flux, params=rot_spec.params, vsini=vsini)
-        chi, spec, mdl = compareSpectra(spec, rot_spec)
-        chi_vals[mdl] = chi
-
-    #Sort grids in dictionary by lowest chi-squared value
-    ranked, values = [], []
-    for w in sorted(chi_vals, key=chi_vals.get):
-        ranked.append(w)
-        values.append(chi_vals[w])
-
-    vsinis = [r.vsini for r in ranked]
-    for i in range(len(ranked)):
-        print(vsinis[i], values[i])
-
-    #Find best fitting vsini spectrum, lowest chi-squared
-    lowest = np.where(values == min(values))[0][0]
-    best_chisq = values[lowest]
-    best_vsini = vsinis[lowest]
-    best_mspec = ranked[lowest]
-
-    plt.subplot(2,1,1)
-    plt.plot(spec.wave, spec.flux, color='k', alpha=.8, label=str(spec.name))
-    plt.plot(best_mspec.wave, best_mspec.flux, color='g', label='vsini = '+str(best_mspec.vsini)+' km/s')
-   
-    plt.xlim(xrange)
-    plt.ylim([.6, 1.4])
-    plt.legend(loc='upper left')
-    plt.tight_layout()
-
-    plt.subplot(2,1,2)
-    # l1, l2, [list(x) for x in zip(*sorted(zip(values, vsinis), key=lambda pair: pair[0]))]
-    plt.plot(vsinis, values, label='vsini vs. chi')
-
-    plt.legend(loc='upper left')
-    plt.show()
-    plt.close()
-
-    return best_chisq, best_vsini, best_mspec
+    return ys
 
