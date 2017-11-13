@@ -269,9 +269,10 @@ class Spectrum():
             flux3 = t3*1e-17
             err3  = hdu_c[2].data[fiber]
             
-            self.wave = np.concatenate([wave1, wave2, wave3])
-            self.flux = np.concatenate([flux1, flux2, flux3])
-            self.sigmas = np.concatenate([err1, err2, err3])
+            #concatenate arrays from 3 chips and reverse lists so that lowest wavelength is first
+            self.wave = np.concatenate([wave1, wave2, wave3])[::-1]
+            self.flux = np.concatenate([flux1, flux2, flux3])[::-1]
+            self.sigmas = np.concatenate([err1, err2, err3])[::-1]
             self.noise  = self.sigmas
 
         else:
@@ -383,20 +384,46 @@ class Spectrum():
         """
         Mask all pixels that are out of the specified sigma cutoff range specified.
 
-        Input: 'sigma' : [lower cuttoff, upper cutoff]
+        Input: 'sigma'        : [lower cuttoff, upper cutoff]
+               'pixel_buffer' : [lower mask pixel buffer, upper mask pixel buffer]
         """
 
-        sigma = kwargs.get('sigma', [3,3])
+        sigma = kwargs.get('sigma', [2,1])
+        pixel_buffer = kwargs.get('pixel_buffer', [0,2])
 
         fmean = np.mean(self.flux)
         fstd  = np.std(self.flux)
 
         #Find outlier flux and bad pixels 
-        mask_flux = self.flux    
-        mask_flux[mask_flux <= fmean - sigma[0]*fstd] = np.nan
-        mask_flux[mask_flux >= fmean + sigma[1]*fstd] = np.nan
+        cut_low  = np.where(self.flux <= fmean - sigma[0]*fstd)[0]
+        cut_high = np.where(self.flux >= fmean + sigma[1]*fstd)[0]
 
-        self.flux = mask_flux
+        group_low_cut = []
+        group_high_cut = []
+
+        for k, g in itertools.groupby(enumerate(cut_low), lambda x:x[0]-x[1]):
+            group_low_cut.append(list(map(itemgetter(1), g)))
+
+        for k, g in itertools.groupby(enumerate(cut_high), lambda x:x[0]-x[1]):
+            group_high_cut.append(list(map(itemgetter(1), g)))
+
+        cuts = []
+        for pixels in group_low_cut:
+            pix1, pixn = pixels[0], pixels[-1]
+            for b in range(pixel_buffer[0]):
+                pixels.append(pix1 - (b+1))
+                pixels.append(pixn + (b+1))
+            cuts.append(pixels)
+
+        for pixels in group_high_cut:
+            pix1, pixn = pixels[0], pixels[-1]
+            for b in range(pixel_buffer[1]):
+                pixels.append(pix1 - (b+1))
+                pixels.append(pixn + (b+1))
+            cuts.append(pixels)
+
+        cuts = list(itertools.chain(*cuts))
+        self.flux[cuts] = np.nan
 
 
     def shift_rv(self, **kwargs):
