@@ -27,6 +27,7 @@ def makeModel(**kwargs):
 
 	#Interpolate model grids at give teff, logg, fe/h
 	interp_sp = ap.interpolateGrid(labels=labels, res=res, grid=grid)
+	interp_sp.flux = interp_sp.flux/max(interp_sp.flux)
 
 	#Apply radial velocity
 	rv_sp   = ap.spec_tools.rvShiftSpec(interp_sp, rv=params['rv'])
