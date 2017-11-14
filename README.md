@@ -144,7 +144,7 @@ Look up the spectrum's fiber number:
 
 	ap_id, plates, mjds, fibers = ap.searchVisits(id_name='2M01195227+8409327')
 
-Synthesize a model:
+Synthesize a model: (with resolution options: 23k, 50k, and 300k)
 
-	mdl = ap.makeModel(params=params, fiber=fibers[0], plot=True, xrange=[15678,15694])
+	mdl = ap.makeModel(params=params, fiber=fibers[0], plot=True, xrange=[15678,15694], res='300k')
 
