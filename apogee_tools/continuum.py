@@ -6,7 +6,18 @@ import apogee_tools as ap
 
 def continuum(data, mdl, **kwargs):
     
-    deg = kwargs.get('deg', 1) 
+    """
+    This function returns a continuum corrected model.
+    @Dino Chih-Chun Hsu
+
+    Input:  'data' : the data used in the fitting as a polynomial
+    	    'mdl'  : the model being corrected
+    	    'deg'  : the degree of the fitting polynomial. The default vaule is 5.
+    
+    Output: 'mdlcont' : spectrum object of model times polynomial
+    """
+    
+    deg = kwargs.get('deg', 5) 
 
     flux_in_rng = np.where((mdl.wave > data.wave[0]) & (mdl.wave < data.wave[-1]))[0]
     mdl_wave = mdl.wave[flux_in_rng]
