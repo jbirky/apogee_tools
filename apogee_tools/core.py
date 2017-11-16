@@ -18,7 +18,6 @@ from astropy.io import fits, ascii
 from astropy import units as u
 
 import apogee_tools as ap
-from apogee_tools.spec_tools import _rvShift
 #from libraries import features
 
 #Get the path of apogee_tools file
@@ -299,7 +298,7 @@ class Spectrum():
         save   = kwargs.get('save', False)
         output = kwargs.get('output', str(self.name) + '.pdf')
         
-        rv_wave = _rvShift(self.wave, rv=rv)
+        rv_wave = ap.rvShift(self.wave, rv=rv)
         
         fig = plt.figure(figsize=(16,4))                                                               
         ax  = fig.add_subplot(1,1,1) 
@@ -436,7 +435,7 @@ class Spectrum():
         """
 
         rv = kwargs.get('rv', -80) 
-        self.wave = _rvShift(self.wave, rv=rv)
+        self.wave = ap.rvShift(self.wave, rv=rv)
 
 
     def broaden(self, **kwargs):
