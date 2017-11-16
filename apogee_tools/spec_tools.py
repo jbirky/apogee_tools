@@ -45,15 +45,6 @@ def calcScale(sp1, sp2):
 
 def compareSpectra(sp1, sp2, **kwargs):
 
-    """
-    Compute the chi-square fit between two spectra (or model and spectrum)
-    @Jessica Birky
-
-    Input:  two spectrum objects
-
-    Output: chi-squared value and scaled spectrum objects
-    """
-
     fit_range = kwargs.get('fit_range', [sp1.wave[0], sp1.wave[-1]])
     fit_scale = kwargs.get('fit_scale', True)
     normalize = kwargs.get('norm', True)
@@ -73,9 +64,17 @@ def compareSpectra(sp1, sp2, **kwargs):
         #Make sure fluxes are normalized
         flux1 = flux1/max(flux1)
         flux2 = flux2/max(flux2)
+        
+    flux1_vals = [x for x in flux1 if str(x) != 'nan']
+    flux1 = flux1/max(flux1_vals)
+    flux1 = np.array([0 if str(x) == 'nan' else x for x in flux1])
+
+    flux2_vals = [x for x in flux2 if str(x) != 'nan']
+    flux2 = flux2/max(flux2_vals)
+    flux2 = np.array([0 if str(x) == 'nan' else x for x in flux2])
 
     #Create a new spectrum object for sp2
-    sp2 = ap.Spectrum(wave=sp2.wave, flux=np.array(flux2), params=sp2.params)
+    sp2 = ap.Spectrum(wave=sp2.wave, flux=flux2, params=sp2.params)
 
     if fit_scale == True:
         #Compute scale factor for 2nd spectrum
