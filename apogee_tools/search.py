@@ -270,7 +270,7 @@ def returnAspcapTable(tm_ids, **kwargs):
 
     # optional
     params = kwargs.get('par', default_params)
-    save   = kwargs.get('save', True)
+    save   = kwargs.get('save', False)
     output = kwargs.get('out', 'aspcap_table.fits')
 
     database = db_path + '/allStar-l31c.2.fits'
@@ -288,7 +288,7 @@ def returnAspcapTable(tm_ids, **kwargs):
 
     return data_dict
 
-    
+
 def returnSimbadParams(id_list):
 
     """
