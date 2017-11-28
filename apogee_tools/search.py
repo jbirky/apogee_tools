@@ -100,34 +100,77 @@ def download(star_id, **kwargs):
 
     if d_type == 'aspcap':
 
-        fname = 'aspcapStar-%s-%s-%s.fits'%(key[dr][0], key[dr][2], star_id)
+        """
+        Name format for the file: aspcapStar-r8-l31c.2-APOGEE_ID.fits
+        """
 
+        fname = 'aspcapStar-{}-{}-{}.fits'.format(key[dr][0], key[dr][2], star_id)
+
+        #check if file has already been downloaded
         if fname not in os.listdir(dl_dir):
 
             #Look up location id from allStar-l30e.2.fits file
             ap_id, loc_id = searchStars(id_name=star_id, rel=dr)
 
             if len(ap_id) != 0:  
-                print('Downloading %s from %s'%(ap_id, dr))
-                os.system("wget https://data.sdss.org/sas/%s/apogee/spectro/redux/%s/stars/%s/%s/%s/%s -P %s" %(dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname, dl_dir)) 
-
+                #1. Try downloading from main survey
+                print('Downloading {} from {} \n'.format(ap_id, dr))
+                main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/{}/{}".format(dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname)
+                os.system("wget {} -P {}" .format(main_url, dl_dir)) 
+                
+                #2. If not in main survey, try downloading from the Mdwarf ancilliary survey directory
+                if fname not in os.listdir(dl_dir):
+                    print(star_id + ' not found in APOGEE main survey. \n')
+                    print('Downloading {} from {} \n Mdwarf ancilliary'.format(ap_id, dr))
+                    anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/Mdwarfs/{}".format(dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname)
+                    os.system("wget {} -P {}" .format(anc_url, dl_dir)) 
+                
+                    #3. If not in main or Mdwarf ancilliary survey, return error message
+                    if fname not in os.listdir(dl_dir):
+                        print(fname + ' could not be found in {} or {}'.format(main_url, anc_url))
             else:
                 print(star_id + ' does not exist in ' + dr)
+
         else:
             print('Already have file for ' + star_id)
 
+
     if d_type == 'apstar': 
 
-        #Look up location id from allStar-l30e.2.fits file
-        ap_id, loc_id = searchStars(id_name=star_id)
+        """
+        Name format for the file: apStar-r6-APOGEE_ID.fits
+        """
 
-        fname = 'apStar-r6-'+star_id+'.fits'
+        fname = 'apStar-r8-'+star_id+'.fits'
         
-        if len(ap_id) != 0:
-            if fname not in os.listdir(dl_dir):
-                os.system("wget https://data.sdss.org/sas/%s/apogee/spectro/redux/%s/stars/apo25m/%s/%s -P %s" %(dr, key[dr][0], loc_id, fname, dl_dir))
+        #check if file has already been downloaded
+        if fname not in os.listdir(dl_dir):
+
+            #Look up location id from allStar-l30e.2.fits file
+            ap_id, loc_id = searchStars(id_name=star_id)
+
+            if len(ap_id) != 0:
+                #1. Try downloading from main survey
+                print('Downloading {} from {} \n'.format(ap_id, dr))
+                main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/apo25m/{}/{}".format(dr, key[dr][0], loc_id, fname)
+                os.system("wget {} -P {}" .format(main_url, dl_dir))
+                
+                #2. If not in main survey, try downloading from the Mdwarf ancilliary survey directory
+                if fname not in os.listdir(dl_dir):
+                    print(star_id + ' not found in APOGEE main survey. \n')
+                    print('Downloading {} from {} \n Mdwarf ancilliary'.format(ap_id, dr))
+                    anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/apo1m/Mdwarfs/{}".format(dr, key[dr][0], fname)
+                    os.system("wget {} -P {}" .format(anc_url, dl_dir)) 
+                    
+                    #3. If not in main or Mdwarf ancilliary survey, return error message
+                    if fname not in os.listdir(dl_dir):
+                        print(fname + ' could not be found in {} or {}'.format(main_url, anc_url))
+            else:
+                print(star_id + ' does not exist in ' + dr)
+
         else:
-            print(star_id + ' does not exist in ' + dr)
+            print('Already have file for ' + star_id)
+
 
     if d_type == 'apvisit': 
 
@@ -152,11 +195,15 @@ def download(star_id, **kwargs):
                 dl_name   = 'apVisit-%s-%s-%s-%s.fits' %(key[dr][0], plate, mjd, fiber)
                 save_name = 'apVisit-%s-%s.fits' %(star_id, str(v+1))
                 
+                #check if file has already been downloaded
                 if save_name not in os.listdir(dl_dir):
-
                     os.system("wget https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{} -O {}/{}" .format(str(dr), key[dr][0], plate, mjd, dl_name, dl_dir, save_name))
+                else:
+                    print('Already have file for ' + star_id)
+
         else:
             print(star_id + ' does not exist in ' + dr)
+
 
     if d_type == 'ap1d':
 
@@ -182,10 +229,11 @@ def download(star_id, **kwargs):
                 dl_name = 'ap1D' + url_list[i].split('ap1D')[1]
                 save_name = 'ap1d-{}-{}-{}.fits' .format(star_id, visit, chips[i])
 
+                #check if file has already been downloaded
                 if save_name in os.listdir(dl_dir):
                     print('Already have file {}'.format(dl_name))
                 elif save_name not in os.listdir(dl_dir):
-                    print('Downloading {} to apogee_data/ap1d_data/{}'.format(url_list[i], save_name))
+                    print('Downloading {} to apogee_data/ap1d_data/{} \n'.format(url_list[i], save_name))
                     print("{}/{}".format(dl_dir, save_name))
                     os.system("wget {} -O {}/{}".format(url_list[i], dl_dir, save_name))
                 else:
