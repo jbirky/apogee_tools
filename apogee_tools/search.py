@@ -114,20 +114,22 @@ def download(star_id, **kwargs):
 
             if len(ap_id) != 0:  
                 #1. Try downloading from main survey
-                print('Downloading {} from {} \n'.format(ap_id, dr))
+                print('Downloading {} from {}'.format(ap_id, dr))
                 main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/{}/{}".format(dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname)
                 os.system("wget {} -P {}" .format(main_url, dl_dir)) 
                 
                 #2. If not in main survey, try downloading from the Mdwarf ancilliary survey directory
                 if fname not in os.listdir(dl_dir):
-                    print(star_id + ' not found in APOGEE main survey. \n')
-                    print('Downloading {} from {} \n Mdwarf ancilliary'.format(ap_id, dr))
-                    anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/Mdwarfs/{}".format(dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname)
+                    print(star_id + ' not found in APOGEE main survey.')
+                    print('Downloading {} from {} Mdwarf ancilliary'.format(ap_id, dr))
+                    anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/Mdwarfs/{}".format(dr, key[dr][0], key[dr][1], key[dr][2], fname)
                     os.system("wget {} -P {}" .format(anc_url, dl_dir)) 
                 
-                    #3. If not in main or Mdwarf ancilliary survey, return error message
-                    if fname not in os.listdir(dl_dir):
-                        print(fname + ' could not be found in {} or {}'.format(main_url, anc_url))
+                #3. If not in main or Mdwarf ancilliary survey, return error message
+                if fname not in os.listdir(dl_dir):
+                    print(fname + ' could not be found in {} or {} \n'.format(main_url, anc_url))
+                else:
+                    print(fname + ' successfully downloaded. \n')
             else:
                 print(star_id + ' does not exist in ' + dr)
 
@@ -151,20 +153,22 @@ def download(star_id, **kwargs):
 
             if len(ap_id) != 0:
                 #1. Try downloading from main survey
-                print('Downloading {} from {} \n'.format(ap_id, dr))
+                print('Downloading {} from {}'.format(ap_id, dr))
                 main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/apo25m/{}/{}".format(dr, key[dr][0], loc_id, fname)
                 os.system("wget {} -P {}" .format(main_url, dl_dir))
                 
                 #2. If not in main survey, try downloading from the Mdwarf ancilliary survey directory
                 if fname not in os.listdir(dl_dir):
-                    print(star_id + ' not found in APOGEE main survey. \n')
+                    print(star_id + ' not found in APOGEE main survey.')
                     print('Downloading {} from {} \n Mdwarf ancilliary'.format(ap_id, dr))
                     anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/apo1m/Mdwarfs/{}".format(dr, key[dr][0], fname)
                     os.system("wget {} -P {}" .format(anc_url, dl_dir)) 
                     
-                    #3. If not in main or Mdwarf ancilliary survey, return error message
-                    if fname not in os.listdir(dl_dir):
-                        print(fname + ' could not be found in {} or {}'.format(main_url, anc_url))
+                #3. If not in main or Mdwarf ancilliary survey, return error message
+                if fname not in os.listdir(dl_dir):
+                    print(fname + ' could not be found in {} or {} \n'.format(main_url, anc_url))
+                else:
+                    print(fname + ' successfully downloaded. \n')
             else:
                 print(star_id + ' does not exist in ' + dr)
 
