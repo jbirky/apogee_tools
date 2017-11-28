@@ -13,6 +13,7 @@ from .rotation_broaden import broaden, applyVsini
 from .continuum import continuum
 from .read import HDF5Convert, HDF5Interface, loadGrid, readModels, getModel
 from .rv_function import rvShift, rvShiftSpec
+from .cannon_tools import labelToSpec, loadLabels, initializeTrainingSet, runCannon
 
 # import .apogee_hack.spec.lsf as lsf
 # from .apogee_hack.spec.plot import apStarWavegrid
