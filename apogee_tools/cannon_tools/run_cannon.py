@@ -5,7 +5,10 @@ from astropy.io import ascii
 from pathlib import Path
 import apogee_tools as ap
 
-from TheCannon import apogee, dataset, model
+try:
+	from TheCannon import apogee, dataset, model
+except:
+	print("Optional dependency TheCannon is not installed. To use cannon_tools, install https://github.com/annayqho/TheCannon \n")
 
 import os
 os.environ["PATH"] += os.pathsep + '/usr/local/texlive/2016/bin/x86_64-darwin'
@@ -218,7 +221,7 @@ def crossValidate(ds, **kwargs):
 	"""
 
 	# optional
-	label_names = kwargs.get('label_names', ['SPT'])
+	label_names = kwargs.get('lbl_names', ['SPT'])
 	uncert = kwargs.get('uncert', False)
 
 	# ds: Data set of all objects (including n); continuum normalized in initializeTrainingSet()
@@ -271,7 +274,7 @@ def crossValidate(ds, **kwargs):
 		crv_label_n = test_labels[n]
 		crv_labels.append(crv_label_n)
 
-		print('Labeled [%s/%s] sources.\n'%(n, nsources))
+		print('Labeled [%s/%s] sources.\n'%(n+1, nsources))
 
 	trn_labels = ds.tr_label
 
