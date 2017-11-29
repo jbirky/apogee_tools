@@ -10,9 +10,10 @@ Contributors:
 * Elizabeth Moreno (Guanajuato)
 * Chris Theissen (BU)
 
-This code also borrows from two other sources, see:
+This code also borrows from several other sources, see:
 * [Starfish](https://github.com/iancze/Starfish) - Ian Czekala
 * [apogee](https://github.com/jobovy/apogee) - Jo Bovy
+* [TheCannon](https://github.com/annayqho/TheCannon) - Anna Ho
 
 ## Code Setup
 
