@@ -1,8 +1,8 @@
 # apogee_tools
 
-Forward modeling pipeline for [APOGEE](http://www.sdss.org/dr13/irspec/) VLM star spectra.
+Forward modeling tools for [APOGEE](http://www.sdss.org/dr13/irspec/) VLM star spectra.
 
-Authors:
+Contributors:
 * Christian Aganze (UCSD)
 * Jessica Birky (UCSD)
 * Adam Burgasser, PI (UCSD)

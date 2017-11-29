@@ -1,19 +1,25 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from .core import Spectrum
-from .spec_tools import calcScale, compareSpectra, subtractContinuum, integralResample
-from .search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
-from .ap1d import get_1dspec_urls
+
+from .cannon_tools.run_cannon import labelToSpec, loadLabels, initializeTrainingSet, runCannon, crossValidate
+from .cannon_tools.plot_cannon import plotCrossValidation, plotSpectralSequence, plotBands
+
+from .forward_model.lsf_function import convolveLsf
+from .forward_model.model import makeModel, returnModelFit
+from .forward_model.rotation_broaden import broaden, applyVsini
+from .forward_model.rv_function import rvShift, rvShiftSpec
+from .forward_model.synthesize_grid import interpolateGrid
+from .forward_model.telluric import applyTelluric
+
 from .info.features import lines
-from .model import makeModel, returnModelFit
-from .telluric import applyTelluric
-from .synthesize_grid import interpolateGrid
-from .lsf_function import convolveLsf
-from .rotation_broaden import broaden, applyVsini
-from .continuum import continuum
-from .read import HDF5Convert, HDF5Interface, loadGrid, readModels, getModel
-from .rv_function import rvShift, rvShiftSpec
-from .cannon_tools import labelToSpec, loadLabels, initializeTrainingSet, runCannon
+
+from .utils.ap1d import get_1dspec_urls
+from .utils.continuum import continuum
+from .utils.read import HDF5Convert, HDF5Interface, loadGrid, readModels, getModel
+from .utils.search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
+from .utils.spec_tools import calcScale, compareSpectra, subtractContinuum, integralResample
+
 
 # import .apogee_hack.spec.lsf as lsf
 # from .apogee_hack.spec.plot import apStarWavegrid
