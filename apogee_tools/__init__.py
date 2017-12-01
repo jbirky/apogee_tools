@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from .core import Spectrum
 
 from .cannon_tools.run_cannon import labelToSpec, loadLabels, initializeTrainingSet, runCannon, crossValidate
-from .cannon_tools.plot_cannon import plotCrossValidation, plotSpectralSequence, plotBands
+from .cannon_tools.plot_cannon import plotCrossValidation, plotCannonModels, plotSpectralSequence, plotBands
 
 from .forward_model.lsf_function import convolveLsf
 from .forward_model.model import makeModel, returnModelFit
