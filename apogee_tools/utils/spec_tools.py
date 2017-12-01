@@ -48,13 +48,17 @@ def compareSpectra(sp1, sp2, **kwargs):
     fit_range = kwargs.get('fit_range', [sp1.wave[0], sp1.wave[-1]])
     fit_scale = kwargs.get('fit_scale', True)
     normalize = kwargs.get('norm', True)
+    ivariance = kwargs.get('ivar', False)
 
     from scipy.interpolate import interp1d
 
     #sp2 will be interpolated to the same wavelenth values as sp1
     wave = sp1.wave
-    unc = sp1.sigmas
     flux1 = sp1.flux
+    if ivariance == True:
+        ivar = sp1.ivar
+    else:
+        unc  = sp1.sigmas
 
     #Interpolation function 
     f = interp1d(sp2.wave, sp2.flux, bounds_error=False, fill_value=0.)
@@ -85,7 +89,10 @@ def compareSpectra(sp1, sp2, **kwargs):
     #Compute chi-squared value
     flux2 = scale*flux2
     diff = flux1 - flux2
-    stat = diff**2/np.array(unc)**2
+    if ivariance == True:
+        stat = (diff**2)*ivar
+    else:
+        stat = diff**2/np.array(unc)**2
     chi  = sum(stat)
 
     sp2 = ap.Spectrum(wave=wave, flux=flux2, params=sp2.params)

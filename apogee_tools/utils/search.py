@@ -59,7 +59,7 @@ def searchVisits(**kwargs):
     ap_id = kwargs.get('id_name')
 
     #Read the database file
-    hdu = fits.open(AP_PATH + '/allVisit-l30e.2.fits')
+    hdu = fits.open(AP_PATH + '/allVisit-l31c.2.fits')
 
     keys = hdu[1].header
     data = hdu[1].data
@@ -196,12 +196,31 @@ def download(star_id, **kwargs):
                 #make sure fiber string has proper number of zeros 
                 fiber = fiber.zfill(3)
 
-                dl_name   = 'apVisit-%s-%s-%s-%s.fits' %(key[dr][0], plate, mjd, fiber)
-                save_name = 'apVisit-%s-%s.fits' %(star_id, str(v+1))
+                dl_name   = 'apVisit-{}-{}-{}-{}.fits'.format(key[dr][0], plate, mjd, fiber)
+                save_name = 'apVisit-{}-{}.fits'.format(star_id, str(v+1))
                 
                 #check if file has already been downloaded
                 if save_name not in os.listdir(dl_dir):
-                    os.system("wget https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{} -O {}/{}" .format(str(dr), key[dr][0], plate, mjd, dl_name, dl_dir, save_name))
+                    #1. Try downloading from the 2.5m survey
+                    if plate != 'Mdwarfs':
+                        print('Downloading {} from {}'.format(ap_id, dr))
+                        main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(str(dr), key[dr][0], plate, mjd, dl_name)
+                        os.system("wget {} -O {}/{}".format(main_url, dl_dir, save_name))
+                    else:
+                        dl_name   = 'apVisit-{}-{}-{}.fits'.format(key[dr][0], mjd, star_id)
+
+                    #2. If not in main survey, try downloading from the 1m survey
+                    if save_name not in os.listdir(dl_dir):
+                        print(star_id + ' not found in APOGEE main survey.')
+                        print('Downloading {} from {} \n Mdwarf ancilliary'.format(ap_id, dr))
+                        anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo1m/{}/{}/{}".format(str(dr), key[dr][0], plate, mjd, dl_name)
+                        os.system("wget {} -O {}/{}".format(anc_url, dl_dir, save_name))
+
+                    #3. If not in main or Mdwarf ancilliary survey, return error message
+                    if save_name not in os.listdir(dl_dir):
+                        print(dl_name + ' could not be found in {} or {} \n'.format(main_url, anc_url))
+                    else:
+                        print('{} successfully downloaded as {}. \n'.format(dl_name, save_name))
                 else:
                     print('Already have file for ' + star_id)
 
@@ -238,7 +257,6 @@ def download(star_id, **kwargs):
                     print('Already have file {}'.format(dl_name))
                 elif save_name not in os.listdir(dl_dir):
                     print('Downloading {} to apogee_data/ap1d_data/{} \n'.format(url_list[i], save_name))
-                    print("{}/{}".format(dl_dir, save_name))
                     os.system("wget {} -O {}/{}".format(url_list[i], dl_dir, save_name))
                 else:
                     print('Unable to download file {}'.format(dl_fname))
