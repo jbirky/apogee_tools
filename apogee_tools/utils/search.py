@@ -113,15 +113,15 @@ def download(star_id, **kwargs):
             ap_id, loc_id = searchStars(id_name=star_id, rel=dr)
 
             if len(ap_id) != 0:  
-                #1. Try downloading from main survey
-                print('Downloading {} from {}'.format(ap_id, dr))
+                #1. Try downloading from the 2.5m survey
+                print('Downloading {} from {} 2.5m survey.'.format(ap_id, dr))
                 main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/{}/{}".format(dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname)
                 os.system("wget {} -P {}" .format(main_url, dl_dir)) 
                 
-                #2. If not in main survey, try downloading from the Mdwarf ancilliary survey directory
+                #2. If not in main survey, try downloading from the 1m survey
                 if fname not in os.listdir(dl_dir):
-                    print(star_id + ' not found in APOGEE main survey.')
-                    print('Downloading {} from {} Mdwarf ancilliary'.format(ap_id, dr))
+                    print(star_id + ' not found in APOGEE 2.5m survey.')
+                    print('Downloading {} from {} 1.0m survey.'.format(ap_id, dr))
                     anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/Mdwarfs/{}".format(dr, key[dr][0], key[dr][1], key[dr][2], fname)
                     os.system("wget {} -P {}" .format(anc_url, dl_dir)) 
                 
@@ -152,15 +152,15 @@ def download(star_id, **kwargs):
             ap_id, loc_id = searchStars(id_name=star_id)
 
             if len(ap_id) != 0:
-                #1. Try downloading from main survey
-                print('Downloading {} from {}'.format(ap_id, dr))
+                #1. Try downloading from the 2.5m survey
+                print('Downloading {} from {} 2.5m survey.'.format(ap_id, dr))
                 main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/apo25m/{}/{}".format(dr, key[dr][0], loc_id, fname)
                 os.system("wget {} -P {}" .format(main_url, dl_dir))
                 
-                #2. If not in main survey, try downloading from the Mdwarf ancilliary survey directory
+                #2. If not in main survey, try downloading from the 1m survey
                 if fname not in os.listdir(dl_dir):
-                    print(star_id + ' not found in APOGEE main survey.')
-                    print('Downloading {} from {} \n Mdwarf ancilliary'.format(ap_id, dr))
+                    print(star_id + ' not found in APOGEE 2.5m survey.')
+                    print('Downloading {} from {} 1.0m survey.'.format(ap_id, dr))
                     anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/apo1m/Mdwarfs/{}".format(dr, key[dr][0], fname)
                     os.system("wget {} -P {}" .format(anc_url, dl_dir)) 
                     
@@ -203,7 +203,7 @@ def download(star_id, **kwargs):
                 if save_name not in os.listdir(dl_dir):
                     #1. Try downloading from the 2.5m survey
                     if plate != 'Mdwarfs':
-                        print('Downloading {} from {}'.format(ap_id, dr))
+                        print('Downloading {} from {} 2.5m survey.'.format(ap_id, dr))
                         main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(str(dr), key[dr][0], plate, mjd, dl_name)
                         os.system("wget {} -O {}/{}".format(main_url, dl_dir, save_name))
                     else:
@@ -211,8 +211,8 @@ def download(star_id, **kwargs):
 
                     #2. If not in main survey, try downloading from the 1m survey
                     if save_name not in os.listdir(dl_dir):
-                        print(star_id + ' not found in APOGEE main survey.')
-                        print('Downloading {} from {} \n Mdwarf ancilliary'.format(ap_id, dr))
+                        print(star_id + ' not found in APOGEE 2.5m survey.')
+                        print('Downloading {} from {} 1.0m survey.'.format(ap_id, dr))
                         anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo1m/{}/{}/{}".format(str(dr), key[dr][0], plate, mjd, dl_name)
                         os.system("wget {} -O {}/{}".format(anc_url, dl_dir, save_name))
 
