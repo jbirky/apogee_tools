@@ -10,7 +10,7 @@ def rvShift(wave, **kwargs):
 
     """
     
-    rv = kwargs.get('rv', -80) 
+    rv = kwargs.get('rv', 0) 
 
     shift   = 1. + rv/299792.
     rv_wave = wave*shift
@@ -28,7 +28,7 @@ def rvShiftSpec(sp, **kwargs):
 
     """
     
-    rv = kwargs.get('rv', -80) 
+    rv = kwargs.get('rv', 0) 
 
     shift   = 1. + rv/299792.
     rv_wave = sp.wave*shift
