@@ -281,6 +281,7 @@ class Spectrum():
             self.sky    = kwargs.get('sky', [])
             self.sigmas = kwargs.get('sigmas', [0 for i in range(len(self.wave))])
             self.noise  = self.sigmas
+            self.ivar   = kwargs.get('ivar', [])
             self.model  = kwargs.get('model', [])
             self.name   = kwargs.get('name', 'spectrum')  
             self.params = kwargs.get('params', [])   
