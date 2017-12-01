@@ -8,7 +8,7 @@ import apogee_tools as ap
 try:
 	from TheCannon import apogee, dataset, model
 except:
-	print("Optional dependency TheCannon is not installed. To use cannon_tools, install https://github.com/annayqho/TheCannon \n")
+	print("apogee_tools: Optional dependency TheCannon is not installed. To use cannon_tools, install https://github.com/annayqho/TheCannon \n")
 
 import os
 os.environ["PATH"] += os.pathsep + '/usr/local/texlive/2016/bin/x86_64-darwin'

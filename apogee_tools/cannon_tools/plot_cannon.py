@@ -69,7 +69,7 @@ def plotCrossValidation(trn_labels, crv_labels, **kwargs):
         ax1.set_xlim(limits_1)
         ax1.set_ylim(limits_1)
 
-        ax1.set_title(label_names[0] + 'Labels')
+        ax1.set_title(label_names[0] + ' Labels')
         ax1.set_xlabel('Training Label')
         ax1.set_ylabel('Cross-Validated Label')
 
@@ -83,13 +83,73 @@ def plotCrossValidation(trn_labels, crv_labels, **kwargs):
         ax2.set_xlim(limits_2)
         ax2.set_ylim(limits_2)
 
-        ax2.set_title(label_names[1] + 'Labels')
+        ax2.set_title(label_names[1] + ' Labels')
         ax2.set_xlabel('Training Label')
-        ax2.set_ylabel('Cross-Validated Label')
+        # ax2.set_ylabel('Cross-Validated Label')
 
-    plt.savefig('plots/'+str(out))
+    plt.savefig(str(out))
 
     plt.tight_layout()
+    plt.show()
+    plt.close()
+
+
+def plotCannonModels(ds, te_flux, te_labels, **kwargs):
+
+    nspecs = len(te_flux)
+    bands  = [[15160,15800],[15880,16420],[16500,16935]]
+    n      = kwargs.get('band', 1)
+    yrange = kwargs.get('yrange', [.6,1.2]) 
+    snr    = kwargs.get('snr', [])
+    lbl_names = kwargs.get('lbl_names', ['TEFF', 'FE/H'])
+    
+    save = kwargs.get('save', False)
+    out  = kwargs.get('out', 'Models_Band'+str(n)+'.pdf')
+    
+    tr_label = ds.tr_label
+    te_label = te_labels
+    tr_label_unc = kwargs.get('tr_lbl_unc')
+    te_label_unc = kwargs.get('te_lbl_unc', [0,0])
+    
+    wl      = ds.wl
+    tr_flux = ds.tr_flux
+    tr_ivar = ds.tr_ivar
+    
+    fig, axs = plt.subplots(nspecs, 1, figsize=(12,3*nspecs))
+    for i, ax in enumerate(fig.axes):
+
+        tr_stdev = [1/math.sqrt(ivar) for ivar in tr_ivar[i]]
+    
+        data = ap.Spectrum(wave=wl, flux=tr_flux[i], sigmas=tr_stdev)
+        mdl  = ap.Spectrum(wave=wl, flux=te_flux[i])
+        chi  = ap.compareSpectra(data, mdl, fit_scale=False)[0]
+        
+        ax.plot(wl, tr_flux[i], color='k')
+        ax.plot(wl, te_flux[i], color='r')
+        
+        cannon_lbl = r'$Cannon: Teff = {} \pm {}, Fe/H = {} \pm {}$'.format(round(te_label[i][0],-1), te_label_unc[0], round(te_label[i][1],2), te_label_unc[1]) 
+        ax.text(bands[n-1][0]+10, yrange[1]-.08, cannon_lbl,color='r', fontsize=15, va='bottom', ha='left')
+        
+        ref_lbl = r'$Ref: Teff = {} \pm {}, Fe/H = {} \pm {}$'.format(round(tr_label[i][0],-1), tr_label_unc[i][0], round(tr_label[i][1],2), tr_label_unc[i][1]) 
+        ax.text(bands[n-1][0]+10, yrange[0]+.08, ref_lbl, color='k', fontsize=15, va='top', ha='left')
+        
+        chi_lbl = r'$\chi^{2} = %s$'%(str(chi))
+        ax.text(bands[n-1][1]-10, yrange[1]-.08, chi_lbl, color='r', fontsize=15, va='bottom', ha='right')
+        
+        if len(snr) != 0:
+            snr_lbl = r'$SNR = {}$'.format(str(snr[i]))
+            ax.text(bands[n-1][1]-10, yrange[0]+.08, snr_lbl, color='k', fontsize=15, va='top', ha='right')
+         
+        ax.set_title(ds.tr_ID[i], fontsize=18)
+        ax.set_xlim(bands[n-1])
+        ax.set_ylim(yrange)
+        ax.set_ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]', fontsize=15)
+        if i == nspecs-1:
+            ax.set_xlabel(r'$\lambda$ [$\mathring{A}$]', fontsize=15)
+    
+    plt.tight_layout()
+    if save == True:
+        plt.savefig(str(out))
     plt.show()
     plt.close()
 
