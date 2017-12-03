@@ -8,7 +8,7 @@ import apogee_tools as ap
 try:
 	from TheCannon import apogee, dataset, model
 except:
-	print("apogee_tools: Optional dependency TheCannon is not installed. To use cannon_tools, install https://github.com/annayqho/TheCannon \n")
+	print("apogee_tools: Optional dependency TheCannon is not installed. To use cannon_tools, run 'pip install TheCannon' \n")
 
 import os
 os.environ["PATH"] += os.pathsep + '/usr/local/texlive/2016/bin/x86_64-darwin'
@@ -165,32 +165,44 @@ def runCannon(ds, **kwargs):
 	label_errs  = md.infer_labels(ds)
 	test_labels = ds.test_label_vals
 
-	# ds.diagnostics_test_step_flagstars()
-	# ds.diagnostics_survey_labels()
-	# ds.diagnostics_1to1()
-
 	coeffs = md.coeffs
 	scatter = md.scatters
 	test_labels = test_labels
 
-	teffs = list(map(itemgetter(0), test_labels))
-	metal = list(map(itemgetter(1), test_labels))
+	if ds.tr_label.shape[1] == 1:
+		par1 = test_labels.T[0]
+		
+		pivot1, scale1 = _getPivotsAndScales(par1)
 
-	t_pivots, t_scales = _getPivotsAndScales(teffs)
-	m_pivots, m_scales = _getPivotsAndScales(metal)
+		lbl1 = [(t - pivot1)/scale1 for t in par1]
+		lbl1_sq = [t**2 for t in lbl1]
 
-	teff_lbl = [(t - t_pivots)/t_scales for t in teffs]
-	feh_lbl  = [(m - m_pivots)/m_scales for m in metal]
-	teff_sq_lbl  = [t**2 for t in teff_lbl]
-	feh_sq_lbl   = [f**2 for f in feh_lbl]
-	teff_feh_lbl = [feh_lbl[i]*teff_lbl[i] for i in range(len(teffs))]
+		# Create label vector
+		label_n = []
+		for i in range(test_labels.shape[0]):
+		    l_i = [1, lbl1[i], lbl1_sq[i]]
+		    label_n.append(l_i)
+		label_n = np.array(label_n)
 
-	# Create label vector
-	label_n = []
-	for i in range(test_labels.shape[0]):
-	    l_i = [1, teff_lbl[i], feh_lbl[i], teff_sq_lbl[i], feh_sq_lbl[i], teff_feh_lbl[i]]
-	    label_n.append(l_i)
-	label_n = np.array(label_n)
+	elif ds.tr_label.shape[1] == 2:
+		par1 = list(map(itemgetter(0), test_labels))
+		par2 = list(map(itemgetter(1), test_labels))
+
+		pivot1, scale1 = _getPivotsAndScales(par1)
+		pivot2, scale2 = _getPivotsAndScales(par2)
+
+		lbl1 = [(t - pivot1)/scale1 for t in par1]
+		lbl2 = [(m - pivot2)/scale2 for m in par2]
+		lbl1_sq = [t**2 for t in lbl1]
+		lbl2_sq = [f**2 for f in lbl2]
+		lbl1_lbl2 = [lbl2[i]*lbl1[i] for i in range(len(par1))]
+
+		# Create label vector
+		label_n = []
+		for i in range(test_labels.shape[0]):
+		    l_i = [1, lbl1[i], lbl2[i], lbl1_sq[i], lbl2_sq[i], lbl1_lbl2[i]]
+		    label_n.append(l_i)
+		label_n = np.array(label_n)
 
 	synth_fluxes = np.dot(coeffs, np.transpose(label_n))
 	synth_fluxes = np.transpose(synth_fluxes)
