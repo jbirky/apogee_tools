@@ -5,6 +5,9 @@ import os
 import h5py
 import apogee_tools as ap
 
+#Get the path of apogee_tools file
+FULL_PATH  = os.path.realpath(__file__)
+BASE, NAME = os.path.split(FULL_PATH)
 
 def HDF5Convert(filename, **kwargs):
 
