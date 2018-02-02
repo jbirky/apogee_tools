@@ -6,8 +6,7 @@ import apogee_tools as ap
 
 #Get the path of apogee_tools file
 FULL_PATH  = os.path.realpath(__file__)
-BASE = os.path.split(os.path.split(FULL_PATH)[0])[0]
-
+BASE = os.path.split(os.path.split(os.path.split(FULL_PATH)[0])[0])[0]
 AP_PATH = os.environ['APOGEE_DATA']
 
 
