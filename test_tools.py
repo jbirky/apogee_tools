@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
 	interp_sp = ap.interpolateGrid(labels=[params['teff'], params['logg'], params['z']], res='500k')
 	interp_sp.flux = interp_sp.flux/max(interp_sp.flux)
-	rv_sp   = ap.spec_tools.rvShiftSpec(interp_sp, rv=params['rv'])
+	rv_sp   = ap.rvShiftSpec(interp_sp, rv=params['rv'])
 	rot_sp  = ap.applyVsini(rv_sp, vsini=params['vsini'])
 	tell_sp = ap.applyTelluric(rot_sp, alpha=params['alpha'], airmass='1.0')
 	lsf_sp  = ap.convolveLsf(tell_sp, fiber=124)
