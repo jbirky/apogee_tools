@@ -109,6 +109,8 @@ def plotCannonModels(ds, te_flux, te_labels, **kwargs):
     
     nspecs = len(te_flux)
     nparam = len(lbl_names)
+
+    nplots = kwargs.get('nplots', nspecs)
     
     tr_label = ds.tr_label
     tr_label_unc = kwargs.get('tr_lbl_unc')
@@ -119,7 +121,7 @@ def plotCannonModels(ds, te_flux, te_labels, **kwargs):
     tr_flux = ds.tr_flux
     tr_ivar = ds.tr_ivar
     
-    fig, axs = plt.subplots(nspecs, 1, figsize=(12,3*nspecs))
+    fig, axs = plt.subplots(nplots, 1, figsize=(12,3*nspecs))
     for i, ax in enumerate(fig.axes):
 
         tr_stdev = [1/math.sqrt(ivar) for ivar in tr_ivar[i]]

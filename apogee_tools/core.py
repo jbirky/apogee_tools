@@ -357,7 +357,6 @@ class Spectrum():
         
         plt.legend(loc='upper right', fontsize=12)
         
-        
         plt.xlim(xrange)
         plt.ylim(yrange)    
     
