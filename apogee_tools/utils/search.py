@@ -282,17 +282,14 @@ def multiParamSearch(**kwargs):
     search_par = kwargs.get('par', ['TEFF'])
     select     = kwargs.get('select', [[3000, 4500]])
     save       = kwargs.get('save', True)
-    release    = kwargs.get('rel', ['dr14'])
+    release    = kwargs.get('rel', 'dr14')
 
     # default save directory is in your APOGEE_DATA environmental variable folder
     if not os.path.exists(AP_PATH + '/tables'):
         os.makedirs(AP_PATH + '/tables')
     output_dir = kwargs.get('dir', AP_PATH + '/tables')
 
-    data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
-    'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits'}
-
-    database = db_path + '/allStar-l30e.2.fits'
+    database = db_path + '/' + data_releases[release]
     data = Table(fits.open(database)[1].data)
 
     for i in range(len(search_par)):
