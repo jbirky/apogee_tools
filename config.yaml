@@ -1,0 +1,25 @@
+# YAML configuration script
+
+data:
+  grid_name: "PHOENIX"
+  instrument: "APOGEE"
+
+outdir : output/
+
+plotdir : plots/
+
+# The parameters defining your raw spectral library live here.
+cannon:
+  raw_path: "libraries/raw/PHOENIX/"
+  hdf5_path: "libraries/PHOENIX_TRES_test.hdf5"
+  parname: ["temp", "logg", "z"]
+  parrange: [[2300, 3300], [4.0, 5.0], [-1.0, 1.0]]
+  wl_range: [14900, 17100] #angstroms
+
+# Initial parameters for MCMC
+Theta :
+    grid: [3500., 4.50, 0.0]
+    rv: -4.77
+    vsini: 5.79
+    alpha: 1.0
+

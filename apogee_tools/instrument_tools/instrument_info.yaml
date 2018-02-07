@@ -1,0 +1,9 @@
+# YAML configuration script
+
+APOGEE:
+  wlrange: [15100, 17000]
+  res: 235000
+
+NIRSPEC:
+  wlrange: [15100, 17000]
+  res: 235000
