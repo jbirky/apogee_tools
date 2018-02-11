@@ -210,17 +210,6 @@ def runCannon(ds, **kwargs):
 	return md, synth_fluxes, test_labels
 
 
-def compareSynthToSpec(**kwargs):
-
-	"""
-	Compute chi-squared of each synthetic model and plot
-
-	Input:  [wl, tr_IDs, tr_flux, tr_label, synth_fluxes, test_labels] from runCannon()
-	
-	Output: plot w/ all spectras and models and chi-squared
-	"""
-
-
 def crossValidate(ds, **kwargs):
 
 	"""
@@ -352,7 +341,7 @@ def fitCannonModels(tr_ds, te_ds):
 def _getPivotsAndScales(label_vals):
 
     """
-    Function scales the labels 
+    Function scales the labels see https://github.com/annayqho/TheCannon
     """
 
     qs = np.percentile(label_vals, (2.5, 50, 97.5), axis=0)
@@ -362,51 +351,46 @@ def _getPivotsAndScales(label_vals):
     return pivots, scales
 
 
-def labelToSpec(labels, coeffs):
+def _get_lvec(labels):
 
 	"""
-	For 3 parameter training set, input set of labels, return set of fluxes
+	Return quadratic label vector, see https://github.com/annayqho/TheCannon
 	"""
 
-	par1 = list(map(itemgetter(0), labels))
-	par2 = list(map(itemgetter(1), labels))
-	par3 = list(map(itemgetter(2), labels))
+    nlabels = len(labels)
+    # specialized to second-order model
+    linear_terms = labels 
+    quadratic_terms = np.outer(linear_terms, 
+                               linear_terms)[np.triu_indices(nlabels)]
+    lvec = np.hstack((linear_terms, quadratic_terms))
+    return lvec
 
-	pivot1, scale1 = _getPivotsAndScales(par1)
-	pivot2, scale2 = _getPivotsAndScales(par2)
-	pivot3, scale3 = _getPivotsAndScales(par3)
 
-	if scale1 != 0:
-		lbl1 = [(t - pivot1)/scale1 for t in par1]
-	else:
-		lbl1 = [t for t in par1]
-	if scale2 != 0:
-		lbl2 = [(l - pivot2)/scale2 for l in par2]
-	else:
-		lbl2 = [l for l in par2]
-	if scale3 != 0:
-		lbl3 = [(z - pivot3)/scale3 for z in par3]
-	else:
-		lbl3 = [z for z in par3]
-	
-	lbl1_sq = [t**2 for t in lbl1]
-	lbl2_sq = [l**2 for l in lbl2]
-	lbl3_sq = [z**2 for z in lbl2]
-	lbl1_lbl2 = [lbl1[i]*lbl2[i] for i in range(len(par1))]
-	lbl1_lbl3 = [lbl2[i]*lbl3[i] for i in range(len(par1))]
-	lbl2_lbl3 = [lbl2[i]*lbl3[i] for i in range(len(par1))]
+def synthesizeFlux(ds, **kwargs):
+    
+    order = kwargs.get('order', 2)
+    
+    md = model.CannonModel(order, None)
+    md.fit(ds)
 
-	# Create label vector
-	label_n = []
-	for i in range(labels.shape[0]):
-		l_i = [1, lbl1[i], lbl2[i], lbl3[i], lbl1_sq[i], lbl2_sq[i], lbl3_sq[i], lbl1_lbl2[i], lbl1_lbl3[i], lbl2_lbl3[i]]
-		label_n.append(l_i)
-	label_n = np.array(label_n)
-
-	synth_fluxes = np.dot(coeffs, np.transpose(label_n))
-	synth_fluxes = np.transpose(synth_fluxes)
-	
-	return synth_fluxes
+    coeffs = md.coeffs
+    md.infer_labels(ds)
+    test_labels = ds.test_label_vals
+    
+    nlabels = test_labels.shape[1]
+    
+    scaled_labels = []
+    for i in range(nlabels):
+        p, s = _getPivotsAndScales(test_labels.T[i])
+        slbl = [(t - p)/s for t in test_labels.T[i]]
+        scaled_labels.append(slbl)
+    
+    label_vec = np.array([_get_lvec(lbl) for lbl in np.array(scaled_labels).T])
+    label_vec = np.insert(label_vec, 0, 1, axis=1)
+    
+    synth_fluxes = np.dot(coeffs, label_vec.T).T
+    
+    return ds, synth_fluxes
 
 
 def interpolateGrids(**kwargs):
