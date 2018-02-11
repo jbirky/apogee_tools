@@ -82,7 +82,7 @@ Example search--will search the `allStar-l30e.2.fits` you downloaded:
 
 	params = ['TEFF', 'LOGG', 'M_H']
 	ranges = [[-10000,4000], [0,5], [-2,2]]
-	source_table = ap.multiParamSearch(par=params, select=ranges, save_dir='/path_to/')
+	source_table = ap.multiParamSearch(par=params, select=ranges, dir='/path_to/')
 
 Look up aspcap parameters in `allStar-l30e.2.fits` for specific list of 2MASS IDs:
 
