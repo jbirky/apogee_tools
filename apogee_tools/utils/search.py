@@ -289,8 +289,21 @@ def multiParamSearch(**kwargs):
         os.makedirs(AP_PATH + '/tables')
     output_dir = kwargs.get('dir', AP_PATH + '/tables')
 
-    database = db_path + '/' + data_releases[release]
+    database = db_path + '/' +data_releases[release]
     data = Table(fits.open(database)[1].data)
+
+    # redefine model parameters to FERRE if requested
+    if kwargs.get('model','ATLAS9') == 'MARCS' or kwargs.get('model','ATLAS9') == 'FERRE':
+        t = data['TEFF']
+        t = t[t>0.]
+        print(np.min(t))
+        select_cols = ['TEFF','LOGG','VMICRO','M_H','C_M','N_M','ALPHA_M','VSINI']
+        for i,s in enumerate(select_cols):
+            data[s] = [x[i] for x in data['FPARAM']]
+	# need to also add in replace uncertainties
+        t = data['TEFF']
+        t = t[t>0.]
+        print(np.min(t))
 
     for i in range(len(search_par)):
         p = data[search_par[i]]
