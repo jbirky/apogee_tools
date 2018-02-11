@@ -234,7 +234,6 @@ def crossValidate(ds, **kwargs):
 
 	# optional
 	label_names = kwargs.get('lbl_names', ['SPT'])
-	uncert = kwargs.get('uncert', False)
 
 	# ds: Data set of all objects (including n); continuum normalized in initializeTrainingSet()
 	wl = ds.wl
@@ -261,19 +260,9 @@ def crossValidate(ds, **kwargs):
 		vr_minus_n = np.array(tr_ivar)
 		tr_label_minus_n = np.array(tr_label)
 
-		if uncert == False:
-			tr_delta_minus_n    = None
-			coeff_old_minus_n   = None
-			scatter_old_minus_n = None
 
-		# Run Cannon on all sources but n
-		try: # Eiler's Cannon
-			ds_minus_n = dataset.Dataset(wl, id_minus_n, fl_minus_n, vr_minus_n, tr_label_minus_n, \
-				tr_delta_minus_n, id_minus_n, fl_minus_n, vr_minus_n, \
-				coeff_old=coeff_old_minus_n, scatter_old=scatter_old_minus_n)
-		except:
-			ds_minus_n = dataset.Dataset(wl, id_minus_n, fl_minus_n, vr_minus_n, tr_label_minus_n, \
-				id_minus_n, fl_minus_n, vr_minus_n)
+		ds_minus_n = dataset.Dataset(wl, id_minus_n, fl_minus_n, vr_minus_n, tr_label_minus_n, \
+			id_minus_n, fl_minus_n, vr_minus_n)
 
 		ds_minus_n.set_label_names(label_names)
 		model_minus_n = runCannon(ds_minus_n)[0]
