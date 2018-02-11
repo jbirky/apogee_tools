@@ -271,84 +271,50 @@ def crossValidate(ds, **kwargs):
 	return trn_labels, crv_labels
 
 
-def fitCannonModels(tr_ds, te_ds):
+def labelToSpec(labels, coeffs):
 
-	"""
-	Enter test dataset and training dataset. Will ouput models for test training set.
-	Output in the form of apogee_tools spectrum objects.
-	"""
+	nlabels = labels.shape[1]
 
-	md = model.CannonModel(2, useErrors=None)
-	md.fit(tr_ds)
+	scaled_labels = []
+	for i in range(nlabels):
+		p, s = _getPivotsAndScales(labels.T[i])
+		slbl = [(t - p)/s for t in labels.T[i]]
+		scaled_labels.append(slbl)
 
-	label_errs = md.infer_labels(te_ds)
-	test_labels = te_ds.test_label_vals
+	label_vec = np.array([_get_lvec(lbl) for lbl in np.array(scaled_labels).T])
+	label_vec = np.insert(label_vec, 0, 1, axis=1)
 
-	coeffs = md.coeffs
-	scatter = md.scatters
-	test_labels = test_labels
+	synth_fluxes = np.dot(coeffs, label_vec.T).T
 
-	if test_labels.shape[1] == 1:
-		par1 = test_labels.T[0]
-		
-		pivot1, scale1 = _getPivotsAndScales(par1)
+	return synth_fluxes
 
-		lbl1 = [(t - pivot1)/scale1 for t in par1]
-		lbl1_sq = [t**2 for t in lbl1]
 
-		# Create label vector
-		label_n = []
-		for i in range(test_labels.shape[0]):
-		    l_i = [1, lbl1[i], lbl1_sq[i]]
-		    label_n.append(l_i)
-		label_n = np.array(label_n)
+def synthesizeFlux(ds, **kwargs):
 
-	elif test_labels.shape[1] == 2:
-		par1 = list(map(itemgetter(0), test_labels))
-		par2 = list(map(itemgetter(1), test_labels))
+	order = kwargs.get('order', 2)
 
-		pivot1, scale1 = _getPivotsAndScales(par1)
-		pivot2, scale2 = _getPivotsAndScales(par2)
+	md = model.CannonModel(order, None)
+	md.fit(ds)
 
-		lbl1 = [(t - pivot1)/scale1 for t in par1]
-		lbl2 = [(m - pivot2)/scale2 for m in par2]
-		lbl1_sq = [t**2 for t in lbl1]
-		lbl2_sq = [f**2 for f in lbl2]
-		lbl1_lbl2 = [lbl2[i]*lbl1[i] for i in range(len(par1))]
+	md.infer_labels(ds)
+	test_labels = ds.test_label_vals
 
-		# Create label vector
-		label_n = []
-		for i in range(test_labels.shape[0]):
-		    l_i = [1, lbl1[i], lbl2[i], lbl1_sq[i], lbl2_sq[i], lbl1_lbl2[i]]
-		    label_n.append(l_i)
-		label_n = np.array(label_n)
+	synth_fluxes = labelToSpec(test_labels, md.coeffs)
 
-	synth_fluxes = np.dot(coeffs, np.transpose(label_n))
-	synth_fluxes = np.transpose(synth_fluxes)
-
-	wave = te_ds.wl
-	test_specs, test_models = [], []
-	for i in range(test_labels.shape[0 ]):
-		sp  = ap.Spectrum(wave=wave, flux=te_ds.tr_flux[i], name=te_ds.tr_ID[i])
-		test_specs.append(sp)
-
-		mdl = ap.Spectrum(wave=wave, flux=synth_fluxes[i], name=test_labels[i])
-		test_models.append(mdl)
-
-	return test_specs, test_models
+	return ds, synth_fluxes
 
 
 def _getPivotsAndScales(label_vals):
 
-    """
-    Function scales the labels see https://github.com/annayqho/TheCannon
-    """
+	"""
+	Function scales the labels see https://github.com/annayqho/TheCannon
+	"""
 
-    qs = np.percentile(label_vals, (2.5, 50, 97.5), axis=0)
-    pivots = qs[1]
-    scales = (qs[2] - qs[0])/4.
-    
-    return pivots, scales
+	qs = np.percentile(label_vals, (2.5, 50, 97.5), axis=0)
+	pivots = qs[1]
+	scales = (qs[2] - qs[0])/4.
+
+	return pivots, scales
 
 
 def _get_lvec(labels):
@@ -357,40 +323,12 @@ def _get_lvec(labels):
 	Return quadratic label vector, see https://github.com/annayqho/TheCannon
 	"""
 
-    nlabels = len(labels)
-    # specialized to second-order model
-    linear_terms = labels 
-    quadratic_terms = np.outer(linear_terms, 
-                               linear_terms)[np.triu_indices(nlabels)]
-    lvec = np.hstack((linear_terms, quadratic_terms))
-    return lvec
-
-
-def synthesizeFlux(ds, **kwargs):
-    
-    order = kwargs.get('order', 2)
-    
-    md = model.CannonModel(order, None)
-    md.fit(ds)
-
-    coeffs = md.coeffs
-    md.infer_labels(ds)
-    test_labels = ds.test_label_vals
-    
-    nlabels = test_labels.shape[1]
-    
-    scaled_labels = []
-    for i in range(nlabels):
-        p, s = _getPivotsAndScales(test_labels.T[i])
-        slbl = [(t - p)/s for t in test_labels.T[i]]
-        scaled_labels.append(slbl)
-    
-    label_vec = np.array([_get_lvec(lbl) for lbl in np.array(scaled_labels).T])
-    label_vec = np.insert(label_vec, 0, 1, axis=1)
-    
-    synth_fluxes = np.dot(coeffs, label_vec.T).T
-    
-    return ds, synth_fluxes
+	nlabels = len(labels)
+	# specialized to second-order model
+	linear_terms = labels 
+	quadratic_terms = np.outer(linear_terms, linear_terms)[np.triu_indices(nlabels)]
+	lvec = np.hstack((linear_terms, quadratic_terms))
+	return lvec
 
 
 def interpolateGrids(**kwargs):
