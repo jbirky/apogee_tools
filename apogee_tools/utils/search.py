@@ -318,15 +318,9 @@ def multiParamSearch(**kwargs):
 
     # Put only interesting values into the data table: 2MASS name and aspcap parameters
     data_dict  = {'2MASS_ID':data['APOGEE_ID'], 'TEFF':data['TEFF'], 'LOGG':data['LOGG'], 'M_H':data['M_H']}
-    # data_dict = {'2MASS_ID':data['APOGEE_ID'], 'RA':data['RA'], 'DEC':data['DEC']}
     data_table = pd.DataFrame(data=data_dict)
 
-    # Save data frame to csv file and save to the 'output' directory specified by keyword argument
-    tmin, tmax = select[0][0], select[0][1]
-    lmin, lmax = select[1][0], select[1][1]
-    mmin, mmax = select[2][0], select[2][1]
-
-    fname = 'teff_%s_%s_logg_%s_%s_feh_%s_%s.csv'%(tmin, tmax, lmin, lmax, mmin, mmax)
+    fname = kwargs.get('fname', 'search.csv')
     if save == True:
         save_dir = '%s/%s' %(output_dir, fname)
         data_table.to_csv(save_dir)
