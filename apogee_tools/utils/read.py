@@ -174,9 +174,12 @@ def readModels(**kwargs):
     Configured to read grid specified in config.yaml file inside apogee_tools
     """
 
+    grid     = kwargs.get('grid', 'BTSETTLb') 
+    grid_lib = BASE + '/libraries/' + grid + '_APOGEE.hdf5'
+
     parrange = kwargs.get('parrange')
-    gridPath = kwargs.get('gridPath')
-    subCont  = kwargs.get('subCont', True)
+    gridPath = kwargs.get('gridPath', grid_lib)
+    subCont  = kwargs.get('subCont', False)
     xrange   = kwargs.get('xrange', [15200,16940])
 
     teff_range = parrange[0]
