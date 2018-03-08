@@ -2,7 +2,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from .core import Spectrum
 
-from .cannon_tools.run_cannon import labelToSpec, loadLabels, initializeTrainingSet, synthesizeFlux, runCannon, crossValidate
+from .cannon_tools.run_cannon import labelToSpec, loadLabels, initializeTrainingSet, synthesizeFlux, \
+	runCannon, fitCannonModel, crossValidate, _getPivotsAndScales, _get_lvec
 from .cannon_tools.plot_cannon import plotCrossValidation, plotCannonModels, plotSpectralSequence, plotBands
 
 from .forward_model.lsf_function import convolveLsf

@@ -304,6 +304,33 @@ def synthesizeFlux(ds, **kwargs):
 	return ds, synth_fluxes
 
 
+def fitCannonModel(ds, **kwargs):
+    
+    order = kwargs.get('order', 2)
+    
+    md = model.CannonModel(order, None)
+    md.fit(ds)
+    
+    coeffs = md.coeffs
+    md.infer_labels(ds)
+    test_labels = ds.test_label_vals
+    
+    nlabels = test_labels.shape[1]
+    
+    scaled_labels = []
+    for i in range(nlabels):
+        p, s = _getPivotsAndScales(test_labels.T[i])
+        slbl = [(t - p)/s for t in test_labels.T[i]]
+        scaled_labels.append(slbl)
+    
+    label_vec = np.array([_get_lvec(lbl) for lbl in np.array(scaled_labels).T])
+    label_vec = np.insert(label_vec, 0, 1, axis=1)
+    
+    synth_fluxes = np.dot(coeffs, label_vec.T).T
+    
+    return md, ds, synth_fluxes
+
+
 def _getPivotsAndScales(label_vals):
 
 	"""
@@ -328,6 +355,7 @@ def _get_lvec(labels):
 	linear_terms = labels 
 	quadratic_terms = np.outer(linear_terms, linear_terms)[np.triu_indices(nlabels)]
 	lvec = np.hstack((linear_terms, quadratic_terms))
+	
 	return lvec
 
 
