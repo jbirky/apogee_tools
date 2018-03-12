@@ -15,7 +15,7 @@ from .forward_model.telluric import applyTelluric
 
 from .info.features import lines
 
-from .utils.ap1d import get_1dspec_urls
+from .utils.ap1d import get_1dspec_urls, coadd_epoch, coadd_spectra
 from .utils.continuum import continuum
 from .utils.read import HDF5Convert, HDF5Interface, loadGrid, readModels, getModel
 from .utils.search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
