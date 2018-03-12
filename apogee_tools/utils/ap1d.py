@@ -1,9 +1,10 @@
 import numpy as np
-import os
-import glob
-import apogee_tools as ap
-from astropy.io import fits
 import matplotlib.pyplot as plt
+import os, sys
+import glob
+from astropy.io import fits
+from astropy.utils.data import download_file
+import apogee_tools as ap
 
 
 def get_urls_from_header(path, frame_id):
@@ -98,4 +99,105 @@ def get_1dspec_urls(apogee_id, **kwargs):
     
     return urls
 
+
+def coadd_spectra(spectra, errorArray):
+
+	"""
+	@Chris Theissen
+	"""
+
+	# Do a masked, uncertainty weighted average over all the spectra
+	AveragedFluxes = np.ma.average(np.array(spectra), axis=0, weights = 1./np.array(errorArray)**2.)
+	AveragedErrors = np.ma.sqrt(1. / np.sum(1./np.array(errorArray)**2., axis=0))
+
+	return AveragedFluxes, AveragedErrors
+
+
+def coadd_epoch(star_id, epoch=1, dr='dr14', show_progess=False):
+
+	"""
+	@Chris Theissen
+	"""
+
+	# Get all APOGEE MJDs for each visit for the object
+	ap_id, plates, mjds, fibers = ap.searchVisits(id_name=star_id)
+
+	# Get the list of urls for each spectrum from each visit
+	spectralist = ap.utils.ap1d.get_1dspec_urls(star_id)
+
+	# Check if visit (epoch) is valid
+	if visit > len(mjds): 
+		raise Exception('Epoch %s is invalid. Only %s epochs available for %s.'%(visit, len(mjds), star_id))
+
+	# Which fiber is it?
+	fiber = fibers[visit-1]
+
+	# Initialize empty arrays for all the spectra and errors
+	spectraA = []
+	errorsA  = []
+	spectraB = []
+	errorsB  = []
+	spectraC = []
+	errorsC  = []
+
+	# Get the spectra from each from of the epoch
+	for j in spectralist['visit%s'%visit]:
+
+		# Download the 1-D spectra
+		fitsA = fits.open(download_file(spectralist['visit%s'%visit]['%s'%j][0], cache=False, show_progress=show_progress))
+		fitsB = fits.open(download_file(spectralist['visit%s'%visit]['%s'%j][1], cache=False, show_progress=show_progress))
+		fitsC = fits.open(download_file(spectralist['visit%s'%visit]['%s'%j][2], cache=False, show_progress=show_progress))
+		
+		# Chip A
+		t1     = fitsA[1].data[fiber] 
+		wave1  = fitsA[4].data[fiber]
+		order1 = np.unravel_index(np.argsort(wave1, axis=None), wave1.shape)
+		flux1  = t1#*1e-17
+		err1   = fitsA[2].data[fiber][order1]
+		mask1  = fitsA[3].data[fiber][order1]
+		wave1  = wave1[order1]
+
+		fluxA = np.ma.array(flux1, mask=mask1)
+		errA  = np.ma.array(err1,  mask=mask1)
+
+		spectraA.append(fluxA)
+		errorsA.append(errA)
+
+		# Chip B
+		t2     = fitsB[1].data[fiber] 
+		wave2  = fitsB[4].data[fiber]
+		order2 = np.unravel_index(np.argsort(wave2, axis=None), wave2.shape)
+		flux2  = t2#*1e-17
+		err2   = fitsB[2].data[fiber][order2]
+		mask2  = fitsB[3].data[fiber][order2]
+		wave2  = wave2[order2]
+
+		fluxB = np.ma.array(flux2, mask=mask2)
+		errB  = np.ma.array(err2,  mask=mask2)
+
+		spectraB.append(fluxB)
+		errorsB.append(errB)
+
+		# Chip C
+		t3     = fitsC[1].data[fiber] 
+		wave3  = fitsC[4].data[fiber]
+		order3 = np.unravel_index(np.argsort(wave3, axis=None), wave3.shape)
+		flux3  = t3#*1e-17
+		err3   = fitsC[2].data[fiber][order3]
+		mask3  = fitsC[3].data[fiber][order3]
+		wave3  = wave3[order3]
+
+		fluxC = np.ma.array(flux3, mask=mask3)
+		errC  = np.ma.array(err3,  mask=mask3)
+
+		spectraC.append(fluxC)
+		errorsC.append(errC)
+
+	# Average the spectra for the epoch
+	FinalFluxA, FinalErrorA = coadd_spectra(spectraA, errorsA)
+	FinalFluxB, FinalErrorB = coadd_spectra(spectraB, errorsB)
+	FinalFluxC, FinalErrorC = coadd_spectra(spectraC, errorsC)
+
+	# return (for each band) flux, error, and wavelengths
+	return FinalFluxA, FinalErrorA, wave1 FinalFluxB, FinalErrorB, wave2, FinalFluxC, FinalErrorC, wave3
 
