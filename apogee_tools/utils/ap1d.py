@@ -199,5 +199,5 @@ def coadd_epoch(star_id, epoch=1, dr='dr14', show_progess=False):
 	FinalFluxC, FinalErrorC = coadd_spectra(spectraC, errorsC)
 
 	# return (for each band) flux, error, and wavelengths
-	return FinalFluxA, FinalErrorA, wave1 FinalFluxB, FinalErrorB, wave2, FinalFluxC, FinalErrorC, wave3
+	return FinalFluxA, FinalErrorA, wave1, FinalFluxB, FinalErrorB, wave2, FinalFluxC, FinalErrorC, wave3
 
