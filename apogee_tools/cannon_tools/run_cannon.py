@@ -212,63 +212,68 @@ def runCannon(ds, **kwargs):
 
 def crossValidate(ds, **kwargs):
 
-	"""
-	Cross-validation test of Cannon test spectra
+    """
+    Cross-validation test of Cannon test spectra
+    Input:  'ds' : dataset object output from initializeTrainingSet()
+    Output: plot training label vs. inferred label left out of set
+            return training label and inferred label
+    """
 
-	Input:  'ds' : dataset object output from initializeTrainingSet()
+    # optional
+    label_names = kwargs.get('lbl_names', ['Teff', 'Fe/H'])
+    save_dir = kwargs.get('save_dir', 'cross_validation/')
 
-	Output: plot training label vs. inferred label left out of set
-			return training label and inferred label
-	"""
+    # ds: Data set of all objects (including n); continuum normalized in initializeTrainingSet()
+    wl = ds.wl
+    N = len(ds.tr_ID)
 
-	# optional
-	label_names = kwargs.get('lbl_names', ['SPT'])
+    # Training labels and cross-validated labels
+    trn_labels, crv_labels = [], []
+    
+    ds.set_label_names(label_names) 
+    md, synth_fluxes, test_labels = ap.runCannon(ds)
+    np.save(save_dir+'model_coeff_fullset', md.coeffs)
+    np.save(save_dir+'synth_flux_fullset', synth_fluxes)
+    np.save(save_dir+'test_labels_fullset', test_labels)
 
-	# ds: Data set of all objects (including n); continuum normalized in initializeTrainingSet()
-	wl = ds.wl
-	nsources = len(ds.tr_ID)
+    # Remove nth spectrum from the training set and run Cannon model on the rest of spectra
+    for n in range(N): 
 
-	# Training labels and cross-validated labels
-	trn_labels, crv_labels = [], []
+        tr_ids   = list(ds.tr_ID)
+        tr_flux  = list(ds.tr_flux)
+        tr_ivar  = list(ds.tr_ivar)
+        tr_label = list(ds.tr_label)
 
-	# Remove nth spectrum from the training set and run Cannon model on the rest of spectra
-	for n in range(nsources): 
+        tr_ids.pop(n)
+        tr_flux.pop(n)
+        tr_ivar.pop(n)
+        tr_label.pop(n)
 
-		tr_ids   = list(ds.tr_ID)
-		tr_flux  = list(ds.tr_flux)
-		tr_ivar  = list(ds.tr_ivar)
-		tr_label = list(ds.tr_label)
+        id_minus_n = np.array(tr_ids)
+        fl_minus_n = np.array(tr_flux)
+        vr_minus_n = np.array(tr_ivar)
+        tr_label_minus_n = np.array(tr_label)
 
-		tr_ids.pop(n)
-		tr_flux.pop(n)
-		tr_ivar.pop(n)
-		tr_label.pop(n)
+        ds_minus_n = dataset.Dataset(wl, id_minus_n, fl_minus_n, vr_minus_n, tr_label_minus_n, \
+            id_minus_n, fl_minus_n, vr_minus_n)
 
-		id_minus_n = np.array(tr_ids)
-		fl_minus_n = np.array(tr_flux)
-		vr_minus_n = np.array(tr_ivar)
-		tr_label_minus_n = np.array(tr_label)
+        ds_minus_n.set_label_names(label_names)       
+        md_minus_n, synth_fl_minus_n, te_label_minus_n = runCannon(ds_minus_n)
 
+        # Find cross-validation label
+        crv_label_n = test_labels[n]
+        crv_labels.append(crv_label_n)
+        
+        np.save(save_dir+'model_coeff_'+str(n), md_minus_n.coeffs)
+        np.save(save_dir+'synth_flux_'+str(n), synth_fl_minus_n)
+        np.save(save_dir+'test_labels_'+str(n), te_label_minus_n)
+        np.save(save_dir+'crv_label_'+str(n), crv_label_n)
 
-		ds_minus_n = dataset.Dataset(wl, id_minus_n, fl_minus_n, vr_minus_n, tr_label_minus_n, \
-			id_minus_n, fl_minus_n, vr_minus_n)
+        print('Labeled [%s/%s] sources.\n'%(n+1, N))
 
-		ds_minus_n.set_label_names(label_names)
-		model_minus_n = runCannon(ds_minus_n)[0]
-		
-		# Inferred labels for full dataset (including n) using models trained on n-1 dataset
-		label_error = model_minus_n.infer_labels(ds)
-		test_labels = ds.test_label_vals
+    trn_labels = ds.tr_label
 
-		# Find nth inferred label
-		crv_label_n = test_labels[n]
-		crv_labels.append(crv_label_n)
-
-		print('Labeled [%s/%s] sources.\n'%(n+1, nsources))
-
-	trn_labels = ds.tr_label
-
-	return trn_labels, crv_labels
+    return trn_labels, crv_labels
 
 
 def labelToSpec(labels, coeffs):
