@@ -364,6 +364,17 @@ def _get_lvec(labels):
 	return lvec
 
 
+def scaleLabels(labels):
+    
+    scaled_labels = []
+    for i in range(labels.shape[1]):
+        p, s = _getPivotsAndScales(labels.T[i])
+        slbl = [(t - p)/s for t in labels.T[i]]
+        scaled_labels.append(slbl)
+        
+    return np.array(scaled_labels).T
+
+
 def interpolateGrids(**kwargs):
 
 	"""
