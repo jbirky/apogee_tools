@@ -279,6 +279,24 @@ def crossValidate(ds, **kwargs):
     return trn_labels, tst_labels, crv_labels
 
 
+def labelToSpec(labels, coeffs):
+
+	nlabels = labels.shape[1]
+
+	scaled_labels = []
+	for i in range(nlabels):
+		p, s = _getPivotsAndScales(labels.T[i])
+		slbl = [(t - p)/s for t in labels.T[i]]
+		scaled_labels.append(slbl)
+
+	label_vec = np.array([_get_lvec(lbl) for lbl in np.array(scaled_labels).T])
+	label_vec = np.insert(label_vec, 0, 1, axis=1)
+
+	synth_fluxes = np.dot(coeffs, label_vec.T).T
+
+	return synth_fluxes
+
+
 def synthesizeFlux(ds, **kwargs):
 
 	order = kwargs.get('order', 2)
