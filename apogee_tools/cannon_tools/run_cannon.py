@@ -231,10 +231,10 @@ def crossValidate(ds, **kwargs):
     trn_labels, crv_labels = [], []
     
     ds.set_label_names(label_names) 
-    md, synth_fluxes, test_labels = ap.runCannon(ds)
+    md, synth_fluxes, tst_labels = ap.runCannon(ds)
     np.save(save_dir+'model_coeff_fullset', md.coeffs)
     np.save(save_dir+'synth_flux_fullset', synth_fluxes)
-    np.save(save_dir+'test_labels_fullset', test_labels)
+    np.save(save_dir+'test_labels_fullset', tst_labels)
 
     # Remove nth spectrum from the training set and run Cannon model on the rest of spectra
     for n in range(N): 
@@ -258,10 +258,13 @@ def crossValidate(ds, **kwargs):
             id_minus_n, fl_minus_n, vr_minus_n)
 
         ds_minus_n.set_label_names(label_names)       
-        md_minus_n, synth_fl_minus_n, te_label_minus_n = runCannon(ds_minus_n)
+        md_minus_n, synth_fl_minus_n, te_label_minus_n = ap.runCannon(ds_minus_n)
 
+        label_errs = md_minus_n.infer_labels(ds)
+        cross_labels = ds.test_label_vals
+        
         # Find cross-validation label
-        crv_label_n = test_labels[n]
+        crv_label_n = cross_labels[n]
         crv_labels.append(crv_label_n)
         
         np.save(save_dir+'model_coeff_'+str(n), md_minus_n.coeffs)
@@ -273,25 +276,7 @@ def crossValidate(ds, **kwargs):
 
     trn_labels = ds.tr_label
 
-    return trn_labels, crv_labels
-
-
-def labelToSpec(labels, coeffs):
-
-	nlabels = labels.shape[1]
-
-	scaled_labels = []
-	for i in range(nlabels):
-		p, s = _getPivotsAndScales(labels.T[i])
-		slbl = [(t - p)/s for t in labels.T[i]]
-		scaled_labels.append(slbl)
-
-	label_vec = np.array([_get_lvec(lbl) for lbl in np.array(scaled_labels).T])
-	label_vec = np.insert(label_vec, 0, 1, axis=1)
-
-	synth_fluxes = np.dot(coeffs, label_vec.T).T
-
-	return synth_fluxes
+    return trn_labels, tst_labels, crv_labels
 
 
 def synthesizeFlux(ds, **kwargs):
