@@ -45,6 +45,8 @@ class Spectrum():
         self.d_type = kwargs.get('type')
 
         input_id = kwargs.get('id')
+
+        # Make sure id is in the proper 2MASS format
         if '+' in input_id:
             spec_id = '2M' + input_id.split('+')[0][-8:] + '+' + input_id.split('+')[1]
         elif '-' in input_id:

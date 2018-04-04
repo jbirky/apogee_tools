@@ -93,6 +93,14 @@ def download(star_id, **kwargs):
     default_dir = AP_PATH + '/%s_data/' %(d_type)
     dl_dir = kwargs.get('dir', default_dir)
 
+    # Make sure id is in the proper 2MASS format
+    if '+' in star_id:
+        star_id = '2M' + star_id.split('+')[0][-8:] + '+' + star_id.split('+')[1]
+    elif '-' in star_id:
+        star_id = '2M' + star_id.split('-')[0][-8:] + '-' + star_id.split('-')[1]
+    else:
+        print('Designation improperly formated. Must be form "__00034394+8606422".')
+
     if not os.path.exists(dl_dir):
         os.makedirs(dl_dir)
 
