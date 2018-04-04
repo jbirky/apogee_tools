@@ -44,8 +44,14 @@ class Spectrum():
 
         self.d_type = kwargs.get('type')
 
-        self.name   = kwargs.get('id')
-        spec_id = self.name
+        input_id = kwargs.get('id')
+        if '+' in input_id:
+            spec_id = '2M' + input_id.split('+')[0][-8:] + '+' + input_id.split('+')[1]
+        elif '-' in input_id:
+            spec_id = '2M' + input_id.split('-')[0][-8:] + '-' + input_id.split('-')[1]
+        else:
+            print('Designation improperly formated. Must be form "__00034394+8606422".')
+        self.name = spec_id
 
         if self.d_type == 'aspcap':
 
