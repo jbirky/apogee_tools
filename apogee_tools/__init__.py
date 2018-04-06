@@ -11,7 +11,7 @@ from .forward_model.model import makeModel, returnModelFit
 from .forward_model.rotation_broaden import broaden, applyVsini
 from .forward_model.rv_function import rvShift, rvShiftSpec
 from .forward_model.synthesize_grid import interpolateGrid
-from .forward_model.telluric import applyTelluric
+from .forward_model.telluric import applyTelluric, getTelluric
 
 from .info.features import lines
 

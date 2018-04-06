@@ -9,6 +9,48 @@ BASE = os.path.split(os.path.split(os.path.split(FULL_PATH)[0])[0])[0]
 AP_PATH = os.environ['APOGEE_DATA'] 
 
 
+
+def getTelluric(wavelow=21600, wavehigh=21900, **kwargs):
+
+    """
+    Get a telluric spectrum.
+
+    Parameters
+    ----------
+    wavelow:  int
+              lower bound of the wavelength range
+
+    wavehigh: int
+              upper bound of the wavelength range
+
+    airmass:  str
+              airmass of the telluric model
+    alpha:    float
+              the power alpha parameter of the telluric model
+
+    Returns
+    -------
+    telluric: arrays
+              telluric wavelength and flux within specified region
+    """
+
+    alpha   = kwargs.get('alpha', 1)
+    airmass = kwargs.get('airmass', '1.0')
+
+    am_key = {'1.0':'10', '1.5':'15'}
+
+    tfile     = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(airmass, am_key[airmass])
+    tellurics = fits.open(BASE + '/libraries/' + tfile)
+
+    tell_wave = np.array(tellurics[1].data['lam'] * 10000)
+    tell_flux = np.array(tellurics[1].data['trans'])**(alpha)
+
+    #cut model wl grid wl array to bounds of telluric spectrum
+    cut = np.where( (tell_wave > wavelow) & (tell_wave < wavehigh) )
+
+    return tell_wave[cut], tell_flux[cut]
+
+
 def applyTelluric(mdl, **kwargs):
 
     """
