@@ -28,7 +28,6 @@ def calcScale(sp1, sp2):
     """
 
     wave1, flux1 = sp1.wave, sp1.flux
-    # wave2, flux2 = sp2.wave, sp2.flux
     unc = sp1.sigmas
 
     # interpolate spectrum 2 to the array size of spectrum 1
@@ -53,7 +52,7 @@ def compareSpectra(sp1, sp2, **kwargs):
     from scipy.interpolate import interp1d
 
     #sp2 will be interpolated to the same wavelenth values as sp1
-    wave = sp1.wave
+    wave1 = sp1.wave
     flux1 = sp1.flux
     if ivariance == True:
         ivar = sp1.ivar
@@ -62,26 +61,13 @@ def compareSpectra(sp1, sp2, **kwargs):
 
     #Interpolation function 
     f = interp1d(sp2.wave, sp2.flux, bounds_error=False, fill_value=0.)
-    flux2 = f(sp1.wave)
-
-    if normalize == True:
-        #Make sure fluxes are normalized
-        flux1 = flux1/max(flux1)
-        flux2 = flux2/max(flux2)
-        
-    flux1_vals = [x for x in flux1 if str(x) != 'nan']
-    flux1 = flux1/max(flux1_vals)
-    flux1 = np.array([0 if str(x) == 'nan' else x for x in flux1])
-
-    flux2_vals = [x for x in flux2 if str(x) != 'nan']
-    flux2 = flux2/max(flux2_vals)
-    flux2 = np.array([0 if str(x) == 'nan' else x for x in flux2])
+    flux2 = f(wave1)
 
     #Create a new spectrum object for sp2
-    sp2 = ap.Spectrum(wave=sp2.wave, flux=flux2, params=sp2.params)
+    sp2 = ap.Spectrum(wave=wave1, flux=flux2, params=sp2.params)
 
+    #Compute scale factor for 2nd spectrum
     if fit_scale == True:
-        #Compute scale factor for 2nd spectrum
         scale = calcScale(sp1, sp2)
     else:
         scale = 1
@@ -93,9 +79,9 @@ def compareSpectra(sp1, sp2, **kwargs):
         stat = (diff**2)*ivar
     else:
         stat = diff**2/np.array(unc)**2
-    chi  = sum(stat)
+    chi = sum(stat)
 
-    sp2 = ap.Spectrum(wave=wave, flux=flux2, params=sp2.params)
+    sp2 = ap.Spectrum(wave=wave1, flux=flux2, params=sp2.params)
 
     return chi, sp1, sp2
 
