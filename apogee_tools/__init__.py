@@ -7,7 +7,7 @@ from .cannon_tools.run_cannon import labelToSpec, loadLabels, initializeTraining
 from .cannon_tools.plot_cannon import plotCrossValidation, plotCannonModels, plotSpectralSequence, plotBands
 
 from .forward_model.lsf_function import convolveLsf
-from .forward_model.model import makeModel, returnModelFit
+from .forward_model.model import initialize, makeModel, returnModelFit
 from .forward_model.rotation_broaden import broaden, applyVsini
 from .forward_model.rv_function import rvShift, rvShiftSpec
 from .forward_model.synthesize_grid import interpolateGrid
@@ -21,6 +21,21 @@ from .utils.read import HDF5Convert, HDF5Interface, loadGrid, readModels, getMod
 from .utils.search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
 from .utils.spec_tools import calcScale, compareSpectra, subtractContinuum, integralResample
 
+import yaml 
+
+# Read configuration file
+f = open("apogee_tools/config.yaml")
+config = yaml.load(f)
+f.close()
+
+data = config["data"]
+workdir = config["workdir"]
+
+grid = config["grid"]
+init = config["init"]
+step = config["step"]
+
+instrument = data["instrument"]
 
 # import .apogee_hack.spec.lsf as lsf
 # from .apogee_hack.spec.plot import apStarWavegrid
