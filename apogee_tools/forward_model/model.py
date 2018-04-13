@@ -7,10 +7,33 @@ import apogee_tools as ap
 import os
 
 
+def initialize(**kwargs):
+
+	# Read in configuration parameters
+
+	instrument = ap.data["instrument"]
+
+	if instrument == 'APOGEE':
+
+		# Read in data that model will be generated for
+		data = ap.Spectrum(id=ap.data['ID'], type='apvisit', visit=ap.data['visit'])
+
+		# Get APOGEE lsf fiber number
+		fiber = ap.searchVisits(id_name=ap.data['ID'])[3][ap.data['visit']-1]
+
+		# Read initilization and step parameters
+		init_par = {key:ap.init[key] for key in ap.grid['parname']}
+		step_par = {key:ap.step[key] for key in ap.grid['parname']}
+
+		return init_par, step_par, fiber
+
+
 def makeModel(**kwargs):
 
 	"""
-	Input:  'params' : dictionary of parameters specified like {'teff': 3051, 'logg': 5.2, 'z': -0.25, 'vsini': 10., 'rv': -12, 'alpha': 0.8}
+	Returns the synthesized model of a given set of parameters, and plots (optional).
+
+	Input:  'params' : dictionary of parameters specified like {'teff': 3051, 'logg': 5.2, 'fe_h': -0.25, 'vsini': 10., 'rv': -12, 'alpha': 0.8}
 			'fiber'  : APOGEE fiber for particular ap1D visit spectrum you are fitting model to
 
 	Output: 'synth_model' : spectrum object synthesized to input paramters
