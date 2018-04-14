@@ -1,7 +1,7 @@
 # Instrument specifications
 data:
   instrument: "APOGEE"
-  data_path: "APOGEE_DATA/"
+  data_path: "default" # defaults to $APOGEE_DATA path (see setup documentation), unless otherwise specified
   ID: "2M03425325+2326495"
   orders: [[15140,15800],[15860,16425],[16475,16945]]
   visit: 1
@@ -16,6 +16,12 @@ workdir:
 grid:
   grid_name: "PHOENIX"
   parname: ['teff', 'logg', 'fe_h', 'rv', 'vsini', 'alpha']
+  # plotname: ['$T_{\rm eff}$', 'logg', '[Fe/H]', 'rv', 'vsini', '$\alpha$']
+
+# MCMC tuning
+mcmc:
+  nwalkers: 50
+  nsteps: 1000
   
 # Initial parameters for MCMC
 init:
