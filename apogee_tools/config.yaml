@@ -7,7 +7,9 @@ data:
   orders: [[15140,15800],[15860,16425],[16475,16945]]
   visit: 1
 
-workdir: "/home/jess/Desktop/Research/FAST/model_tests/test_output"
+workdir: 
+  input: "/home/jess/Desktop/Research/FAST/model_tests/test_output"
+  output: "/home/jess/Desktop/Research/FAST/model_tests/test_output"
 
 grid:
   grid_name: "PHOENIX"
