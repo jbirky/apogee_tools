@@ -1,5 +1,4 @@
-# YAML configuration script
-
+# Instrument specifications
 data:
   instrument: "APOGEE"
   data_path: "APOGEE_DATA/"
@@ -7,10 +6,13 @@ data:
   orders: [[15140,15800],[15860,16425],[16475,16945]]
   visit: 1
 
+# Make sure this config.yaml file is placed in your input directory
 workdir: 
   input: "/home/jess/Desktop/Research/FAST/model_tests/test_output"
   output: "/home/jess/Desktop/Research/FAST/model_tests/test_output"
 
+# Specify which parameters will be sampled by MCMC
+# otherwise parameters will be fixed at 'init' values
 grid:
   grid_name: "PHOENIX"
   parname: ['teff', 'logg', 'fe_h', 'rv', 'vsini', 'alpha']
