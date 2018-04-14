@@ -13,6 +13,10 @@ def initialize(**kwargs):
 
 	instrument = ap.data["instrument"]
 
+	# Read initilization and step parameters
+	init_par = {key:ap.init[key] for key in ap.grid['parname']}
+	step_par = {key:ap.step[key] for key in ap.grid['parname']}
+
 	if instrument == 'APOGEE':
 
 		# Read in data that model will be generated for
@@ -21,11 +25,11 @@ def initialize(**kwargs):
 		# Get APOGEE lsf fiber number
 		fiber = ap.searchVisits(id_name=ap.data['ID'])[3][ap.data['visit']-1]
 
-		# Read initilization and step parameters
-		init_par = {key:ap.init[key] for key in ap.grid['parname']}
-		step_par = {key:ap.step[key] for key in ap.grid['parname']}
-
 		return init_par, step_par, fiber
+
+	elif instrument == 'NIRSPEC':
+
+		return init_par, step_par
 
 
 def makeModel(**kwargs):
