@@ -2,7 +2,7 @@
 data:
   instrument: "APOGEE"
   data_path: "default" # defaults to $APOGEE_DATA path (see setup documentation), unless otherwise specified
-  ID: "2M03425325+2326495"
+  ID: "2M01195227+8409327"
   orders: [[15140,15800],[15860,16425],[16475,16945]]
   visit: 1
 
