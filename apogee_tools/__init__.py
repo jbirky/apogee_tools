@@ -24,18 +24,22 @@ from .utils.spec_tools import calcScale, compareSpectra, subtractContinuum, inte
 import yaml 
 
 # Read configuration file
-f = open("apogee_tools/config.yaml")
-config = yaml.load(f)
-f.close()
+try:
+	f = open("config.yaml")
+	config = yaml.load(f)
+	f.close()
 
-data = config["data"]
-workdir = config["workdir"]
+	data = config["data"]
+	workdir = config["workdir"]
 
-grid = config["grid"]
-init = config["init"]
-step = config["step"]
+	grid = config["grid"]
+	init = config["init"]
+	step = config["step"]
 
-instrument = data["instrument"]
+	instrument = data["instrument"]
+
+except:
+	print('\nError: config.yaml not found in the current working directory.\n')
 
 # import .apogee_hack.spec.lsf as lsf
 # from .apogee_hack.spec.plot import apStarWavegrid
