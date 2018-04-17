@@ -6,10 +6,11 @@ data:
   orders: [[15140,15800],[15860,16425],[16475,16945]]
   visit: 1
 
-# Make sure this config.yaml file is placed in your input directory
+# Make sure this config.yaml and run.py files are placed in your input directory
+# I recommend copying config.yaml and run.py to a path external to apogee_tools
 workdir: 
-  input: "/home/jess/Desktop/Research/FAST/model_tests/test_output"
-  output: "/home/jess/Desktop/Research/FAST/model_tests/test_output"
+  input: "/home/jess/Desktop/Research/FAST/fit_models"
+  output: "/home/jess/Desktop/Research/FAST/fit_models/output"
 
 # Specify which parameters will be sampled by MCMC
 # otherwise parameters will be fixed at 'init' values
