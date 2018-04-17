@@ -21,26 +21,32 @@ from .utils.read import HDF5Convert, HDF5Interface, loadGrid, readModels, getMod
 from .utils.search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
 from .utils.spec_tools import calcScale, compareSpectra, subtractContinuum, integralResample
 
+import os
 import yaml 
 
 # Read configuration file
-try:
+try: # open from the current working directory
 	f = open("config.yaml")
 	config = yaml.load(f)
 	f.close()
 
-	data = config["data"]
-	workdir = config["workdir"]
+except: # otherwise read file from inside apogee_tools
+	conf_path = os.path.split(os.path.split(os.path.realpath(__file__))[0])[0] + '/config.yaml'
 
-	grid = config["grid"]
-	init = config["init"]
-	step = config["step"]
-	prior = config["prior"]
+	f = open(conf_path)
+	config = yaml.load(f)
+	f.close()
 
-	instrument = data["instrument"]
+data = config["data"]
+workdir = config["workdir"]
 
-except:
-	print('\nError: config.yaml not found in the current working directory.\n')
+grid = config["grid"]
+init = config["init"]
+step = config["step"]
+prior = config["prior"]
+
+instrument = data["instrument"]
+
 
 # import .apogee_hack.spec.lsf as lsf
 # from .apogee_hack.spec.plot import apStarWavegrid
