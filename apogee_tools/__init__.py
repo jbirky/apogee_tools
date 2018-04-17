@@ -35,6 +35,7 @@ try:
 	grid = config["grid"]
 	init = config["init"]
 	step = config["step"]
+	prior = config["prior"]
 
 	instrument = data["instrument"]
 
