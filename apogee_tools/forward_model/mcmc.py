@@ -8,7 +8,8 @@ import random
 
 #toy_model, this should be replaced by apogee_tools model class
 class ToyModel(object):
-    def __init__(self):
+
+    def __init__(self, **kwargs):
         theta=[0.0, 0.0, 0.0, 0.0, 0.0]
         chi=0.0
         
@@ -35,9 +36,9 @@ def lnlike(params):
     I return a random model) 
     chi: chi-sqaure
     """
-    model=ToyModel() #replace this by actual getmodel from apogee_tools as model=ap.get_model(params)
-    lnp=lnprior(model)
-    lnposterior=-0.5*model.chi
+    model = ToyModel() #replace this by actual getmodel from apogee_tools as model=ap.get_model(params)
+    lnp = lnprior(model)
+    lnposterior = -0.5*model.chi
     
     return lnp+lnposterior
     
@@ -47,7 +48,7 @@ def lnprior(model):
     """
     teff, logg,  fe_h, rv, vsini = model.theta  #parameters should be arranged in this manner
     
-    if  (200< teff< 4000) and (3.0 < logg  < 6.0) \
+    if  (prior["teff"][0] < teff < 4000) and (3.0 < logg  < 6.0) \
     and (-2.0 < fe_h < 2.0) and (-50.0< rv < 50.0) \
     and (0 < vsini < 20):
         return 0.0

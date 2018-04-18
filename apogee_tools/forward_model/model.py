@@ -17,8 +17,8 @@ def initialize(**kwargs):
 	init_param = {key:ap.init[key] for key in ap.init.keys()}
 	step_param = {key:ap.step[key] for key in ap.init.keys()}
 
-	init_theta = {key:ap.init[key] for key in ap.grid["theta"]}
-	step_theta = {key:ap.step[key] for key in ap.grid["theta"]}
+	init_theta = {key:ap.init[key] for key in ap.model["theta"]}
+	step_theta = {key:ap.step[key] for key in ap.model["theta"]}
 
 	if instrument == 'APOGEE':
 
@@ -55,6 +55,7 @@ def makeModel(**kwargs):
 	plot   = kwargs.get('plot', False)
 	res    = kwargs.get('res', '300k')
 	grid   = kwargs.get('grid', 'phoenix').lower()
+	bands  = kwargs.get('bands', [[15200,15800],[15860,16425],[16475,16935]])
 
 	# mdl_name = r'Teff = {}, logg = {}, Fe/H = {}, vsini = {}, rv = {}, $\alpha$ = {}'.format(params['teff'], params['logg'], params['fe_h'], params['vsini'], params['rv'], params['alpha'])
 	labels = [params['teff'], params['logg'], params['fe_h']]
@@ -98,7 +99,7 @@ def makeModel(**kwargs):
 	return synth_model
 
 
-def returnModelFit(data, synth_mdl, **kwargs):
+def returnModelFit(data, theta, **kwargs):
 
 	"""
 	Function to be fed into the MCMC.
@@ -112,10 +113,20 @@ def returnModelFit(data, synth_mdl, **kwargs):
 	params = kwargs.get('params')
 	fiber  = kwargs.get('fiber', 40)
 
-	synth_mdl = makeModel(params=params, fiber=fiber)
-	chi = ap.compareSpectra(data, synth_mdl)
+	# normalize and apply sigma clip to data flux
+	data.mask(sigma=ap.data["sigma_clip"], pixel_buffer=[0,0])
+	data.flux = data.flux/max(data.flux[np.isfinite(data.flux)])
 
-	return chi
+	# synthesize model
+	synth_mdl = ap.makeModel(params=theta, fiber=fiber)
+
+	# multiply model by continuum polynomial
+	cont_sp = ap.continuum(data, synth_mdl, bands=ap.data["orders"], deg=ap.model["cont_deg"], norm=True)
+
+	# return chi-squared fit
+	chisq = ap.compareSpectra(data, cont_sp)[0]
+
+	return chisq
 
 
 def fitMCMC(**kwargs):
