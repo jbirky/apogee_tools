@@ -14,8 +14,11 @@ def initialize(**kwargs):
 	instrument = ap.data["instrument"]
 
 	# Read initilization and step parameters
-	init_par = {key:ap.init[key] for key in ap.grid['parname']}
-	step_par = {key:ap.step[key] for key in ap.grid['parname']}
+	init_param = {key:ap.init[key] for key in ap.init.keys()}
+	step_param = {key:ap.step[key] for key in ap.init.keys()}
+
+	init_theta = {key:ap.init[key] for key in ap.grid["theta"]}
+	step_theta = {key:ap.step[key] for key in ap.grid["theta"]}
 
 	if instrument == 'APOGEE':
 
@@ -25,11 +28,15 @@ def initialize(**kwargs):
 		# Get APOGEE lsf fiber number
 		fiber = ap.searchVisits(id_name=ap.data['ID'])[3][ap.data['visit']-1]
 
-		return init_par, step_par, fiber
+		return init_param, step_param, init_theta, step_theta, fiber
 
 	elif instrument == 'NIRSPEC':
 
-		return init_par, step_par
+
+		### DINO'S NIRSPEC READING CODE ###
+
+
+		return init_par, step_par, init_theta, step_theta, fiber
 
 
 def makeModel(**kwargs):
@@ -49,15 +56,15 @@ def makeModel(**kwargs):
 	res    = kwargs.get('res', '300k')
 	grid   = kwargs.get('grid', 'phoenix').lower()
 
-	mdl_name = r'Teff = {}, logg = {}, Fe/H = {}, vsini = {}, rv = {}, $\alpha$ = {}'.format(params['teff'], params['logg'], params['z'], params['vsini'], params['rv'], params['alpha'])
-	labels = [params['teff'], params['logg'], params['z']]
+	# mdl_name = r'Teff = {}, logg = {}, Fe/H = {}, vsini = {}, rv = {}, $\alpha$ = {}'.format(params['teff'], params['logg'], params['fe_h'], params['vsini'], params['rv'], params['alpha'])
+	labels = [params['teff'], params['logg'], params['fe_h']]
 
 	#Interpolate model grids at give teff, logg, fe/h
 	interp_sp = ap.interpolateGrid(labels=labels, res=res, grid=grid)
 	interp_sp.flux = interp_sp.flux/max(interp_sp.flux)
 
 	#Apply radial velocity
-	rv_sp   = ap.spec_tools.rvShiftSpec(interp_sp, rv=params['rv'])
+	rv_sp   = ap.rvShiftSpec(interp_sp, rv=params['rv'])
 
 	#Apply rotational velocity broadening
 	rot_sp  = ap.applyVsini(rv_sp, vsini=params['vsini'])
@@ -68,7 +75,8 @@ def makeModel(**kwargs):
 	#Apply APOGEE LSF function
 	lsf_sp  = ap.convolveLsf(tell_sp, fiber=fiber)
 
-	synth_model = ap.Spectrum(wave=lsf_sp.wave, flux=lsf_sp.flux, name=mdl_name)
+	# synth_model = ap.Spectrum(wave=lsf_sp.wave, flux=lsf_sp.flux, name=mdl_name)
+	synth_model = ap.Spectrum(wave=lsf_sp.wave, flux=lsf_sp.flux)
 
 	if plot == True:
 		xrange = kwargs.get('xrange', [interp_sp.wave[0], interp_sp.wave[-1]])
@@ -108,4 +116,9 @@ def returnModelFit(data, synth_mdl, **kwargs):
 	chi = ap.compareSpectra(data, synth_mdl)
 
 	return chi
+
+
+def fitMCMC(**kwargs):
+
+	return None
 
