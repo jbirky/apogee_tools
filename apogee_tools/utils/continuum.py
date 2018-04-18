@@ -21,6 +21,7 @@ def continuum(data, mdl, **kwargs):
     
     deg = kwargs.get('deg', 5) 
     bands = kwargs.get('bands', [[data.wave[0], data.wave[-1]]])
+    norm  = kwargs.get('norm', False)
 
     # Cut data to region of bands
     dcut_rng = np.where((data.wave >= bands[0][0]) & (data.wave <= bands[-1][1]))
@@ -71,5 +72,9 @@ def continuum(data, mdl, **kwargs):
     
     # Return model flux times polynomial
     mdl_poly = ap.Spectrum(wave=mdl_res.wave, flux=np.concatenate(poly_flux))
+
+    # Normalize the flux to 1
+    if norm == True:
+        mdl_poly.flux = mdl_poly.flux/max(mdl_poly.flux[np.isfinite(mdl_poly.flux)])
 
     return mdl_poly
