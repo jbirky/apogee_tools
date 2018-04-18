@@ -40,7 +40,7 @@ except: # otherwise read file from inside apogee_tools
 data = config["data"]
 workdir = config["workdir"]
 
-grid = config["grid"]
+model = config["model"]
 mcmc = config["mcmc"]
 init = config["init"]
 step = config["step"]
