@@ -20,7 +20,7 @@ def continuum(data, mdl, **kwargs):
     """
     
     deg = kwargs.get('deg', 5) 
-    bands = kwargs.get('bands', [[15140,15800],[15860,16425],[16475,16945]])
+    bands = kwargs.get('bands', [[data.wave[0], data.wave[-1]]])
 
     # Cut data to region of bands
     dcut_rng = np.where((data.wave >= bands[0][0]) & (data.wave <= bands[-1][1]))
