@@ -41,6 +41,7 @@ data = config["data"]
 workdir = config["workdir"]
 
 grid = config["grid"]
+mcmc = config["mcmc"]
 init = config["init"]
 step = config["step"]
 prior = config["prior"]
