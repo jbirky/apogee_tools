@@ -3,8 +3,9 @@ data:
   instrument: "APOGEE"
   data_path: "default" # defaults to $APOGEE_DATA path (see setup documentation), unless otherwise specified
   ID: "2M01195227+8409327"
-  orders: [[15140,15800],[15860,16425],[16475,16945]]
+  orders: [[15200,15800],[15860,16425],[16475,16935]]
   visit: 1
+  sigma_clip: [.3,.01]
 
 # Make sure this config.yaml and run.py files are placed in your input directory
 # I recommend copying config.yaml and run.py to a path external to apogee_tools
@@ -14,15 +15,16 @@ workdir:
 
 # Specify which parameters will be sampled by MCMC
 # otherwise parameters will be fixed at 'init' values
-grid:
+model:
   grid_name: "PHOENIX"
-  parname: ['teff', 'logg', 'fe_h', 'rv', 'vsini', 'alpha']
+  theta: ['teff', 'logg', 'fe_h', 'rv', 'vsini', 'alpha']
+  cont_deg: 5
   # plotname: ['$T_{\rm eff}$', 'logg', '[Fe/H]', 'rv', 'vsini', '$\alpha$']
 
 # MCMC tuning
 mcmc:
-  nwalkers: 50
-  nsteps: 1000
+  nwalkers: 20
+  nsteps: 100
   
 # Initial parameters for MCMC
 init:
