@@ -40,7 +40,7 @@ def getTelluric(wavelow=21600, wavehigh=21900, **kwargs):
     am_key = {'1.0':'10', '1.5':'15'}
 
     tfile     = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(airmass, am_key[airmass])
-    tellurics = fits.open(BASE + '/libraries/TELLURIC' + tfile)
+    tellurics = fits.open(BASE + '/libraries/TELLURIC/' + tfile)
 
     tell_wave = np.array(tellurics[1].data['lam'] * 10000)
     tell_flux = np.array(tellurics[1].data['trans'])**(alpha)
@@ -71,7 +71,7 @@ def applyTelluric(mdl, **kwargs):
     # tell_flux = np.asarray(tellurics['trans'])**(alpha)
 
     tfile = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(airmass, am_key[airmass])
-    tellurics = fits.open(BASE + '/libraries/TELLURIC' + tfile)
+    tellurics = fits.open(BASE + '/libraries/TELLURIC/' + tfile)
 
     tell_wave = np.array(tellurics[1].data['lam'] * 10000)
     tell_flux = np.array(tellurics[1].data['trans'])**(alpha)
