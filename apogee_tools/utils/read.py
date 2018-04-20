@@ -46,7 +46,10 @@ class HDF5Interface(object):
         :param ranges: optionally select a smaller part of the grid to use.
         :type ranges: dict
         '''
-        filename = kwargs.get('hdf5_path', BASE + '/libraries/BTSETTLb_APOGEE.hdf5')
+        grid     = kwargs.get('grid', 'BTSETTL') 
+        grid_lib = BASE + '/libraries/%s/%s_APOGEE.hdf5'%(grid.upper(), grid.upper())
+
+        filename = kwargs.get('hdf5_path', grid_lib)
         key_name = kwargs.get('key_name', "t{0:.0f}g{1:.1f}z{2:.1f}")
 
         self.filename = os.path.expandvars(filename)
@@ -146,7 +149,8 @@ def loadGrid(**kwargs):
     # from Starfish.grid_tools import HDF5Interface
 
     # optional key word arguments:
-    grid_lib = BASE + '/libraries/BTSETTLb_APOGEE.hdf5'
+    grid     = kwargs.get('grid', 'BTSETTL') 
+    grid_lib = BASE + '/libraries/%s/%s_APOGEE.hdf5'%(grid.upper(), grid.upper())
 
     gridPath = kwargs.get('gridPath', grid_lib)
     myHDF5 = HDF5Interface(hdf5_path=gridPath)
@@ -174,8 +178,8 @@ def readModels(**kwargs):
     Configured to read grid specified in config.yaml file inside apogee_tools
     """
 
-    grid     = kwargs.get('grid', 'BTSETTLb') 
-    grid_lib = BASE + '/libraries/' + grid + '_APOGEE.hdf5'
+    grid     = kwargs.get('grid', 'BTSETTL') 
+    grid_lib = BASE + '/libraries/%s/%s_APOGEE.hdf5'%(grid.upper(), grid.upper())
 
     parrange = kwargs.get('parrange')
     gridPath = kwargs.get('gridPath', grid_lib)
@@ -232,8 +236,8 @@ def getModel(**kwargs):
     Obtain just one model, given parameters. Make sure they are in order [Teff, logg, [Fe/H]]
     """
 
-    grid     = kwargs.get('grid', 'BTSETTLb') 
-    grid_lib = BASE + '/libraries/' + grid + '_APOGEE.hdf5'
+    grid     = kwargs.get('grid', 'BTSETTL') 
+    grid_lib = BASE + '/libraries/%s/%s_APOGEE.hdf5'%(grid.upper(), grid.upper())
 
     params   = kwargs.get('params', [3000, 5.0, 0.0])
     gridPath = kwargs.get('gridPath', grid_lib)

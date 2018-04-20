@@ -30,10 +30,10 @@ def interpolateGrid(**kwargs):
 	labels  = np.array([labels])
 	nlabels = labels.shape[1]
 
-	pivots = np.load(BASE+'/libraries/cannon_%s/%s_pivots.npy'%(grid, resolution))
-	scales = np.load(BASE+'/libraries/cannon_%s/%s_scales.npy'%(grid, resolution))
-	coeffs = np.load(BASE+'/libraries/cannon_%s/%s_coeffs.npy'%(grid, resolution))
-	wave   = np.load(BASE+'/libraries/cannon_%s/%s_wl.npy'%(grid, resolution))
+	pivots = np.load(BASE+'/libraries/%s/cannon_%s/%s_pivots.npy'%(grid.upper(), grid, resolution))
+	scales = np.load(BASE+'/libraries/%s/cannon_%s/%s_scales.npy'%(grid.upper(), grid, resolution))
+	coeffs = np.load(BASE+'/libraries/%s/cannon_%s/%s_coeffs.npy'%(grid.upper(), grid, resolution))
+	wave   = np.load(BASE+'/libraries/%s/cannon_%s/%s_wl.npy'%(grid.upper(), grid, resolution))
 
 	scaled_labels = [(lbl - pivots) / scales for lbl in labels]
 
