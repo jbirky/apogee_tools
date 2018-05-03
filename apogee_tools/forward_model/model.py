@@ -123,8 +123,14 @@ def returnModelFit(data, theta, **kwargs):
 	# multiply model by continuum polynomial
 	cont_sp = ap.continuum(data, synth_mdl, bands=ap.data["orders"], deg=ap.model["cont_deg"], norm=True)
 
+	# plt.figure(figsize=[12,5])
+	# plt.plot(data.wave, data.flux)
+	# plt.plot(cont_sp.wave, cont_sp.flux)
+	# plt.show()
+	# plt.close()
+
 	# return chi-squared fit
-	chisq = ap.compareSpectra(data, cont_sp)[0]
+	chisq = ap.compareSpectra(data, cont_sp, fit_scale=False)[0]
 
 	return chisq
 

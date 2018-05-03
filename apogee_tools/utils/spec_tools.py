@@ -79,7 +79,7 @@ def compareSpectra(sp1, sp2, **kwargs):
         stat = (diff**2)*ivar
     else:
         stat = diff**2/np.array(unc)**2
-    chi = sum(stat)
+    chi = np.nansum(stat)
 
     sp2 = ap.Spectrum(wave=wave1, flux=flux2, params=sp2.params)
 
