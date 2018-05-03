@@ -13,10 +13,8 @@ def lnlike(theta):
 	if type(theta) == np.ndarray:
 		theta = dict(zip(theta_keys, theta))
 
-	print('\n theta', theta, '\n')
-
 	# mdl  = ap.makeModel(params=theta, fiber=124)
-	data = ap.Spectrum(id=ap.data['ID'], type='ap1d', visit=ap.data['visit'])
+	data = ap.Spectrum(id=ap.data['ID'], type=ap.data["dtype"], visit=ap.data['visit'])
 
 	chisq = ap.returnModelFit(data, theta, fiber=124)
 
@@ -70,18 +68,34 @@ if __name__ == "__main__":
 	nsteps = ap.mcmc["nsteps"]
 	nwalkers = ap.mcmc["nwalkers"]
 
-	print(lnlike(init_theta))
+	pos = [list(init_theta.values()) + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
-	# mdl = makeModel(params=init_theta, fiber=fiber)
+	sampler = emcee.EnsembleSampler(nwalkers, ndim, lnlike)
+	sampler.run_mcmc(pos, nsteps)
 
-	# pos = [list(init_theta.values()) + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
+	np.save('sampler_chain', sampler.chain[:, :, :])
 
-	# sampler = emcee.EnsembleSampler(nwalkers, ndim, lnlike)
-	# sampler.run_mcmc(pos, nsteps)
+	samples = sampler.chain[:, :, :].reshape((-1, ndim))
 
-	# samples = sampler.chain[:, 50:, :].reshape((-1, ndim))
+	np.save('samples', samples)
 
-	# fig = corner.corner(samples, labels=theta_keys, truths=theta_vals)
-	# fig.savefig("triangle.png")
+	try:
+		fig = corner.corner(samples, labels=theta_keys, truths=theta_vals)
+		fig.savefig("triangle.png")
+	except:
+		print('traingle plot failed')
 
-	# fit = ap.fitMCMC(init_par, step_par, fiber)
+	sampler_chain = np.load('sampler_chain.npy')
+	lbl = ['Teff', 'logg', '[Fe/H]', 'rv', 'vsini', r'$\alpha$']
+
+	fig, ax = plt.subplots(ndim, sharex=True, figsize=[8,12])
+	for i in range(ndim):
+		ax[i].plot(sampler_chain.T[i], '-k', alpha=0.2);
+		ax[i].set_ylabel(str(lbl[i]))
+		if i == ndim:
+			ax[i].set_xlabel(step)
+	plt.tight_layout()
+	plt.savefig('Walkers.png', dpi=300, bbox_inches='tight')
+	plt.show()
+	plt.close()
+

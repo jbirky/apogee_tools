@@ -3,7 +3,8 @@ data:
   instrument: "APOGEE"
   data_path: "default" # defaults to $APOGEE_DATA path (see setup documentation), unless otherwise specified
   ID: "2M01195227+8409327"
-  orders: [[15200,15800],[15860,16425],[16475,16935]]
+  orders: [[15200,15800],[15860,16425],[16475,16935]] # wave ranges, and orders
+  dtype: "ap1d"
   visit: 1
   sigma_clip: [.3,.01]
 
@@ -16,15 +17,14 @@ workdir:
 # Specify which parameters will be sampled by MCMC
 # otherwise parameters will be fixed at 'init' values
 model:
-  grid_name: "PHOENIX"
+  grid_name: "PHOENIX" #directory: phoenix/apogee/order
   theta: ['teff', 'logg', 'fe_h', 'rv', 'vsini', 'alpha']
   cont_deg: 5
-  # plotname: ['$T_{\rm eff}$', 'logg', '[Fe/H]', 'rv', 'vsini', '$\alpha$']
 
 # MCMC tuning
 mcmc:
-  nwalkers: 20
-  nsteps: 100
+  nwalkers: 12
+  nsteps: 3
   
 # Initial parameters for MCMC
 init:
@@ -42,9 +42,9 @@ step:
   fe_h: .01
   rv: .1
   vsini: .1
-  alpha: .001
+  alpha: .01
 
-# Prior ranges for MCMC
+# Prior ranges for MCMC (for flat prior)
 prior:
   teff: [2500, 5500]
   logg: [0.0, 5.5]
