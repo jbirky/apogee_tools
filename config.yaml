@@ -21,6 +21,9 @@ model:
   theta: ['teff', 'logg', 'fe_h', 'rv', 'vsini', 'alpha']
   cont_deg: 5
 
+fix_param: # specify fixed parameters (not sampled by MCMC)
+  airmass: 1.0  # airmass of telluric model, either 1.0 or 1.5
+
 # MCMC tuning
 mcmc:
   nwalkers: 12
