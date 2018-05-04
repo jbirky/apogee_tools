@@ -20,11 +20,12 @@ This code also borrows from several other sources, see:
 Dependencies:
 * astropy
 * astroquery
+* emcee
 * numpy 
-* pandas
-* scipy
 * matplotlib
+* pandas
 * PyAstronomy
+* scipy
 
 Create a new directory to store your data files:
 
