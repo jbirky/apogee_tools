@@ -13,16 +13,21 @@ data:
 workdir: 
   input: "/home/jess/Desktop/Research/FAST/fit_models"
   output: "/home/jess/Desktop/Research/FAST/fit_models/output"
+  
+out:
+  mcmc_sampler: True
+  corner: True
+  walkers: True
 
 # Specify which parameters will be sampled by MCMC
 # otherwise parameters will be fixed at 'init' values
 model:
   grid_name: "PHOENIX" #directory: phoenix/apogee/order
   theta: ['teff', 'logg', 'fe_h', 'rv', 'vsini', 'alpha']
-  cont_deg: 5
 
 fix_param: # specify fixed parameters (not sampled by MCMC)
   airmass: 1.0  # airmass of telluric model, either 1.0 or 1.5
+  cont_deg: 5   # continuum polynomial degree
 
 # MCMC tuning
 mcmc:

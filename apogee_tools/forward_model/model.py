@@ -123,7 +123,7 @@ def returnModelFit(data, theta, **kwargs):
 	synth_mdl = ap.makeModel(params=theta, fiber=fiber)
 
 	# multiply model by continuum polynomial
-	cont_sp = ap.continuum(data, synth_mdl, bands=ap.data["orders"], deg=ap.model["cont_deg"], norm=True)
+	cont_sp = ap.continuum(data, synth_mdl, bands=ap.data["orders"], deg=ap.fix_param["cont_deg"], norm=True)
 
 	# plt.figure(figsize=[12,5])
 	# plt.plot(data.wave, data.flux)

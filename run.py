@@ -59,7 +59,11 @@ if __name__ == "__main__":
 		print('\nError: config.yaml not found in the current working directory. \
 			Using default file found inside apogee_tools.\n')
 
-	init_param, step_param, init_theta, step_theta, fiber = ap.initialize()
+	# =============================================================
+	# Pre-MCMC initialization
+	# =============================================================
+
+	init_param, step_param, init_theta, step_theta, fiber, tell_sp = ap.initialize()
 
 	theta_keys = list(init_theta.keys())
 	theta_vals = list(init_theta.values())
@@ -68,34 +72,57 @@ if __name__ == "__main__":
 	nsteps = ap.mcmc["nsteps"]
 	nwalkers = ap.mcmc["nwalkers"]
 
-	pos = [list(init_theta.values()) + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
-	sampler = emcee.EnsembleSampler(nwalkers, ndim, lnlike)
-	sampler.run_mcmc(pos, nsteps)
+	# =============================================================
+	# Run MCMC!
+	# =============================================================
 
-	np.save('sampler_chain', sampler.chain[:, :, :])
+	if ap.out["mcmc_sampler"] == True:
 
-	samples = sampler.chain[:, :, :].reshape((-1, ndim))
+		pos = [list(init_theta.values()) + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
-	np.save('samples', samples)
+		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnlike)
+		sampler.run_mcmc(pos, nsteps)
 
-	try:
-		fig = corner.corner(samples, labels=theta_keys, truths=theta_vals)
-		fig.savefig("triangle.png")
-	except:
-		print('traingle plot failed')
+		np.save('sampler_chain', sampler.chain[:, :, :])
 
-	sampler_chain = np.load('sampler_chain.npy')
-	lbl = ['Teff', 'logg', '[Fe/H]', 'rv', 'vsini', r'$\alpha$']
+		samples = sampler.chain[:, :, :].reshape((-1, ndim))
 
-	fig, ax = plt.subplots(ndim, sharex=True, figsize=[8,12])
-	for i in range(ndim):
-		ax[i].plot(sampler_chain.T[i], '-k', alpha=0.2);
-		ax[i].set_ylabel(str(lbl[i]))
-		if i == ndim:
-			ax[i].set_xlabel(step)
-	plt.tight_layout()
-	plt.savefig('Walkers.png', dpi=300, bbox_inches='tight')
-	plt.show()
-	plt.close()
+		np.save('samples', samples)
 
+
+	# =============================================================
+	# Output corner/walker plots
+	# =============================================================
+
+	if ap.out["corner"] == True:
+
+		try:
+			fig = corner.corner(samples, labels=theta_keys, truths=theta_vals)
+			fig.savefig("triangle.png")
+
+		except:
+			print('Traingle plot failed.')
+
+
+	if ap.out["walkers"] == True:
+
+		try:
+			sampler_chain = np.load('sampler_chain.npy')
+			lbl = ['Teff', 'logg', '[Fe/H]', 'rv', 'vsini', r'$\alpha$']
+
+			ndim = len(sampler.chain.T)
+
+			fig, ax = plt.subplots(ndim, sharex=True, figsize=[8,12])
+			for i in range(ndim):
+				ax[i].plot(sampler_chain.T[i], '-k', alpha=0.2);
+				ax[i].set_ylabel(str(lbl[i]))
+				if i == ndim:
+					ax[i].set_xlabel(step)
+			plt.tight_layout()
+			plt.savefig('Walkers.png', dpi=300, bbox_inches='tight')
+			plt.show()
+			plt.close()
+
+		except:
+			print('Corner plot failed.')
