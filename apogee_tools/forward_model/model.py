@@ -20,6 +20,8 @@ def initialize(**kwargs):
 	init_theta = {key:ap.init[key] for key in ap.model["theta"]}
 	step_theta = {key:ap.step[key] for key in ap.model["theta"]}
 
+	tell_sp = ap.getTelluric(airmass=str(ap.fix_param["airmass"]), cut_rng=[ap.data['orders'][0][0], ap.data['orders'][-1][-1]])
+
 	if instrument == 'APOGEE':
 
 		# Read in data that model will be generated for
@@ -36,7 +38,7 @@ def initialize(**kwargs):
 		### DINO'S NIRSPEC READING CODE ###
 
 
-		return init_par, step_par, init_theta, step_theta, fiber
+		return init_par, step_par, init_theta, step_theta, fiber, tell_sp
 
 
 def makeModel(**kwargs):

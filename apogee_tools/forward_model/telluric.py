@@ -10,7 +10,7 @@ AP_PATH = os.environ['APOGEE_DATA']
 
 
 
-def getTelluric(wavelow=21600, wavehigh=21900, **kwargs):
+def getTelluric(**kwargs):
 
     """
     Get a telluric spectrum.
@@ -34,12 +34,16 @@ def getTelluric(wavelow=21600, wavehigh=21900, **kwargs):
               telluric wavelength and flux within specified region
     """
 
-    alpha   = kwargs.get('alpha', 1)
-    airmass = kwargs.get('airmass', '1.0')
+    airmass = kwargs.get('airmass', ap.fix_param["airmass"])
+    cut_rng = kwargs.get('cut_rng', [ap.data['orders'][0][0], ap.data['orders'][-1][-1]])
 
     am_key = {'1.0':'10', '1.5':'15'}
 
-    tfile     = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(airmass, am_key[airmass])
+    if 'cut_rng' not in kwargs:
+        print("Reading in telluric model between default wavelength {} and {} angstrom. \
+            Use key word 'cut_rng'=[wl_min, wl_max] to specify otherwise.".format(cut_rng[0], cut_rng[1]))
+
+    tfile     = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(str(airmass), am_key[airmass])
     tellurics = fits.open(BASE + '/libraries/TELLURIC/' + tfile)
 
     tell_wave = np.array(tellurics[1].data['lam'] * 10000)
@@ -48,10 +52,12 @@ def getTelluric(wavelow=21600, wavehigh=21900, **kwargs):
     #cut model wl grid wl array to bounds of telluric spectrum
     cut = np.where( (tell_wave > wavelow) & (tell_wave < wavehigh) )
 
-    return tell_wave[cut], tell_flux[cut]
+    tell_sp = ap.Spectrum(wave=tell_wave[cut], flux=tell_flux[cut])
+
+    return tell_sp
 
 
-def applyTelluric(mdl, **kwargs):
+def applyTelluric(mdl, tell_sp, **kwargs):
 
     """
     Apply telluric model to PHOENIX model (or whatever grid you're using)
@@ -59,28 +65,18 @@ def applyTelluric(mdl, **kwargs):
     """
 
     alpha = kwargs.get('alpha', 1)
-    airmass = kwargs.get('airmass', '1.0')
-
-    am_key = {'1.0':'10', '1.5':'15'}
-
+    
     mdl_wave  = mdl.wave
     mdl_flux  = mdl.flux
 
-    # tellurics = pd.read_csv(BASE + '/libraries/lw_solartrans_apogee.csv')
-    # tell_wave = np.asarray(tellurics['wave'] * 10000.0)
-    # tell_flux = np.asarray(tellurics['trans'])**(alpha)
-
-    tfile = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(airmass, am_key[airmass])
-    tellurics = fits.open(BASE + '/libraries/TELLURIC/' + tfile)
-
-    tell_wave = np.array(tellurics[1].data['lam'] * 10000)
-    tell_flux = np.array(tellurics[1].data['trans'])**(alpha)
+    tell_wave = tell_sp.wave
+    tell_flux = tell_sp.flux
 
     #Resample higher res spectrum to lower res spectrum
     try: #if res tell > res mdl, resample tell to mdl
 
         #cut telluric spectrum wl array to bounds of model wl grid
-        cut = np.where((mdl_wave > tell_wave[0]) & (mdl_wave < tell_wave[-1]))[0][5:-5]
+        cut = np.where((mdl_wave > tell_wave[0]) & (mdl_wave < tell_wave[-1]))[0]
         mdl_wave = mdl_wave[cut]
         mdl_flux = mdl_flux[cut]
 
@@ -95,7 +91,7 @@ def applyTelluric(mdl, **kwargs):
     except: #if res mdl > res tell, resample mdl to tell 
 
         #cut model wl grid wl array to bounds of telluric spectrum
-        cut = np.where((tell_wave > mdl_wave[0]) & (tell_wave < mdl_wave[-1]))[0][5:-5]
+        cut = np.where((tell_wave > mdl_wave[0]) & (tell_wave < mdl_wave[-1]))[0]
         tell_wave = tell_wave[cut]
         tell_flux = tell_flux[cut]
 
