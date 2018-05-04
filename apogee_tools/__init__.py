@@ -41,6 +41,7 @@ except: # otherwise read file from inside apogee_tools
 data = config["data"]
 workdir = config["workdir"]
 fix_param = config["fix_param"]
+out = config["out"]
 
 model = config["model"]
 mcmc = config["mcmc"]
