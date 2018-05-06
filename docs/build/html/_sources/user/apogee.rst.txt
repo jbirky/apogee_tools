@@ -105,10 +105,10 @@ Compare two spectra; return ``chi`` (chi-squared value between data and mdl), ``
 NIRSPEC Data
 ------------
 
-More info coming soon.
+.. todo:: More info coming soon. 
 
 
 Adding New Instruments
 ----------------------
 
-More info coming soon.
+.. todo:: More info coming soon. 

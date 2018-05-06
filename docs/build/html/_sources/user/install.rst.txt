@@ -1,8 +1,8 @@
 Installation
 ============
 
-Dependencies:
--------------
+Dependencies
+------------
 
 * `astropy <http://www.astropy.org/>`_
 * `astroquery <https://astroquery.readthedocs.io/en/latest/>`_

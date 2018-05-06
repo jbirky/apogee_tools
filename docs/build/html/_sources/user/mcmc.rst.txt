@@ -1,7 +1,7 @@
 MCMC Fitting 
 ============
 
-[Under construction]
+.. warning:: These functions are under construction. 
 
 Steps
 -----
@@ -17,3 +17,5 @@ Configuration
 -------------
 
 .. literalinclude:: ../../../config.yaml
+
+.. todo:: Add detailed description of config.yaml script. 
