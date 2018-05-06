@@ -433,39 +433,3 @@ class Spectrum():
         cuts = list(itertools.chain(*cuts))
         self.flux[cuts] = np.nan
 
-
-    def shift_rv(self, **kwargs):
-
-        """
-        Shift wavelenth of spectrum object by specific rv.
-        @Jessica Birky
-
-        Input: 'rv' : radial velocity (km/s)
-        """
-
-        rv = kwargs.get('rv', -80) 
-        self.wave = ap.rvShift(self.wave, rv=rv)
-
-
-    def broaden(self, **kwargs):
-
-        """
-        Add vsini to spectrum using PyAstronomy.
-        @Jessica Birky
-
-        Input:  'limb'  : limb darkening coefficient
-                'vsini' : rotational velocity (km/s)
-                'xlim'  : specify a wavelength region to perform over
-                'plot'  : plot broadened spectrum
-        """
-
-        #Input limb-darkening coefficient, vsini, plotting x range
-        limb  = kwargs.get('limb', 0)
-        vsini = kwargs.get('vsini', 0)
-        xlim  = kwargs.get('xlim')
-        plot  = kwargs.get('plot', False)
-
-        broad_spec = smoothVSINI(self, limb=limb, vsini=vsini, xlim=xlim, plot=plot)
-
-        self.wave = broad_spec.wave
-        self.flux = broad_spec.flux
