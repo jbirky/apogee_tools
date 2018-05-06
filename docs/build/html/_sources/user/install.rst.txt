@@ -32,9 +32,3 @@ Download the apogee_tools code and then set up the following environmental varia
 
 	export PATH=$PATH:'/Users/path_to/apogee_tools'
 	export APOGEE_DATA=/Users/path_to/apogee_data
-
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-

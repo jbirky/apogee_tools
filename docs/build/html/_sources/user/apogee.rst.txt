@@ -1,6 +1,8 @@
 Instrument Tools
 ================
 
+.. todo:: Add description of Spectrum object class.
+
 APOGEE Data
 -----------
 
@@ -22,7 +24,7 @@ For data type 'apvisit' or 'ap1d':
 	ap.download('2M03425325+2326495', type='apvisit')
 	ap.download('2M03425325+2326495', type='ap1d', visit=1, frame=1)
 
-Bote: ``type='apvisit'`` will download the spectra for all visits observed, while ``type='ap1d'`` will download only the visit specified (and if not specified, will default to visit=1, frame=1).
+Note: ``type='apvisit'`` will download the spectra for all visits observed, while ``type='ap1d'`` will download only the visit specified (and if not specified, will default to visit=1, frame=1).
 
 For information on APOGEE data files, see the following:
 
