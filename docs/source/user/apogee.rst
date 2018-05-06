@@ -65,6 +65,43 @@ Look up aspcap parameters in ``allStar-l30e.2.fits`` for specific list of 2MASS 
 	ap_dict = ap.returnAspcapTable(tm_ids, params=['TEFF', 'LOGG', 'M_H', 'SNR'], save=False)
 
 
+Plot data
+~~~~~~~~~
+
+Some plotting examples:
+
+.. code-block:: python
+
+	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
+
+	# plot spectrum
+	data.plot()
+
+	# plot aspcap model and noise:
+	data.plot(items=['spec', 'apModel', 'noise'], save=True)
+
+	# plot indentified lines (from Souto 2016):
+	data.plot(items=['spec', 'lines'], xrange=[15200,15500], yrange=[.6,1.2])
+
+Mask outlying flux
+~~~~~~~~~~~~~~~~~~
+
+Specify number of standard deviations above and below the mean of the flux to cut (`sigma = [lower cuttoff, upper cutoff]`), and the number pixels to buffer each side of the cut (`pixel_buffer = [lower mask pixel buffer, upper mask pixel buffer]`):
+
+.. code-block:: python
+
+	data.mask(sigma=[3,2], pixel_buffer=[0,3])
+
+Chi-squared comparison
+~~~~~~~~~~~~~~~~~~~~~~
+
+Compare two spectra; return `chi` (chi-squared value between data and mdl), `norm_data` (`data` spectrum normalized), and `scaled_mdl` (`mdl` which has been scaled to `data`):
+
+.. code-block:: python
+
+	chi, norm_data, scaled_mdl = ap.compareSpectra(data, mdl)
+
+
 NIRSPEC Data
 ------------
 
