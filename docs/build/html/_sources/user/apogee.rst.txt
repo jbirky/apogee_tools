@@ -17,14 +17,14 @@ To download APOGEE spectrum by 2MASS name and data type ``aspcap``, or ``apstar`
 	ap.download('2M03425325+2326495', type='aspcap')
 	ap.download('2M03425325+2326495', type='apstar')
 
-For data type 'apvisit' or 'ap1d': 
+For data type ``apvisit`` or ``ap1d``: 
 
 .. code-block:: python
 
 	ap.download('2M03425325+2326495', type='apvisit')
 	ap.download('2M03425325+2326495', type='ap1d', visit=1, frame=1)
 
-Note: ``type='apvisit'`` will download the spectra for all visits observed, while ``type='ap1d'`` will download only the visit specified (and if not specified, will default to visit=1, frame=1).
+Note: ``type='apvisit'`` will download the spectra for all visits observed, while ``type='ap1d'`` will download only the visit specified (and if not specified, will default to ``visit=1``, ``frame=1``).
 
 For information on APOGEE data files, see the following:
 

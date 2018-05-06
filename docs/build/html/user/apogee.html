@@ -177,12 +177,12 @@
 <span class="n">ap</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;2M03425325+2326495&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;apstar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>For data type ‘apvisit’ or ‘ap1d’:</p>
+<p>For data type <code class="docutils literal"><span class="pre">apvisit</span></code> or <code class="docutils literal"><span class="pre">ap1d</span></code>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ap</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;2M03425325+2326495&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;apvisit&#39;</span><span class="p">)</span>
 <span class="n">ap</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;2M03425325+2326495&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ap1d&#39;</span><span class="p">,</span> <span class="n">visit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Note: <code class="docutils literal"><span class="pre">type='apvisit'</span></code> will download the spectra for all visits observed, while <code class="docutils literal"><span class="pre">type='ap1d'</span></code> will download only the visit specified (and if not specified, will default to visit=1, frame=1).</p>
+<p>Note: <code class="docutils literal"><span class="pre">type='apvisit'</span></code> will download the spectra for all visits observed, while <code class="docutils literal"><span class="pre">type='ap1d'</span></code> will download only the visit specified (and if not specified, will default to <code class="docutils literal"><span class="pre">visit=1</span></code>, <code class="docutils literal"><span class="pre">frame=1</span></code>).</p>
 <p>For information on APOGEE data files, see the following:</p>
 <ul class="simple">
 <li><a class="reference external" href="https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html">aspcap</a> - combined, continuum normalized spectra</li>
