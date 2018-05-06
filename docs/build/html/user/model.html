@@ -1,0 +1,257 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Modelling Tools &mdash; apogee_tools  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Instrument Tools" href="apogee.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> apogee_tools
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apogee.html">Instrument Tools</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Modelling Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#reading-in-model-grids">Reading in Model Grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#synthesize-a-model">Synthesize a model</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">apogee_tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Modelling Tools</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/user/model.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="modelling-tools">
+<h1>Modelling Tools<a class="headerlink" href="#modelling-tools" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="reading-in-model-grids">
+<h2>Reading in Model Grids<a class="headerlink" href="#reading-in-model-grids" title="Permalink to this headline">¶</a></h2>
+<p>Read in a model, specifying the parameters <code class="docutils literal"><span class="pre">[Teff,</span> <span class="pre">logg,</span> <span class="pre">[Fe/H]]</span></code>, grid type (listed below), and wavelength range <code class="docutils literal"><span class="pre">xrange</span></code>. Models sampled to APOGEE resolution are contained in the libraries folder of this package, and span the following parameter ranges: <code class="docutils literal"><span class="pre">PHOENIX:</span> <span class="pre">[[2500,</span> <span class="pre">5500],</span> <span class="pre">[0.0,</span> <span class="pre">5.5],</span> <span class="pre">[-1.0,</span> <span class="pre">1.0]]</span></code>, <code class="docutils literal"><span class="pre">BTSETTL</span> <span class="pre">(CIFIST</span> <span class="pre">2011b</span> <span class="pre">&amp;</span> <span class="pre">2015):</span> <span class="pre">[[2200,</span> <span class="pre">3200],</span> <span class="pre">[2.5,</span> <span class="pre">5.5],</span> <span class="pre">[-0.5,</span> <span class="pre">0.0]]</span></code>. To use grids outside of these ranges, download the libraries from the links below, create an <code class="docutils literal"><span class="pre">.hdf5</span></code> file using Starfish, and add it to the <code class="docutils literal"><span class="pre">libraries</span></code> folder.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">mdl</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="mi">3200</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">grid</span><span class="o">=</span><span class="s1">&#39;BTSETTL&#39;</span><span class="p">,</span> <span class="nb">xrange</span><span class="o">=</span><span class="p">[</span><span class="mi">15200</span><span class="p">,</span><span class="mi">16940</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Grid types:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://phoenix.astro.physik.uni-goettingen.de/">PHOENIX</a> (Husser et. al. 2013)</li>
+<li><a class="reference external" href="https://phoenix.ens-lyon.fr/Grids/BT-Settl/CIFIST2011b/">BTSETTL</a> (Allard et. al. 2010) - CIFIST 2011b</li>
+</ul>
+</div>
+<div class="section" id="synthesize-a-model">
+<h2>Synthesize a model<a class="headerlink" href="#synthesize-a-model" title="Permalink to this headline">¶</a></h2>
+<p>First specify a dictionary of stellar parameters:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;teff&#39;</span><span class="p">:</span> <span class="mi">3051</span><span class="p">,</span> <span class="s1">&#39;logg&#39;</span><span class="p">:</span> <span class="mf">5.2</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">,</span> <span class="s1">&#39;vsini&#39;</span><span class="p">:</span> <span class="mf">10.</span><span class="p">,</span> <span class="s1">&#39;rv&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Read in some data you are creating a model for:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ap</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;2M01195227+8409327&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ap1d&#39;</span><span class="p">,</span> <span class="n">visit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;2M01195227+8409327&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ap1d&#39;</span><span class="p">,</span> <span class="n">visit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Look up the spectrum’s fiber number:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ap_id</span><span class="p">,</span> <span class="n">plates</span><span class="p">,</span> <span class="n">mjds</span><span class="p">,</span> <span class="n">fibers</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">searchVisits</span><span class="p">(</span><span class="n">id_name</span><span class="o">=</span><span class="s1">&#39;2M01195227+8409327&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Synthesize a model: (with resolution options: 23k, 50k, and 300k)</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">mdl</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">makeModel</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">fiber</span><span class="o">=</span><span class="n">fibers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">plot</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="nb">xrange</span><span class="o">=</span><span class="p">[</span><span class="mi">15678</span><span class="p">,</span><span class="mi">15694</span><span class="p">],</span> <span class="n">res</span><span class="o">=</span><span class="s1">&#39;300k&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="apogee.html" class="btn btn-neutral" title="Instrument Tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Jessica Birky.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
