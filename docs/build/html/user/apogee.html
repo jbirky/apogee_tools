@@ -86,9 +86,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#apogee-data">APOGEE Data</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#downloading-and-reading-apogee-data-files">Downloading and reading APOGEE data files</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#search-the-apogee-catalog">Search the APOGEE catalog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plot-data">Plot data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mask-outlying-flux">Mask outlying flux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chi-squared-comparison">Chi-squared comparison</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#nirspec-data">NIRSPEC Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-new-instruments">Adding New Instruments</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="model.html">Modelling Tools</a></li>
@@ -205,9 +209,43 @@
 </pre></div>
 </div>
 </div>
+<div class="section" id="plot-data">
+<h3>Plot data<a class="headerlink" href="#plot-data" title="Permalink to this headline">¶</a></h3>
+<p>Some plotting examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;2M03290406+3117075&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;aspcap&#39;</span><span class="p">)</span>
+
+<span class="c1"># plot spectrum</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="c1"># plot aspcap model and noise:</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;spec&#39;</span><span class="p">,</span> <span class="s1">&#39;apModel&#39;</span><span class="p">,</span> <span class="s1">&#39;noise&#39;</span><span class="p">],</span> <span class="n">save</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># plot indentified lines (from Souto 2016):</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;spec&#39;</span><span class="p">,</span> <span class="s1">&#39;lines&#39;</span><span class="p">],</span> <span class="nb">xrange</span><span class="o">=</span><span class="p">[</span><span class="mi">15200</span><span class="p">,</span><span class="mi">15500</span><span class="p">],</span> <span class="n">yrange</span><span class="o">=</span><span class="p">[</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span><span class="mf">1.2</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mask-outlying-flux">
+<h3>Mask outlying flux<a class="headerlink" href="#mask-outlying-flux" title="Permalink to this headline">¶</a></h3>
+<p>Specify number of standard deviations above and below the mean of the flux to cut (<code class="docutils literal"><span class="pre">sigma</span> <span class="pre">=</span> <span class="pre">[lower</span> <span class="pre">cuttoff,</span> <span class="pre">upper</span> <span class="pre">cutoff]</span></code>), and the number pixels to buffer each side of the cut (<code class="docutils literal"><span class="pre">pixel_buffer</span> <span class="pre">=</span> <span class="pre">[lower</span> <span class="pre">mask</span> <span class="pre">pixel</span> <span class="pre">buffer,</span> <span class="pre">upper</span> <span class="pre">mask</span> <span class="pre">pixel</span> <span class="pre">buffer]</span></code>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">pixel_buffer</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="chi-squared-comparison">
+<h3>Chi-squared comparison<a class="headerlink" href="#chi-squared-comparison" title="Permalink to this headline">¶</a></h3>
+<p>Compare two spectra; return <code class="docutils literal"><span class="pre">chi</span></code> (chi-squared value between data and mdl), <code class="docutils literal"><span class="pre">norm_data</span></code> (<code class="docutils literal"><span class="pre">data</span></code> spectrum normalized), and <code class="docutils literal"><span class="pre">scaled_mdl</span></code> (<code class="docutils literal"><span class="pre">mdl</span></code> which has been scaled to <code class="docutils literal"><span class="pre">data</span></code>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">chi</span><span class="p">,</span> <span class="n">norm_data</span><span class="p">,</span> <span class="n">scaled_mdl</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">compareSpectra</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mdl</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="section" id="nirspec-data">
 <h2>NIRSPEC Data<a class="headerlink" href="#nirspec-data" title="Permalink to this headline">¶</a></h2>
+<p>More info coming soon.</p>
+</div>
+<div class="section" id="adding-new-instruments">
+<h2>Adding New Instruments<a class="headerlink" href="#adding-new-instruments" title="Permalink to this headline">¶</a></h2>
 <p>More info coming soon.</p>
 </div>
 </div>

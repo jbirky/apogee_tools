@@ -88,6 +88,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="apogee.html">Instrument Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model.html">Modelling Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcmc.html">MCMC Fitting</a></li>
 </ul>
 
             
@@ -170,18 +171,21 @@
 <div class="section" id="apogee-data-setup">
 <h2>APOGEE Data Setup<a class="headerlink" href="#apogee-data-setup" title="Permalink to this headline">¶</a></h2>
 <p>Create a new directory to store your data files:</p>
-<blockquote>
-<div>$ mkdir apogee_data/</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ mkdir apogee_data/
+</pre></div>
+</div>
 <p>Then download the APOGEE data info file for DR14:</p>
-<blockquote>
-<div><p>$ cd apogee_data/</p>
-<p>$ wget <a class="reference external" href="https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allStar-l31c.2.fits">https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allStar-l31c.2.fits</a> –no-check-certificate
-$ wget <a class="reference external" href="https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allVisit-l31c.2.fits">https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allVisit-l31c.2.fits</a> –no-check-certificate</p>
-</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ cd apogee_data/
+
+$ wget https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allStar-l31c.2.fits --no-check-certificate
+$ wget https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allVisit-l31c.2.fits --no-check-certificate
+</pre></div>
+</div>
 <p>Download the apogee_tools code and then set up the following environmental variables in your <code class="docutils literal"><span class="pre">.bash_profile</span></code> or <code class="docutils literal"><span class="pre">.bashrc</span></code>:</p>
-<blockquote>
-<div>export PATH=$PATH:’/Users/path_to/apogee_tools’
-export APOGEE_DATA=/Users/path_to/apogee_data</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span>export PATH=$PATH:&#39;/Users/path_to/apogee_tools&#39;
+export APOGEE_DATA=/Users/path_to/apogee_data
+</pre></div>
+</div>
 <ul class="simple">
 <li><a class="reference internal" href="../genindex.html"><span class="std std-ref">Index</span></a></li>
 <li><a class="reference internal" href="../py-modindex.html"><span class="std std-ref">Module Index</span></a></li>

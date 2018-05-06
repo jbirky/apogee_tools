@@ -86,7 +86,7 @@ Some plotting examples:
 Mask outlying flux
 ~~~~~~~~~~~~~~~~~~
 
-Specify number of standard deviations above and below the mean of the flux to cut (`sigma = [lower cuttoff, upper cutoff]`), and the number pixels to buffer each side of the cut (`pixel_buffer = [lower mask pixel buffer, upper mask pixel buffer]`):
+Specify number of standard deviations above and below the mean of the flux to cut (``sigma = [lower cuttoff, upper cutoff]``), and the number pixels to buffer each side of the cut (``pixel_buffer = [lower mask pixel buffer, upper mask pixel buffer]``):
 
 .. code-block:: python
 
@@ -95,7 +95,7 @@ Specify number of standard deviations above and below the mean of the flux to cu
 Chi-squared comparison
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Compare two spectra; return `chi` (chi-squared value between data and mdl), `norm_data` (`data` spectrum normalized), and `scaled_mdl` (`mdl` which has been scaled to `data`):
+Compare two spectra; return ``chi`` (chi-squared value between data and mdl), ``norm_data`` (``data`` spectrum normalized), and ``scaled_mdl`` (``mdl`` which has been scaled to ``data``):
 
 .. code-block:: python
 
@@ -104,5 +104,11 @@ Compare two spectra; return `chi` (chi-squared value between data and mdl), `nor
 
 NIRSPEC Data
 ------------
+
+More info coming soon.
+
+
+Adding New Instruments
+----------------------
 
 More info coming soon.

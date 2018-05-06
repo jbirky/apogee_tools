@@ -17,18 +17,18 @@ Dependencies:
 APOGEE Data Setup
 -----------------
 
-Create a new directory to store your data files:
+Create a new directory to store your data files::
 
 	$ mkdir apogee_data/
 
-Then download the APOGEE data info file for DR14:
+Then download the APOGEE data info file for DR14::
 
 	$ cd apogee_data/
 
 	$ wget https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allStar-l31c.2.fits --no-check-certificate
 	$ wget https://data.sdss.org/sas/dr14/apogee/spectro/redux/r8/allVisit-l31c.2.fits --no-check-certificate
 
-Download the apogee_tools code and then set up the following environmental variables in your ``.bash_profile`` or ``.bashrc``:
+Download the apogee_tools code and then set up the following environmental variables in your ``.bash_profile`` or ``.bashrc``::
 
 	export PATH=$PATH:'/Users/path_to/apogee_tools'
 	export APOGEE_DATA=/Users/path_to/apogee_data

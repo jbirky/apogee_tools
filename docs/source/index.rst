@@ -30,6 +30,7 @@ This code also borrows from several other sources, see:
    user/install
    user/apogee
    user/model
+   user/mcmc
 
 
 Search
