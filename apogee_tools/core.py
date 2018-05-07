@@ -180,7 +180,6 @@ class APOGEE(Spectrum):
 
         if self.d_type == 'aspcap':
 
-            file_dr13 = '%s/aspcap_data/aspcapStar-r6-l30e.2-%s.fits' %(AP_PATH, spec_id)
             file_dr14 = '%s/aspcap_data/aspcapStar-r8-l31c.2-%s.fits' %(AP_PATH, spec_id)
 
             """ ASPCAP file info:
@@ -192,13 +191,10 @@ class APOGEE(Spectrum):
             Information found at https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html 
             """
 
-            if (os.path.exists(file_dr13) == False) & (os.path.exists(file_dr14) == False):
+            if (os.path.exists(file_dr14) == False):
                 ap.download(self.name, type='aspcap')
 
-            try:
-                openFile = fits.open(file_dr14)
-            except:
-                openFile = fits.open(file_dr13)
+            openFile = fits.open(file_dr14)
 
             self.HDU0 = openFile[0]
             self.HDU1 = openFile[1]
@@ -206,46 +202,24 @@ class APOGEE(Spectrum):
             self.HDU3 = openFile[3]
             self.HDU4 = openFile[4]
 
-            master    = self.HDU0
-            spectra   = self.HDU1
-            error     = self.HDU2
-            best_fit  = self.HDU3
-            aspcap_dt = self.HDU4
-
             #conversion from pixel to wavelength, info available in the hdu header
-            crval = spectra.header['CRVAL1']
-            cdelt = spectra.header['CDELT1']
-            wave  = np.array(pow(10, crval+cdelt*np.arange(spectra.header['NAXIS1']))/10000)*u.micron #microns
+            crval = self.HDU1.header['CRVAL1']
+            cdelt = self.HDU1.header['CDELT1']
+            wave  = np.array(pow(10, crval+cdelt*np.arange(self.HDU1.header['NAXIS1']))/10000)*u.micron #microns
 
             # convert fluxes from  (10^-17 erg/s/cm^2/Ang) to  ( erg/s/cm^2/Mircon)
-            spectras = [1e-13*np.array(f)*u.erg/u.s/u.centimeter**2/u.micron for f in spectra.data]
+            spectras = [1e-13*np.array(f)*u.erg/u.s/u.centimeter**2/u.micron for f in self.HDU1.data]
                     
             self.wave    = 10000*np.array(wave.value)
-            self.flux    = np.array(spectra.data)
-            self.error  = np.array(error.data)
-            self.apModel = np.array(best_fit.data)
-
-            self.avgFlux = np.mean(self.flux)
-            self.stdFlux = np.std(self.flux)
-
-            #Find outlier flux and bad pixels
-            self.smooth_flux = self.flux       
-            self.smooth_flux[self.smooth_flux <= 1-.6*self.stdFlux] = 0
-
-            #Mask outliers
-            mask = np.where(self.smooth_flux == 0)
-
-            self.wave    = np.delete(self.wave, list(mask))
-            self.flux    = np.delete(self.flux,list(mask))
-            self.error   = np.delete(self.error, list(mask))
-            self.apModel = np.delete(self.apModel, list(mask))
+            self.flux    = np.array(self.HDU1.data)
+            self.error   = np.array(self.HDU2.data)
+            self.apModel = np.array(self.HDU3.data)
 
             #Obtain aspcap parameters
-            self.params = aspcap_dt.data['PARAM'] 
+            self.params = self.HDU4.data['PARAM'] 
 
         elif self.d_type == 'apstar':
 
-            file_dr13 = '%s/apstar_data/apStar-r6-%s.fits' %(AP_PATH, spec_id)
             file_dr14 = '%s/apstar_data/apStar-r8-%s.fits' %(AP_PATH, spec_id)
 
             """ APSTAR file info:
@@ -262,13 +236,10 @@ class APOGEE(Spectrum):
             Information found at https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/TELESCOPE/LOCATION_ID/apStar.html 
             """
 
-            if (os.path.exists(file_dr13) == False) & (os.path.exists(file_dr14) == False):
+            if (os.path.exists(file_dr14) == False):
                 ap.download(self.name, type='apstar')
 
-            try:
-                openFile = fits.open(file_dr14)
-            except:
-                openFile = fits.open(file_dr13)
+            openFile = fits.open(file_dr14)
 
             self.HDU0 = openFile[0]
             self.HDU1 = openFile[1]
@@ -302,17 +273,8 @@ class APOGEE(Spectrum):
                     
             self.wave    = 10000*np.array(wave.value)
             self.flux    = np.array(spectra.data)
-            self.error  = np.array(error.data)
+            self.error   = np.array(error.data)
             self.sky     = np.array(sky.data)
- 
-            self.avgFlux = np.mean(self.flux)
-            self.stdFlux = np.std(self.flux)
-
-            mask = mask.data
-            
-            self.wave    = np.delete(self.wave, list(mask))
-            self.flux    = np.delete(self.flux,list(mask))
-            self.error  = np.delete(self.error, list(mask))
 
         elif self.d_type == 'apvisit':
 
@@ -401,103 +363,4 @@ class APOGEE(Spectrum):
             self.flux = np.concatenate([flux1, flux2, flux3])[::-1]
             self.error = np.concatenate([err1, err2, err3])[::-1]
 
-        else:
-            #Save spectrum values into the spectrum object class
-            self.wave   = kwargs.get('wave', [])
-            self.flux   = kwargs.get('flux', [])
-            self.error  = kwargs.get('error', [0 for i in range(len(self.wave))])
-            self.ivar   = kwargs.get('ivar', [])
-            self.model  = kwargs.get('model', [])
-            self.name   = kwargs.get('name', 'spectrum')  
-            self.params = kwargs.get('params', [])   
-            self.vsini  = kwargs.get('vsini', []) 
-            self.type   = 'input'   
         
-        
-    def plot(self, **kwargs):
-
-        xrange = kwargs.get('xrange', [self.wave[0], self.wave[-1]])
-        yrange = kwargs.get('yrange', [min(self.flux)-.2, max(self.flux)+.2])
-        rv     = kwargs.get('rv', 0)
-        items  = kwargs.get('items', ['spec'])
-        title  = kwargs.get('title')
-        save   = kwargs.get('save', False)
-        output = kwargs.get('output', str(self.name) + '.pdf')
-        
-        rv_wave = ap.rvShift(self.wave, rv=rv)
-        
-        fig = plt.figure(figsize=(16,4))                                                               
-        ax  = fig.add_subplot(1,1,1) 
-
-        #Plot masked spectrum
-        if ('spectrum' in items) or ('spec' in items):
-            plt.plot(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
-
-        #Plot spectrum error
-        if 'error' in items:
-            plt.plot(self.wave, self.error, color='c', linewidth=1, alpha=.6)
-
-        #Plot continuum
-        if ('cont' in items) or ('continuum' in items):
-            plt.plot(rv_wave, self.cont, color='m', linewidth=1, alpha=.8)
-
-        #Plot aspcap model 
-        if 'apModel' in items:
-            plt.plot(self.wave, self.apModel, color='r', alpha=.8, linewidth=1, label='ASPCAP Model')
-        
-        #Plot read in model
-        if 'model' in items:
-            plt.plot(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model')
-
-        #Plot and label atomic lines
-        if 'lines' in items:
-            line_list = ap.lines
-            line_names = line_list.keys()
-
-            for lines in line_names:
-                for feature in line_list[lines]:
-
-                    if (feature <= xrange[1]) & (feature >= xrange[0]):
-                        # determine position of the line and label based on pixel of the spectrum
-                        xpos = min(self.wave, key=lambda x:abs(x - feature))
-                        index = list(self.wave).index(xpos)
-                        ypos = self.flux[index]
-                        plot_ypos_min = (ypos - yrange[0] -.15)/(yrange[1] - yrange[0])
-                        plot_ypos_max = (ypos - yrange[0] -.1)/(yrange[1] - yrange[0])
-
-                        plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color = 'g')
-                        plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='b', fontsize=8)
-
-        #Plot and highlight molecular bands
-        # if 'bands' in items:
-
-        #Plot piece-wise model segments in different colors
-        if 'model' in kwargs:
-            colors = ['m', 'b', 'g', 'y', '#ffa500', 'r']
-            model  = kwargs.get('model')
-            labels = kwargs.get('labels')
-
-            for i in range(len(model)):
-                plt.plot(model[i]['wl'], model[i]['model'], label=labels[i],color=colors[i], alpha=.8)
-        
-        plt.legend(loc='upper right', fontsize=12)
-        
-        plt.xlim(xrange)
-        plt.ylim(yrange)    
-    
-        minor_locator = AutoMinorLocator(5)
-        ax.xaxis.set_minor_locator(minor_locator)
-        # plt.grid(which='minor') 
-    
-        plt.xlabel(r'$\lambda$ [$\mathring{A}$]', fontsize=18)
-        plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]', fontsize=18)
-        if title != None:
-            plt.title(title, fontsize=20)
-        plt.tight_layout()
-
-        if save == True:
-            plt.savefig(output)
-
-        plt.show()
-        plt.close()
-
