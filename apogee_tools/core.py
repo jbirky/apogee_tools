@@ -280,6 +280,25 @@ class Apogee(Spectrum):
 
             super().__init__(wave=wave, flux=flux, error=error, name=name)
 
+
+class Nirspec(Spectrum):
+
+    def __init__(self, **kwargs): 
+
+        name = kwargs.get('id')
+        path = kwargs.get('path', AP_PATH)
+        order = kwargs.get('order')
+
+        file = path + '/' + name + '_' + str(order) + '_all.fits'
+
+        openFile = fits.open(fullpath, ignore_missing_end=True)
+
+        wave  = openFile[0].data
+        flux  = openFile[1].data
+        error = openFile[2].data
+
+        super().__init__(wave=wave, flux=flux, error=error, name=name)
+
         
 class ModelGrid(Spectrum):
 
