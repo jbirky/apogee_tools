@@ -157,7 +157,7 @@ class Spectrum:
         plt.close()
 
 
-class APOGEE(Spectrum):
+class Apogee(Spectrum):
 
     """ 
     APOGEE Spectrum class for reading in apogee fits files; includes features for aspcap, apStar, and apVisit.
@@ -281,3 +281,11 @@ class APOGEE(Spectrum):
             super().__init__(wave=wave, flux=flux, error=error, name=name)
 
         
+class ModelGrid(Spectrum):
+
+    def __init__(self, **kwargs): 
+
+        self.type = kwargs.get('type', 'BTSETTL')
+
+        # read in model
+        # super().__init__(wave=wave, flux=flux, error=error, name=name)

@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .core import Spectrum, APOGEE
+from .core import Spectrum, Apogee
 
 from .cannon_tools.run_cannon import labelToSpec, loadLabels, initializeTrainingSet, synthesizeFlux, \
 	runCannon, fitCannonModel, crossValidate, _getPivotsAndScales, _get_lvec, scaleLabels
