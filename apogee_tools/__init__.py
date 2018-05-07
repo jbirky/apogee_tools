@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from .core import Spectrum
+from .core import Spectrum, APOGEE
 
 from .cannon_tools.run_cannon import labelToSpec, loadLabels, initializeTrainingSet, synthesizeFlux, \
 	runCannon, fitCannonModel, crossValidate, _getPivotsAndScales, _get_lvec, scaleLabels
@@ -21,6 +21,8 @@ from .utils.continuum import continuum
 from .utils.read import HDF5Convert, HDF5Interface, loadGrid, readModels, getModel
 from .utils.search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
 from .utils.spec_tools import calcScale, compareSpectra, subtractContinuum, integralResample
+
+from .instrument_tools.instrument import formatDesignation, apogeeFile
 
 import os
 import yaml 
