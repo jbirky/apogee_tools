@@ -18,7 +18,6 @@ from astropy.io import fits, ascii
 from astropy import units as u
 
 import apogee_tools as ap
-#from libraries import features
 
 #Get the path of apogee_tools file
 FULL_PATH  = os.path.realpath(__file__)
@@ -26,7 +25,136 @@ BASE, NAME = os.path.split(FULL_PATH)
 
 AP_PATH = os.environ['APOGEE_DATA']
 
-class Spectrum():
+
+class Spectrum:
+
+    def __init__(self, **kwargs):
+
+            self.wave   = kwargs.get('wave', [])
+            self.flux   = kwargs.get('flux', [])
+            self.error  = kwargs.get('error', [0 for i in range(len(self.wave))])
+            self.ivar   = kwargs.get('ivar', [])
+            self.model  = kwargs.get('model', [])
+            self.name   = kwargs.get('name', 'Spectrum')  
+            self.params = kwargs.get('params', [])   
+            self.vsini  = kwargs.get('vsini', []) 
+
+    def mask(self, **kwargs):
+
+        """
+        Mask all pixels that are out of the specified sigma cutoff range specified.
+
+        Input: 'sigma'        : [lower cuttoff, upper cutoff]
+               'pixel_buffer' : [lower mask pixel buffer, upper mask pixel buffer]
+        """
+
+        sigma = kwargs.get('sigma', [2,1])
+        pixel_buffer = kwargs.get('pixel_buffer', [0,2])
+
+        fmean = np.mean(self.flux)
+        fstd  = np.std(self.flux)
+
+        #Find outlier flux and bad pixels 
+        cut_low  = np.where(self.flux <= fmean - sigma[0]*fstd)[0]
+        cut_high = np.where(self.flux >= fmean + sigma[1]*fstd)[0]
+
+        group_low_cut = []
+        group_high_cut = []
+
+        for k, g in itertools.groupby(enumerate(cut_low), lambda x:x[0]-x[1]):
+            group_low_cut.append(list(map(itemgetter(1), g)))
+
+        for k, g in itertools.groupby(enumerate(cut_high), lambda x:x[0]-x[1]):
+            group_high_cut.append(list(map(itemgetter(1), g)))
+
+        cuts = []
+        for pixels in group_low_cut:
+            pix1, pixn = pixels[0], pixels[-1]
+            for b in range(pixel_buffer[0]):
+                pixels.append(pix1 - (b+1))
+                pixels.append(pixn + (b+1))
+            cuts.append(pixels)
+
+        for pixels in group_high_cut:
+            pix1, pixn = pixels[0], pixels[-1]
+            for b in range(pixel_buffer[1]):
+                pixels.append(pix1 - (b+1))
+                pixels.append(pixn + (b+1))
+            cuts.append(pixels)
+
+        cuts = list(itertools.chain(*cuts))
+        self.flux[cuts] = np.nan
+
+
+    def plot(self, **kwargs):
+
+        xrange = kwargs.get('xrange', [self.wave[0], self.wave[-1]])
+        yrange = kwargs.get('yrange', [min(self.flux)-.2, max(self.flux)+.2])
+        rv     = kwargs.get('rv', 0)
+        items  = kwargs.get('items', ['spec'])
+        title  = kwargs.get('title')
+        save   = kwargs.get('save', False)
+        output = kwargs.get('output', str(self.name) + '.pdf')
+        
+        rv_wave = ap.rvShift(self.wave, rv=rv)
+        
+        fig = plt.figure(figsize=(16,4))                                                               
+        ax  = fig.add_subplot(1,1,1) 
+
+        #Plot masked spectrum
+        if ('spectrum' in items) or ('spec' in items):
+            plt.plot(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
+
+        #Plot spectrum error
+        if 'error' in items:
+            plt.plot(self.wave, self.error, color='c', linewidth=1, alpha=.6)
+        
+        #Plot read in model
+        if 'model' in items:
+            plt.plot(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model')
+
+        #Plot and label atomic lines
+        if 'lines' in items:
+            line_list = ap.lines
+            line_names = line_list.keys()
+
+            for lines in line_names:
+                for feature in line_list[lines]:
+
+                    if (feature <= xrange[1]) & (feature >= xrange[0]):
+                        # determine position of the line and label based on pixel of the spectrum
+                        xpos = min(self.wave, key=lambda x:abs(x - feature))
+                        index = list(self.wave).index(xpos)
+                        ypos = self.flux[index]
+                        plot_ypos_min = (ypos - yrange[0] -.15)/(yrange[1] - yrange[0])
+                        plot_ypos_max = (ypos - yrange[0] -.1)/(yrange[1] - yrange[0])
+
+                        plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color = 'g')
+                        plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='b', fontsize=8)
+        
+        plt.legend(loc='upper right', fontsize=12)
+        
+        plt.xlim(xrange)
+        plt.ylim(yrange)    
+    
+        minor_locator = AutoMinorLocator(5)
+        ax.xaxis.set_minor_locator(minor_locator)
+        # plt.grid(which='minor') 
+    
+        plt.xlabel(r'$\lambda$ [$\mathring{A}$]', fontsize=18)
+        plt.ylabel(r'$F_{\lambda}$ [$erg/s \cdot cm^{2}$]', fontsize=18)
+        if title != None:
+            plt.title(title, fontsize=20)
+        plt.tight_layout()
+
+        if save == True:
+            plt.savefig(output)
+
+        plt.show()
+        plt.close()
+
+
+class APOGEE(Spectrum):
 
     """ 
     Spectrum class for reading in apogee fits files; includes features for aspcap, apStar, and apVisit.
@@ -37,24 +165,18 @@ class Spectrum():
            'type' : aspcap, apStar, or apVisit
     
     Spectrum object contains parameters: 
-        wave, flux, sky, noise (or sigmas), name, continuum, params, apModel (aspcap model)
+        wave, flux, sky, error (or error), name, continuum, params, apModel (aspcap model)
     """
 
     def __init__(self, **kwargs):  
 
+        super()__init__(self, **kwargs)
+
         self.d_type = kwargs.get('type')
 
-        if 'id' in kwargs:
-            input_id = kwargs.get('id')
-
-            # Make sure id is in the proper 2MASS format
-            if '+' in input_id:
-                spec_id = '2M' + input_id.split('+')[0][-8:] + '+' + input_id.split('+')[1]
-            elif '-' in input_id:
-                spec_id = '2M' + input_id.split('-')[0][-8:] + '-' + input_id.split('-')[1]
-            else:
-                print('Designation improperly formated. Must be form "__00034394+8606422".')
-            self.name = spec_id
+        # Get designation of 2MASS object
+        input_id  = kwargs.get('id')            
+        self.name = ap.formatDesignation(input_id)
 
         if self.d_type == 'aspcap':
 
@@ -89,34 +211,33 @@ class Spectrum():
             error     = self.HDU2
             best_fit  = self.HDU3
             aspcap_dt = self.HDU4
-        
+
             #conversion from pixel to wavelength, info available in the hdu header
             crval = spectra.header['CRVAL1']
             cdelt = spectra.header['CDELT1']
             wave  = np.array(pow(10, crval+cdelt*np.arange(spectra.header['NAXIS1']))/10000)*u.micron #microns
-            
+
             # convert fluxes from  (10^-17 erg/s/cm^2/Ang) to  ( erg/s/cm^2/Mircon)
             spectras = [1e-13*np.array(f)*u.erg/u.s/u.centimeter**2/u.micron for f in spectra.data]
                     
             self.wave    = 10000*np.array(wave.value)
             self.flux    = np.array(spectra.data)
-            self.sigmas  = np.array(error.data)
+            self.error  = np.array(error.data)
             self.apModel = np.array(best_fit.data)
 
             self.avgFlux = np.mean(self.flux)
             self.stdFlux = np.std(self.flux)
-            
+
             #Find outlier flux and bad pixels
             self.smooth_flux = self.flux       
             self.smooth_flux[self.smooth_flux <= 1-.6*self.stdFlux] = 0
 
             #Mask outliers
             mask = np.where(self.smooth_flux == 0)
-            
+
             self.wave    = np.delete(self.wave, list(mask))
             self.flux    = np.delete(self.flux,list(mask))
-            self.sigmas  = np.delete(self.sigmas, list(mask))
-            self.noise   = self.sigmas
+            self.error   = np.delete(self.error, list(mask))
             self.apModel = np.delete(self.apModel, list(mask))
 
             #Obtain aspcap parameters
@@ -181,7 +302,7 @@ class Spectrum():
                     
             self.wave    = 10000*np.array(wave.value)
             self.flux    = np.array(spectra.data)
-            self.sigmas  = np.array(error.data)
+            self.error  = np.array(error.data)
             self.sky     = np.array(sky.data)
  
             self.avgFlux = np.mean(self.flux)
@@ -191,8 +312,7 @@ class Spectrum():
             
             self.wave    = np.delete(self.wave, list(mask))
             self.flux    = np.delete(self.flux,list(mask))
-            self.sigmas  = np.delete(self.sigmas, list(mask))
-            self.noise   = self.sigmas
+            self.error  = np.delete(self.error, list(mask))
 
         elif self.d_type == 'apvisit':
 
@@ -226,8 +346,7 @@ class Spectrum():
             self.wave = np.array(list(wave[0]) + list(wave[1]) + list(wave[2]))
             self.flux = np.array(list(flux[0]) + list(flux[1]) + list(flux[2]))
 
-            self.sigmas = np.array(error.data)
-            self.noise  = self.sigmas
+            self.error = np.array(error.data)
             # self.sky    = np.array(sky.data)
         
         elif self.d_type == 'ap1d':
@@ -280,16 +399,13 @@ class Spectrum():
             #concatenate arrays from 3 chips and reverse lists so that lowest wavelength is first
             self.wave = np.concatenate([wave1, wave2, wave3])[::-1]
             self.flux = np.concatenate([flux1, flux2, flux3])[::-1]
-            self.sigmas = np.concatenate([err1, err2, err3])[::-1]
-            self.noise  = self.sigmas
+            self.error = np.concatenate([err1, err2, err3])[::-1]
 
         else:
             #Save spectrum values into the spectrum object class
             self.wave   = kwargs.get('wave', [])
             self.flux   = kwargs.get('flux', [])
-            self.sky    = kwargs.get('sky', [])
-            self.sigmas = kwargs.get('sigmas', [0 for i in range(len(self.wave))])
-            self.noise  = self.sigmas
+            self.error  = kwargs.get('error', [0 for i in range(len(self.wave))])
             self.ivar   = kwargs.get('ivar', [])
             self.model  = kwargs.get('model', [])
             self.name   = kwargs.get('name', 'spectrum')  
@@ -317,9 +433,9 @@ class Spectrum():
         if ('spectrum' in items) or ('spec' in items):
             plt.plot(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
 
-        #Plot spectrum noise
-        if 'noise' in items:
-            plt.plot(self.wave, self.sigmas, color='c', linewidth=1, alpha=.6)
+        #Plot spectrum error
+        if 'error' in items:
+            plt.plot(self.wave, self.error, color='c', linewidth=1, alpha=.6)
 
         #Plot continuum
         if ('cont' in items) or ('continuum' in items):
@@ -384,52 +500,4 @@ class Spectrum():
 
         plt.show()
         plt.close()
-
-    # Add more functions here to easily manipulate spectrum object (like splat):
-
-    def mask(self, **kwargs):
-
-        """
-        Mask all pixels that are out of the specified sigma cutoff range specified.
-
-        Input: 'sigma'        : [lower cuttoff, upper cutoff]
-               'pixel_buffer' : [lower mask pixel buffer, upper mask pixel buffer]
-        """
-
-        sigma = kwargs.get('sigma', [2,1])
-        pixel_buffer = kwargs.get('pixel_buffer', [0,2])
-
-        fmean = np.mean(self.flux)
-        fstd  = np.std(self.flux)
-
-        #Find outlier flux and bad pixels 
-        cut_low  = np.where(self.flux <= fmean - sigma[0]*fstd)[0]
-        cut_high = np.where(self.flux >= fmean + sigma[1]*fstd)[0]
-
-        group_low_cut = []
-        group_high_cut = []
-
-        for k, g in itertools.groupby(enumerate(cut_low), lambda x:x[0]-x[1]):
-            group_low_cut.append(list(map(itemgetter(1), g)))
-
-        for k, g in itertools.groupby(enumerate(cut_high), lambda x:x[0]-x[1]):
-            group_high_cut.append(list(map(itemgetter(1), g)))
-
-        cuts = []
-        for pixels in group_low_cut:
-            pix1, pixn = pixels[0], pixels[-1]
-            for b in range(pixel_buffer[0]):
-                pixels.append(pix1 - (b+1))
-                pixels.append(pixn + (b+1))
-            cuts.append(pixels)
-
-        for pixels in group_high_cut:
-            pix1, pixn = pixels[0], pixels[-1]
-            for b in range(pixel_buffer[1]):
-                pixels.append(pix1 - (b+1))
-                pixels.append(pixn + (b+1))
-            cuts.append(pixels)
-
-        cuts = list(itertools.chain(*cuts))
-        self.flux[cuts] = np.nan
 
