@@ -86,7 +86,10 @@
 <li class="toctree-l1"><a class="reference internal" href="model.html">Modelling Tools</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Analysis Tools</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#plotting-features">Plotting Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#atomic-and-molecular-lines">Atomic and Molecular Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#atomic-and-molecular-lines">Atomic and Molecular Lines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="mcmc.html">MCMC Fitting</a></li>
@@ -165,9 +168,21 @@
 </div>
 <div class="section" id="atomic-and-molecular-lines">
 <h2>Atomic and Molecular Lines<a class="headerlink" href="#atomic-and-molecular-lines" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="index-1">
-<p class="first admonition-title">Todo</p>
-<p class="last">More info coming soon.</p>
+<p>Search atomic and molecular lines from the following databases:</p>
+<p><strong>NIST</strong> (<a class="reference external" href="https://physics.nist.gov/PhysRefData/ASD/lines_form.html">download1</a>): atomic lines</p>
+<p><strong>HITEMP</strong> (<a class="reference external" href="ftp://cfa-ftp.harvard.edu/pub/HITEMP-2010/)">download2</a>, <a class="reference external" href="https://www.cfa.harvard.edu/atmosphere/publications/2010-HITEMP-JQSRT-111.pdf">paper2</a>): molecular lines H2O, CO2, CO, NO, and OH</p>
+<p><strong>APOGEE</strong> (<a class="reference external" href="https://zenodo.org/record/32629#.Vi0XBBCrSfS">download3</a>), <a class="reference external" href="https://arxiv.org/abs/1502.04080">paper3</a>): atomic and molecular lines</p>
+<div class="section" id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ap</span><span class="o">.</span><span class="n">listLibraries</span><span class="p">()</span>
+
+<span class="n">ap</span><span class="o">.</span><span class="n">listSpecies</span><span class="p">(</span><span class="s1">&#39;APOGEE_ATOMS&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Search a wavelegth region for certain species of atoms/molecules (returns a dictionary):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">lines</span> <span class="o">=</span> <span class="n">apsearchLines</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;OH&#39;</span><span class="p">,</span> <span class="s1">&#39;Fe I&#39;</span><span class="p">],</span> <span class="n">libraries</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;NIST&#39;</span><span class="p">,</span> <span class="s1">&#39;APOGEE_ATOMS&#39;</span><span class="p">,</span> <span class="s1">&#39;APOGEE_MOLEC&#39;</span><span class="p">],</span> <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mi">15200</span><span class="p">,</span><span class="mi">15300</span><span class="p">])</span>
+</pre></div>
+</div>
 </div>
 </div>
 </div>
