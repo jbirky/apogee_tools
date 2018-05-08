@@ -251,7 +251,7 @@ class Apogee(Spectrum):
             ChipB = ap1d_dir + 'ap1d-{}-{}-b.fits'.format(name, visit)
             ChipC = ap1d_dir + 'ap1d-{}-{}-c.fits'.format(name, visit)
             
-            if (os.path.exists(ChipA) == False) or (os.path.exists(ChipB) == False) or (os.path.exists(ChipC) == False) :
+            if (os.path.exists(ChipA) == False) or (os.path.exists(ChipB) == False) or (os.path.exists(ChipC) == False):
                 ap.download(name, type='ap1d', visit=visit, frame=1)
 
             # Get wavelength, flux, and error arrays of spectrum
@@ -291,7 +291,10 @@ class Nirspec(Spectrum):
 
         file = path + '/' + name + '_' + str(order) + '_all.fits'
 
-        openFile = fits.open(fullpath, ignore_missing_end=True)
+        try:
+            openFile = fits.open(file, ignore_missing_end=True)
+        except:
+            print(file, 'not found.')
 
         wave  = openFile[0].data
         flux  = openFile[1].data
