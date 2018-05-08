@@ -98,25 +98,33 @@ class Spectrum:
         title  = kwargs.get('title')
         save   = kwargs.get('save', False)
         output = kwargs.get('output', str(self.name) + '.pdf')
+
+        highlight = kwargs.get('highlight')
+        hcolor    = kwargs.get('hcolor', 'b')
         
         rv_wave = ap.rvShift(self.wave, rv=rv)
         
         fig = plt.figure(figsize=(16,4))                                                               
         ax  = fig.add_subplot(1,1,1) 
 
-        #Plot masked spectrum
+        # Plot masked spectrum
         if ('spectrum' in items) or ('spec' in items):
             plt.plot(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
 
-        #Plot spectrum error
+        # Plot spectrum error
         if 'error' in items:
             plt.plot(self.wave, self.error, color='c', linewidth=1, alpha=.6)
         
-        #Plot read in model
+        # Plot read in model
         if 'model' in items:
             plt.plot(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model')
 
-        #Plot and label atomic lines
+        # Highlight specified bands
+        if 'highlight' in kwargs:
+            for h in highlight:
+               plt.axvspan(h[0], h[1], color=hcolor, alpha=0.1)
+
+        # Plot and label atomic lines
         if 'lines' in items:
             line_list = ap.lines
             line_names = line_list.keys()
