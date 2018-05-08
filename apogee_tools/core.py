@@ -37,8 +37,9 @@ class Spectrum:
             self.wave  = kwargs.get('wave', [])
             self.flux  = kwargs.get('flux', [])
             self.error = kwargs.get('error', [0 for i in range(len(self.wave))])
-            self.maske = kwargs.get('mask', [])
+            self.mask  = kwargs.get('mask', [])
             self.model = kwargs.get('model', [])
+            self.sky   = kwargs.get('sky', [])
             self.name  = kwargs.get('name', 'Spectrum')  
             self.param = kwargs.get('param', [])   
 
@@ -142,6 +143,34 @@ class Spectrum:
 
                         plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color = 'g')
                         plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='b', fontsize=8)
+
+        # Plot multiple dictionaries of lines in different colors
+        if 'line_lists' in kwargs:
+            line_lists = kwargs.get('line_lists', [ap.lines])
+            list_labels = kwargs.get('list_labels', ['list'+str(i) for i in range(len(line_lists))])
+
+            colors = ['r', 'b', 'g', 'p', 'c', 'y']
+            cindex = 0
+
+            for line_list in line_lists:
+                line_names = line_list.keys()
+
+                for lines in line_names:
+                    for feature in line_list[lines]:
+
+                        if (feature <= xrange[1]) & (feature >= xrange[0]):
+                            # determine position of the line and label based on pixel of the spectrum
+                            xpos = min(self.wave, key=lambda x:abs(x - feature))
+                            index = list(self.wave).index(xpos)
+                            ypos = self.flux[index]
+                            plot_ypos_min = (ypos - yrange[0] -.15)/(yrange[1] - yrange[0])
+                            plot_ypos_max = (ypos - yrange[0] -.1)/(yrange[1] - yrange[0])
+
+                            plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color=colors[cindex])
+                            plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='k', fontsize=8)
+
+                cindex += 1
+
         
         plt.legend(loc='upper right', fontsize=12)
         

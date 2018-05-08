@@ -28,6 +28,7 @@ def searchLines(**kwargs):
     species = kwargs.get('species')
     rng = kwargs.get('range') #units assumed angstroms
     libraries = kwargs.get('libraries', ['APOGEE_ATOMS'])
+    report = kwargs.get('report', True)
 
     line_dict = dict([(key, []) for key in species])
 
@@ -46,6 +47,7 @@ def searchLines(**kwargs):
 
                     try:
                         spec = spec.upper()
+                        
                         if spec in hf_keys:
                             spec_lines = np.array(hf[spec])
                             range_indx = np.where((spec_lines > rng[0]) & (spec_lines < rng[1]))[0]
@@ -53,13 +55,14 @@ def searchLines(**kwargs):
                             if len(range_indx) != 0:
                                 line_dict[spec].append(spec_lines[range_indx])
 
-                        print('{} found in {}.'.format(spec, lib))
+                                if report == True:
+                                    print('{} found in {}.'.format(spec, lib))
 
                     except:
                         pass
 
                 hf.close()
-                
+
             except:
                 print('Library {} does not exist. Valid linelist keywords are {}'.format(lib, listLibraries()))
 
@@ -79,7 +82,8 @@ def searchLines(**kwargs):
                 if len(spec_lines) != 0:
                     line_dict[spec].append(spec_lines)
                 
-                print('{} found in NIST.'.format(spec))
+                    if report == True:
+                        print('{} found in NIST.'.format(spec))
 
             except:
                 pass
