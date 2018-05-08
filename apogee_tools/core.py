@@ -149,7 +149,7 @@ class Spectrum:
             line_lists = kwargs.get('line_lists', [ap.lines])
             list_labels = kwargs.get('list_labels', ['list'+str(i) for i in range(len(line_lists))])
 
-            colors = ['r', 'b', 'g', 'p', 'c', 'y']
+            line_colors = kwargs.get('line_colors', ['r', 'g', 'b', 'p', 'c', 'y'])
             cindex = 0
 
             for line_list in line_lists:
@@ -166,7 +166,7 @@ class Spectrum:
                             plot_ypos_min = (ypos - yrange[0] -.15)/(yrange[1] - yrange[0])
                             plot_ypos_max = (ypos - yrange[0] -.1)/(yrange[1] - yrange[0])
 
-                            plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color=colors[cindex])
+                            plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color=line_colors[cindex])
                             plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='k', fontsize=8)
 
                 cindex += 1
