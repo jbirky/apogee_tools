@@ -46,9 +46,18 @@ def searchLines(**kwargs):
                 for spec in line_dict.keys():
 
                     try:
-                        spec = spec.upper()
-                        
+
                         if spec in hf_keys:
+                            spec_lines = np.array(hf[spec])
+                            range_indx = np.where((spec_lines > rng[0]) & (spec_lines < rng[1]))[0]
+
+                            if len(range_indx) != 0:
+                                line_dict[spec].append(spec_lines[range_indx])
+
+                                if report == True:
+                                    print('{} found in {}.'.format(spec, lib))
+
+                        elif spec.upper() in hf_keys: # APOGEE libraries have upper case keys
                             spec_lines = np.array(hf[spec])
                             range_indx = np.where((spec_lines > rng[0]) & (spec_lines < rng[1]))[0]
 
