@@ -125,8 +125,8 @@ class Spectrum:
                plt.axvspan(h[0], h[1], color=hcolor, alpha=0.1)
 
         # Plot and label atomic lines
-        if 'lines' in items:
-            line_list = ap.lines
+        if ('lines' in items) or ('line_list' in kwargs):
+            line_list = kwargs.get('line_list', ap.lines)
             line_names = line_list.keys()
 
             for lines in line_names:
