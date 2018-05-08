@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Instrument Tools &mdash; apogee_tools  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Modelling Tools" href="model.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> apogee_tools
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Instrument Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#apogee-data">APOGEE Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#downloading-and-reading-apogee-data-files">Downloading and reading APOGEE data files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#search-the-apogee-catalog">Search the APOGEE catalog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plot-data">Plot data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mask-outlying-flux">Mask outlying flux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chi-squared-comparison">Chi-squared comparison</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#nirspec-data">NIRSPEC Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-new-instruments">Adding New Instruments</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Modelling Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcmc.html">MCMC Fitting</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">apogee_tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Instrument Tools</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/user/instrument.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="instrument-tools">
+<h1>Instrument Tools<a class="headerlink" href="#instrument-tools" title="Permalink to this headline">¶</a></h1>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Add description of Spectrum object class.</p>
+</div>
+<div class="section" id="apogee-data">
+<h2>APOGEE Data<a class="headerlink" href="#apogee-data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="downloading-and-reading-apogee-data-files">
+<h3>Downloading and reading APOGEE data files<a class="headerlink" href="#downloading-and-reading-apogee-data-files" title="Permalink to this headline">¶</a></h3>
+<p>To download APOGEE spectrum by 2MASS name and data type <code class="docutils literal"><span class="pre">aspcap</span></code>, or <code class="docutils literal"><span class="pre">apstar</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">apogee_tools</span> <span class="kn">as</span> <span class="nn">ap</span>
+<span class="n">ap</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;2M03425325+2326495&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;aspcap&#39;</span><span class="p">)</span>
+<span class="n">ap</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;2M03425325+2326495&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;apstar&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For data type <code class="docutils literal"><span class="pre">apvisit</span></code> or <code class="docutils literal"><span class="pre">ap1d</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ap</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;2M03425325+2326495&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;apvisit&#39;</span><span class="p">)</span>
+<span class="n">ap</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;2M03425325+2326495&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ap1d&#39;</span><span class="p">,</span> <span class="n">visit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note: <code class="docutils literal"><span class="pre">type='apvisit'</span></code> will download the spectra for all visits observed, while <code class="docutils literal"><span class="pre">type='ap1d'</span></code> will download only the visit specified (and if not specified, will default to <code class="docutils literal"><span class="pre">visit=1</span></code>, <code class="docutils literal"><span class="pre">frame=1</span></code>).</p>
+<p>For information on APOGEE data files, see the following:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/LOCATION_ID/aspcapStar.html">aspcap</a> - combined, continuum normalized spectra</li>
+<li><a class="reference external" href="https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/TELESCOPE/LOCATION_ID/apStar.html">apStar</a> - combined spectra</li>
+<li><a class="reference external" href="https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/TELESCOPE/PLATE_ID/MJD5/apVisit.html">apVisit</a> - individual raw visit spectra with telluric correction</li>
+<li><a class="reference external" href="https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/red/MJD5/ap1D.html">ap1D</a> - individual raw visit spectra with NO telluric correction</li>
+</ul>
+<p>Also for info about the allStar file (such as aspcap pipeline parameters and photometry for all of the sources), see: <a class="reference external" href="https://data.sdss.org/datamodel/files/APOGEE_REDUX/APRED_VERS/APSTAR_VERS/ASPCAP_VERS/RESULTS_VERS/allStar.html">allStar</a>.</p>
+<p>Once the data for a source has been downloaded, read aspcap or apStar files by specifying the 2MASS name and data type:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">Apogee</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;2M03425325+2326495&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;aspcap&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or for single visit spectrum, indicate the index of the visit number at the end:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">Apogee</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;2M03425325+2326495&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;apvisit&#39;</span><span class="p">,</span> <span class="n">visit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="search-the-apogee-catalog">
+<h3>Search the APOGEE catalog<a class="headerlink" href="#search-the-apogee-catalog" title="Permalink to this headline">¶</a></h3>
+<p>Example search–will search the <code class="docutils literal"><span class="pre">allStar-l30e.2.fits</span></code> you downloaded:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TEFF&#39;</span><span class="p">,</span> <span class="s1">&#39;LOGG&#39;</span><span class="p">,</span> <span class="s1">&#39;M_H&#39;</span><span class="p">]</span>
+<span class="n">ranges</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mi">10000</span><span class="p">,</span><span class="mi">4000</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
+<span class="n">source_table</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">multiParamSearch</span><span class="p">(</span><span class="n">par</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="n">ranges</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="s1">&#39;/path_to/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Look up aspcap parameters in <code class="docutils literal"><span class="pre">allStar-l30e.2.fits</span></code> for specific list of 2MASS IDs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">tm_ids</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;2M01195227+8409327&#39;</span><span class="p">]</span>
+<span class="n">ap_dict</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">returnAspcapTable</span><span class="p">(</span><span class="n">tm_ids</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;TEFF&#39;</span><span class="p">,</span> <span class="s1">&#39;LOGG&#39;</span><span class="p">,</span> <span class="s1">&#39;M_H&#39;</span><span class="p">,</span> <span class="s1">&#39;SNR&#39;</span><span class="p">],</span> <span class="n">save</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="plot-data">
+<h3>Plot data<a class="headerlink" href="#plot-data" title="Permalink to this headline">¶</a></h3>
+<p>Some plotting examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">Apogee</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;2M03290406+3117075&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;aspcap&#39;</span><span class="p">)</span>
+
+<span class="c1"># plot spectrum</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="c1"># plot aspcap model and noise:</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;spec&#39;</span><span class="p">,</span> <span class="s1">&#39;apModel&#39;</span><span class="p">,</span> <span class="s1">&#39;noise&#39;</span><span class="p">],</span> <span class="n">save</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># plot indentified lines (from Souto 2016):</span>
+<span class="n">data</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;spec&#39;</span><span class="p">,</span> <span class="s1">&#39;lines&#39;</span><span class="p">],</span> <span class="nb">xrange</span><span class="o">=</span><span class="p">[</span><span class="mi">15200</span><span class="p">,</span><span class="mi">15500</span><span class="p">],</span> <span class="n">yrange</span><span class="o">=</span><span class="p">[</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span><span class="mf">1.2</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mask-outlying-flux">
+<h3>Mask outlying flux<a class="headerlink" href="#mask-outlying-flux" title="Permalink to this headline">¶</a></h3>
+<p>Specify number of standard deviations above and below the mean of the flux to cut (<code class="docutils literal"><span class="pre">sigma</span> <span class="pre">=</span> <span class="pre">[lower</span> <span class="pre">cuttoff,</span> <span class="pre">upper</span> <span class="pre">cutoff]</span></code>), and the number pixels to buffer each side of the cut (<code class="docutils literal"><span class="pre">pixel_buffer</span> <span class="pre">=</span> <span class="pre">[lower</span> <span class="pre">mask</span> <span class="pre">pixel</span> <span class="pre">buffer,</span> <span class="pre">upper</span> <span class="pre">mask</span> <span class="pre">pixel</span> <span class="pre">buffer]</span></code>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">pixel_buffer</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="chi-squared-comparison">
+<h3>Chi-squared comparison<a class="headerlink" href="#chi-squared-comparison" title="Permalink to this headline">¶</a></h3>
+<p>Compare two spectra; return <code class="docutils literal"><span class="pre">chi</span></code> (chi-squared value between data and mdl), <code class="docutils literal"><span class="pre">norm_data</span></code> (<code class="docutils literal"><span class="pre">data</span></code> spectrum normalized), and <code class="docutils literal"><span class="pre">scaled_mdl</span></code> (<code class="docutils literal"><span class="pre">mdl</span></code> which has been scaled to <code class="docutils literal"><span class="pre">data</span></code>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">chi</span><span class="p">,</span> <span class="n">norm_data</span><span class="p">,</span> <span class="n">scaled_mdl</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">compareSpectra</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mdl</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="nirspec-data">
+<h2>NIRSPEC Data<a class="headerlink" href="#nirspec-data" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="index-1">
+<p class="first admonition-title">Todo</p>
+<p class="last">More info coming soon.</p>
+</div>
+</div>
+<div class="section" id="adding-new-instruments">
+<h2>Adding New Instruments<a class="headerlink" href="#adding-new-instruments" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="index-2">
+<p class="first admonition-title">Todo</p>
+<p class="last">More info coming soon.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="model.html" class="btn btn-neutral float-right" title="Modelling Tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install.html" class="btn btn-neutral" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Jessica Birky.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

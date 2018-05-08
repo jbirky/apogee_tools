@@ -39,13 +39,13 @@ Once the data for a source has been downloaded, read aspcap or apStar files by s
 
 .. code-block:: python
 
-	data = ap.Spectrum(id='2M03425325+2326495', type='aspcap')
+	data = ap.Apogee(id='2M03425325+2326495', type='aspcap')
 
 Or for single visit spectrum, indicate the index of the visit number at the end:
 
 .. code-block:: python
 
-	data = ap.Spectrum(id='2M03425325+2326495', type='apvisit', visit=1)
+	data = ap.Apogee(id='2M03425325+2326495', type='apvisit', visit=1)
 
 
 Search the APOGEE catalog
@@ -74,7 +74,7 @@ Some plotting examples:
 
 .. code-block:: python
 
-	data = ap.Spectrum(id='2M03290406+3117075', type='aspcap')
+	data = ap.Apogee(id='2M03290406+3117075', type='aspcap')
 
 	# plot spectrum
 	data.plot()

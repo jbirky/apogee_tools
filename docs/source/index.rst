@@ -28,7 +28,7 @@ This code also borrows from several other sources, see:
    :caption: User Guide:
 
    user/install
-   user/apogee
+   user/instrument
    user/model
    user/analysis
    user/mcmc
