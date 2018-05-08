@@ -19,6 +19,7 @@ from .info.features import lines
 from .utils.ap1d import get_1dspec_urls, coadd_epoch, coadd_spectra
 from .utils.continuum import continuum
 from .utils.read import HDF5Convert, HDF5Interface, loadGrid, readModels, getModel
+from .utils.read_lines import listLibraries, listSpecies, searchLines
 from .utils.search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
 from .utils.spec_tools import calcScale, compareSpectra, subtractContinuum, integralResample
 
@@ -27,8 +28,12 @@ from .instrument_tools.instrument import formatDesignation, apogeeFile
 import os
 import yaml 
 
-PATH = os.path.realpath(__file__)
-AP_TOOLS_PATH = os.path.split(os.path.split(PATH)[0])[0]
+
+# Get directories of apogee_tools 
+PATH 	  = os.path.realpath(__file__)
+AP_TOOLS  = os.path.split(os.path.split(PATH)[0])[0]
+LIBRARIES = AP_TOOLS + '/libraries'
+
 
 # Read configuration file
 try: # open from the current working directory
