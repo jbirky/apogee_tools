@@ -25,7 +25,7 @@ def initialize(**kwargs):
 	if instrument == 'APOGEE':
 
 		# Read in data that model will be generated for
-		data = ap.Spectrum(id=ap.data['ID'], type='apvisit', visit=ap.data['visit'])
+		data = ap.Apogee(id=ap.data['ID'], type='apvisit', visit=ap.data['visit'])
 
 		# Get APOGEE lsf fiber number
 		fiber = ap.searchVisits(id_name=ap.data['ID'])[3][ap.data['visit']-1]
