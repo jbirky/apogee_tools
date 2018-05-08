@@ -27,6 +27,9 @@ from .instrument_tools.instrument import formatDesignation, apogeeFile
 import os
 import yaml 
 
+PATH = os.path.realpath(__file__)
+AP_TOOLS_PATH = os.path.split(os.path.split(PATH)[0])[0]
+
 # Read configuration file
 try: # open from the current working directory
 	f = open("config.yaml")
