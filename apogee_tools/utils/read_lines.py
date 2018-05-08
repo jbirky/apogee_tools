@@ -37,22 +37,29 @@ def searchLines(**kwargs):
 
             try:
                 fname = ap.LIBRARIES + '/linelists/' + lib + '.hdf5'
-                print('Searching library', fname)
+                # print('Searching library', fname)
 
                 hf = h5py.File(fname, 'r')
                 hf_keys = [k.upper() for k in hf.keys()]
 
                 for spec in line_dict.keys():
 
-                    spec = spec.upper()
-                    if spec in hf_keys:
-                        spec_lines = np.array(hf[spec])
-                        range_indx = np.where((spec_lines > rng[0]) & (spec_lines < rng[1]))[0]
+                    try:
+                        spec = spec.upper()
+                        if spec in hf_keys:
+                            spec_lines = np.array(hf[spec])
+                            range_indx = np.where((spec_lines > rng[0]) & (spec_lines < rng[1]))[0]
 
-                        if len(range_indx) != 0:
-                            line_dict[spec].append(spec_lines[range_indx])
+                            if len(range_indx) != 0:
+                                line_dict[spec].append(spec_lines[range_indx])
+
+                        print('{} found in {}.'.format(spec, lib))
+
+                    except:
+                        pass
 
                 hf.close()
+                
             except:
                 print('Library {} does not exist. Valid linelist keywords are {}'.format(lib, listLibraries()))
 
@@ -62,7 +69,7 @@ def searchLines(**kwargs):
         from astroquery.nist import Nist
         import astropy.units as u
         
-        print('Searching NIST library.')
+        # print('Searching NIST library.')
         
         for spec in species:
             try:
@@ -72,8 +79,10 @@ def searchLines(**kwargs):
                 if len(spec_lines) != 0:
                     line_dict[spec].append(spec_lines)
                 
+                print('{} found in NIST.'.format(spec))
+
             except:
-                print(spec, 'not found in NIST.')
+                pass
        
     # Flatten lists in line dictionary
     for key in line_dict.keys():
