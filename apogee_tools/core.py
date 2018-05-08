@@ -96,6 +96,7 @@ class Spectrum:
         yrange = kwargs.get('yrange', [min(self.flux)-.2, max(self.flux)+.2])
         rv     = kwargs.get('rv', 0)
         items  = kwargs.get('items', ['spec'])
+        style  = kwargs.get('style', 'plot')
         title  = kwargs.get('title')
         save   = kwargs.get('save', False)
         output = kwargs.get('output', str(self.name) + '.pdf')
@@ -110,15 +111,24 @@ class Spectrum:
 
         # Plot masked spectrum
         if ('spectrum' in items) or ('spec' in items):
-            plt.plot(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
+            if style == 'step':
+                plt.step(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
+            else:
+                plt.plot(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
 
         # Plot spectrum error
         if 'error' in items:
-            plt.plot(self.wave, self.error, color='c', linewidth=1, alpha=.6)
+            if style == 'step':
+                plt.step(self.wave, self.error, color='c', linewidth=1, alpha=.6, label='Error')
+            else:
+                plt.plot(self.wave, self.error, color='c', linewidth=1, alpha=.6, label='Error')
         
         # Plot read in model
         if 'model' in items:
-            plt.plot(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model')
+            if style == 'step':
+                plt.step(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model')
+            else:
+                plt.plot(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model')
 
         # Highlight specified bands
         if 'highlight' in kwargs:
@@ -134,14 +144,21 @@ class Spectrum:
                 for feature in line_list[lines]:
 
                     if (feature <= xrange[1]) & (feature >= xrange[0]):
+
                         # determine position of the line and label based on pixel of the spectrum
                         xpos = min(self.wave, key=lambda x:abs(x - feature))
                         index = list(self.wave).index(xpos)
                         ypos = self.flux[index]
-                        plot_ypos_min = (ypos - yrange[0] -.15)/(yrange[1] - yrange[0])
-                        plot_ypos_max = (ypos - yrange[0] -.1)/(yrange[1] - yrange[0])
 
-                        plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color = 'g')
+                        if kwargs.get('line_style', 'short') == 'short':
+                            plot_ypos_min = (ypos - yrange[0] -.15)/(yrange[1] - yrange[0])
+                            plot_ypos_max = (ypos - yrange[0] -.1)/(yrange[1] - yrange[0])
+
+                            plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color = 'g')
+                        
+                        else:
+                            plt.axvline(x=feature, linewidth=.3, color = 'g')
+
                         plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='b', fontsize=8)
 
         # Plot multiple dictionaries of lines in different colors
@@ -159,14 +176,21 @@ class Spectrum:
                     for feature in line_list[lines]:
 
                         if (feature <= xrange[1]) & (feature >= xrange[0]):
+
                             # determine position of the line and label based on pixel of the spectrum
                             xpos = min(self.wave, key=lambda x:abs(x - feature))
                             index = list(self.wave).index(xpos)
                             ypos = self.flux[index]
-                            plot_ypos_min = (ypos - yrange[0] -.15)/(yrange[1] - yrange[0])
-                            plot_ypos_max = (ypos - yrange[0] -.1)/(yrange[1] - yrange[0])
 
-                            plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color=line_colors[cindex])
+                            if kwargs.get('line_style', 'short') == 'short':
+                                plot_ypos_min = (ypos - yrange[0] -.15)/(yrange[1] - yrange[0])
+                                plot_ypos_max = (ypos - yrange[0] -.1)/(yrange[1] - yrange[0])
+
+                                plt.axvline(x=feature, ymin=plot_ypos_min, ymax=plot_ypos_max, linewidth=1, color=line_colors[cindex])
+                            
+                            else:
+                                plt.axvline(x=feature, linewidth=.3, color=line_colors[cindex])
+
                             plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='k', fontsize=8)
 
                 cindex += 1
