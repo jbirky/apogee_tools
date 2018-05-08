@@ -30,7 +30,7 @@ Read in some data you are creating a model for:
 .. code-block:: python
 
 	ap.download('2M01195227+8409327', type='ap1d', visit=1, frame=1)
-	data = ap.Spectrum(id='2M01195227+8409327', type='ap1d', visit=1)
+	data = ap.Apogee(id='2M01195227+8409327', type='ap1d', visit=1)
 
 Look up the spectrum's fiber number:
 

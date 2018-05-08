@@ -80,7 +80,7 @@ Some plotting examples:
 	data.plot()
 
 	# plot aspcap model and noise:
-	data.plot(items=['spec', 'apModel', 'noise'], save=True)
+	data.plot(items=['spec', 'model', 'noise'], save=True)
 
 	# plot indentified lines (from Souto 2016):
 	data.plot(items=['spec', 'lines'], xrange=[15200,15500], yrange=[.6,1.2])
