@@ -23,7 +23,7 @@ from .utils.read_lines import listLibraries, listSpecies, searchLines
 from .utils.search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
 from .utils.spec_tools import calcScale, compareSpectra, subtractContinuum, integralResample
 
-from .instrument_tools.instrument import formatDesignation, apogeeFile
+from .instrument_tools.instrument import formatDesignation, getShortname, apogeeFile
 
 import os
 import yaml 
