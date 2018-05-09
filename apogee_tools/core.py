@@ -178,10 +178,10 @@ class Spectrum:
 
         # Plot multiple dictionaries of lines in different colors
         if 'line_lists' in kwargs:
-            line_lists = kwargs.get('line_lists', [ap.lines])
+            line_lists = kwargs.get('line_lists')
             list_labels = kwargs.get('list_labels', ['list'+str(i) for i in range(len(line_lists))])
 
-            line_colors = kwargs.get('line_colors', ['r', 'g', 'b', 'p', 'c', 'y'])
+            line_colors = kwargs.get('line_colors', ['r', 'g', 'b', 'v', 'c', 'y'])
             cindex = 0
 
             for line_list in line_lists:
@@ -209,6 +209,22 @@ class Spectrum:
                             plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='k', fontsize=8)
 
                 cindex += 1
+
+        # Plot plain vertical lines
+        if 'vert_lines' in kwargs:
+            vert_lines = kwargs.get('vert_lines')
+            vcolor = kwargs.get('vcolor', 'g')
+
+            for lines in vert_lines:
+                lines = np.array(lines)
+                range_indices = np.where((lines > xrange[0]) & (lines < xrange[1]))[0]
+                lines = np.array(lines)[range_indices]
+
+                ysize = yrange[1] - yrange[0]
+
+                for line in lines:
+                    plt.axvline(x=line, linewidth=.3, color=vcolor)
+                    plt.text(line, yrange[0] + .03*ysize, round(line,2), rotation=90, ha='right', va='bottom', color='k', fontsize=10)
 
         
         plt.legend(loc='upper right', fontsize=12)
