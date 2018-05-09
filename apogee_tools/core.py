@@ -92,45 +92,60 @@ class Spectrum:
 
     def plot(self, **kwargs):
 
+        # Plot specifications
         xrange = kwargs.get('xrange', [self.wave[0], self.wave[-1]])
         yrange = kwargs.get('yrange', [min(self.flux)-.2, max(self.flux)+.2])
-        rv     = kwargs.get('rv', 0)
         items  = kwargs.get('items', ['spec'])
-        style  = kwargs.get('style', 'plot')
+        style  = kwargs.get('style')
         title  = kwargs.get('title')
         save   = kwargs.get('save', False)
         output = kwargs.get('output', str(self.name) + '.pdf')
-
-        highlight = kwargs.get('highlight')
-        hcolor    = kwargs.get('hcolor', 'b')
         
+        # Shift by radial velocity
+        rv      = kwargs.get('rv', 0)
         rv_wave = ap.rvShift(self.wave, rv=rv)
         
+        # Set up plot
         fig = plt.figure(figsize=(16,4))                                                               
         ax  = fig.add_subplot(1,1,1) 
 
         # Plot masked spectrum
         if ('spectrum' in items) or ('spec' in items):
             if style == 'step':
-                plt.step(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
+                plt.step(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name, where='mid')
             else:
                 plt.plot(rv_wave, self.flux, color='k', alpha=.8, linewidth=1, label=self.name)
 
         # Plot spectrum error
         if 'error' in items:
             if style == 'step':
-                plt.step(self.wave, self.error, color='c', linewidth=1, alpha=.6, label='Error')
+                plt.step(self.wave, self.error, color='c', linewidth=1, alpha=.6, label='Error', where='mid')
             else:
                 plt.plot(self.wave, self.error, color='c', linewidth=1, alpha=.6, label='Error')
         
         # Plot read in model
         if 'model' in items:
             if style == 'step':
-                plt.step(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model')
+                plt.step(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model', where='mid')
             else:
                 plt.plot(self.wave, self.model, color='r', alpha=.8, linewidth=1, label='Model')
 
+        # Input additional spectrum objects to plot
+        if 'objects' in kwargs:
+            objects = kwargs.get('objects')
+            obj_style = kwargs.get('obj_style')
+
+            for obj in objects:
+                if obj_style == 'step':
+                    plt.step(obj.wave, obj.flux, label=obj.name)
+                else:
+                    plt.plot(obj.wave, obj.flux, label=obj.name)
+
+
         # Highlight specified bands
+        highlight = kwargs.get('highlight')
+        hcolor    = kwargs.get('hcolor', 'b')
+
         if 'highlight' in kwargs:
             for h in highlight:
                plt.axvspan(h[0], h[1], color=hcolor, alpha=0.1)
@@ -254,6 +269,9 @@ class Apogee(Spectrum):
             error = np.array(openFile[2].data)
             model = np.array(openFile[3].data)
             param = openFile[4].data['PARAM'] 
+
+            # Correct wavelength by -80 km/s 
+            # wave = ap.rvShift(wave, rv=80)
 
             super().__init__(wave=wave, flux=flux, error=error, model=model, param=param, name=name)
 
