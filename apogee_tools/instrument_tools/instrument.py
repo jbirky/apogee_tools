@@ -17,6 +17,20 @@ def formatDesignation(input_id):
 	return spec_id
 
 
+def getShortname(input_id):
+
+    """
+    Return shortname of a spectrum designation. 
+    Ex: >> getShortname('2M03425325+2326495')
+        '2M0342+2326'
+
+    """
+    
+    name = ap.formatDesignation(input_id)
+    
+    return name[0:6] + name[10:15]
+
+
 class apogeeFile():
 
     """ 
