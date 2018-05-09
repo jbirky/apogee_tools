@@ -199,6 +199,21 @@ def splineInterpolate(sp, **kwargs):
     xs = np.linspace(sp.wave[0], sp.wave[-1], points)
     
     spline = ap.Spectrum(wave=xs, flux=spl(xs), name=ap.getShortname(sp.name)+' interpolation')
+
+    local_min, local_max = [], []
+    for root in spl.derivative().roots():
+
+        # determine position of the line and label based on pixel of the spectrum
+        xpos = min(sp.wave, key=lambda x:abs(x - root))
+        index = list(sp.wave).index(xpos)
+
+        fl_root = spl(root)
+
+        if (fl_root > spl(root - .01)) & (fl_root > spl(root + .01)):
+            local_max.append(root)
+
+        elif (fl_root < spl(root - .01)) & (fl_root < spl(root + .01)):
+            local_min.append(root)
     
-    return spline
+    return spline, local_min, local_max
 
