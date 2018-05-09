@@ -21,7 +21,7 @@ from .utils.continuum import continuum
 from .utils.read import HDF5Convert, HDF5Interface, loadGrid, readModels, getModel
 from .utils.read_lines import listLibraries, listSpecies, searchLines
 from .utils.search import searchStars, searchVisits, download, multiParamSearch, returnSimbadParams, returnAspcapTable
-from .utils.spec_tools import calcScale, compareSpectra, subtractContinuum, integralResample
+from .utils.spec_tools import calcScale, compareSpectra, subtractContinuum, integralResample, splineInterpolate
 
 from .instrument_tools.instrument import formatDesignation, getShortname, apogeeFile
 

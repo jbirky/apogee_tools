@@ -183,3 +183,22 @@ def subtractContinuum(spec, **kwargs):
     sub_spec = ap.Spectrum(wave=wave, flux=sub_flux, params=spec.params)
 
     return sub_spec, continuum
+
+
+def splineInterpolate(sp, **kwargs):
+
+    """
+    Spline interpolate a spectrum object.
+    """
+
+    from scipy.interpolate import UnivariateSpline
+    
+    points = kwargs.get('points', 10**4)
+    
+    spl = UnivariateSpline(sp.wave, sp.flux, k=4, s=0)
+    xs = np.linspace(sp.wave[0], sp.wave[-1], points)
+    
+    spline = ap.Spectrum(wave=xs, flux=spl(xs), name=ap.getShortname(sp.name)+' interpolation')
+    
+    return spline
+

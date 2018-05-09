@@ -26,7 +26,7 @@ def getShortname(input_id):
 
     """
     
-    name = ap.formatDesignation(input_id)
+    name = formatDesignation(input_id)
     
     return name[0:6] + name[10:15]
 
