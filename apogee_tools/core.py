@@ -26,7 +26,7 @@ BASE, NAME = os.path.split(FULL_PATH)
 AP_PATH = os.environ['APOGEE_DATA']
 
 
-class Spectrum:
+class Spectrum():
 
     """
     Master Spectrum class.
@@ -37,11 +37,13 @@ class Spectrum:
             self.wave  = kwargs.get('wave', [])
             self.flux  = kwargs.get('flux', [])
             self.error = kwargs.get('error', [0 for i in range(len(self.wave))])
-            self.mask  = kwargs.get('mask', [])
             self.model = kwargs.get('model', [])
             self.sky   = kwargs.get('sky', [])
             self.name  = kwargs.get('name', 'Spectrum')  
-            self.param = kwargs.get('param', [])   
+            self.param = kwargs.get('param', []) 
+
+            self.mean_flux = np.mean(self.flux)
+            self.std_flux  = np.std(self.flux)  
 
     def mask(self, **kwargs):
 
@@ -53,14 +55,11 @@ class Spectrum:
         """
 
         sigma = kwargs.get('sigma', [2,1])
-        pixel_buffer = kwargs.get('pixel_buffer', [0,2])
-
-        fmean = np.mean(self.flux)
-        fstd  = np.std(self.flux)
+        pixel_buffer = kwargs.get('pixel_buffer', [0,0])
 
         #Find outlier flux and bad pixels 
-        cut_low  = np.where(self.flux <= fmean - sigma[0]*fstd)[0]
-        cut_high = np.where(self.flux >= fmean + sigma[1]*fstd)[0]
+        cut_low  = np.where(self.flux <= self.mean_flux - sigma[0]*self.std_flux)[0]
+        cut_high = np.where(self.flux >= self.mean_flux + sigma[1]*self.std_flux)[0]
 
         group_low_cut = []
         group_high_cut = []
@@ -92,12 +91,9 @@ class Spectrum:
 
     def plot(self, **kwargs):
 
-        mean_flux = np.mean(self.flux)
-        std_flux  = np.std(self.flux)
-
         # Plot specifications
         xrange = kwargs.get('xrange', [self.wave[0], self.wave[-1]])
-        yrange = kwargs.get('yrange', [mean_flux - 3*std_flux, mean_flux + 3*std_flux])
+        yrange = kwargs.get('yrange', [self.mean_flux - 3*self.std_flux, self.mean_flux + 3*self.std_flux])
         items  = kwargs.get('items', ['spec'])
         style  = kwargs.get('style')
         title  = kwargs.get('title')
