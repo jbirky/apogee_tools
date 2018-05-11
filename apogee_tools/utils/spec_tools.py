@@ -64,7 +64,7 @@ def compareSpectra(sp1, sp2, **kwargs):
     flux2 = f(wave1)
 
     #Create a new spectrum object for sp2
-    sp2 = ap.Spectrum(wave=wave1, flux=flux2, params=sp2.params)
+    sp2 = ap.Spectrum(wave=wave1, flux=flux2, param=sp2.param)
 
     #Compute scale factor for 2nd spectrum
     if fit_scale == True:
@@ -81,7 +81,7 @@ def compareSpectra(sp1, sp2, **kwargs):
         stat = diff**2/np.array(unc)**2
     chi = np.nansum(stat)
 
-    sp2 = ap.Spectrum(wave=wave1, flux=flux2, params=sp2.params)
+    sp2 = ap.Spectrum(wave=wave1, flux=flux2, param=sp2.param)
 
     return chi, sp1, sp2
 
@@ -180,7 +180,7 @@ def subtractContinuum(spec, **kwargs):
         plt.show()
         plt.close()
 
-    sub_spec = ap.Spectrum(wave=wave, flux=sub_flux, params=spec.params)
+    sub_spec = ap.Spectrum(wave=wave, flux=sub_flux, param=spec.param)
 
     return sub_spec, continuum
 
