@@ -92,9 +92,12 @@ class Spectrum:
 
     def plot(self, **kwargs):
 
+        mean_flux = np.mean(self.flux)
+        std_flux  = np.std(self.flux)
+
         # Plot specifications
         xrange = kwargs.get('xrange', [self.wave[0], self.wave[-1]])
-        yrange = kwargs.get('yrange', [min(self.flux)-.2, max(self.flux)+.2])
+        yrange = kwargs.get('yrange', [mean_flux - 3*std_flux, mean_flux + 3*std_flux])
         items  = kwargs.get('items', ['spec'])
         style  = kwargs.get('style')
         title  = kwargs.get('title')
