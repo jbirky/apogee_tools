@@ -15,9 +15,10 @@ workdir:
   output: "/home/jess/Desktop/Research/FAST/fit_models/output"
   
 out:
-  mcmc_sampler: True
-  corner: True
-  walkers: True
+  mcmc_sampler: False
+  corner: False
+  walkers: False
+  print_report: True
 
 # Specify which parameters will be sampled by MCMC
 # otherwise parameters will be fixed at 'init' values
