@@ -28,7 +28,7 @@ def calcScale(sp1, sp2):
     """
 
     wave1, flux1 = sp1.wave, sp1.flux
-    unc = sp1.sigmas
+    unc = sp1.error
 
     # interpolate spectrum 2 to the array size of spectrum 1
     wave2 = wave1
@@ -57,7 +57,7 @@ def compareSpectra(sp1, sp2, **kwargs):
     if ivariance == True:
         ivar = sp1.ivar
     else:
-        unc  = sp1.sigmas
+        unc  = sp1.error
 
     #Interpolation function 
     f = interp1d(sp2.wave, sp2.flux, bounds_error=False, fill_value=0.)
