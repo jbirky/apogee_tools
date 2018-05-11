@@ -1,22 +1,34 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 import emcee
 import apogee_tools as ap
 import corner
+import os
 
 
-def lnlike(theta):
+# =============================================================
+# MCMC prior and likelihood functions
+# =============================================================
 
+def lnlike(theta, fiber, tell_sp):
+
+	"""
+	Log-likelihood, computed from chi-squared
+	"""
+
+	# If theta is entered as a list, make it into a dictionary
 	theta_keys = [key for key in ap.init.keys()]
 	if type(theta) == np.ndarray:
 		theta = dict(zip(theta_keys, theta))
 
-	# mdl  = ap.makeModel(params=theta, fiber=124)
-	data = ap.Spectrum(id=ap.data['ID'], type=ap.data["dtype"], visit=ap.data['visit'])
+	# Choose the appropriate Spectrum class to read the data
+	if ap.data['instrument'] == 'APOGEE':
+		data = ap.Apogee(id=ap.data['ID'], type=ap.data["dtype"], visit=ap.data['visit'])
+	else:
+		print('No Spectrum class to read data for instrument', ap.data['instrument'])
 
-	chisq = ap.returnModelFit(data, theta, fiber=124)
+	chisq = ap.returnModelFit(data, theta, fiber=[fiber], telluric=tell_sp)
 
 	print('\n chisq', chisq, '\n')
 
@@ -24,6 +36,10 @@ def lnlike(theta):
 
 
 def lnprior(theta):
+
+	"""
+	Specifies a flat prior
+	"""
 
 	keys = theta.keys()
 
@@ -36,13 +52,13 @@ def lnprior(theta):
 	return 0.0
 
 
-def lnprob(theta):
+def lnprob(theta, fiber, tell_sp):
 
 	lnp = lnprior(theta)
-	if not np.isfinite(lp):
+	if not np.isfinite(lnp):
 	    return -np.inf
 
-	return lnp + lnlike(theta, x, y, yerr)
+	return lnp + lnlike(theta, fiber, tell_sp)
 
 
 #########################################################################################
@@ -74,6 +90,13 @@ if __name__ == "__main__":
 
 
 	# =============================================================
+	# Testing...
+	# =============================================================
+
+	print(lnprob(init_theta, fiber, tell_sp))
+
+
+	# =============================================================
 	# Run MCMC!
 	# =============================================================
 
@@ -81,7 +104,7 @@ if __name__ == "__main__":
 
 		pos = [list(init_theta.values()) + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
-		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnlike)
+		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(fiber, tell_sp))
 		sampler.run_mcmc(pos, nsteps)
 
 		np.save('sampler_chain', sampler.chain[:, :, :])
