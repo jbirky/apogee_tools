@@ -34,6 +34,7 @@ def getTelluric(**kwargs):
               telluric wavelength and flux within specified region
     """
 
+    alpha   = kwargs.get('alpha', 1)
     airmass = kwargs.get('airmass', ap.fix_param["airmass"])
     cut_rng = kwargs.get('cut_rng', [ap.data['orders'][0][0], ap.data['orders'][-1][-1]])
 
@@ -43,14 +44,14 @@ def getTelluric(**kwargs):
         print("Reading in telluric model between default wavelength {} and {} angstrom. \
             Use key word 'cut_rng'=[wl_min, wl_max] to specify otherwise.".format(cut_rng[0], cut_rng[1]))
 
-    tfile     = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(str(airmass), am_key[airmass])
+    tfile     = 'pwv_R300k_airmass{}/LBL_A{}_s0_w005_R0300000_T.fits'.format(str(airmass), am_key[str(airmass)])
     tellurics = fits.open(BASE + '/libraries/TELLURIC/' + tfile)
 
     tell_wave = np.array(tellurics[1].data['lam'] * 10000)
     tell_flux = np.array(tellurics[1].data['trans'])**(alpha)
 
     #cut model wl grid wl array to bounds of telluric spectrum
-    cut = np.where( (tell_wave > wavelow) & (tell_wave < wavehigh) )
+    cut = np.where((tell_wave > cut_rng[0]) & (tell_wave < cut_rng[1]))[0]
 
     tell_sp = ap.Spectrum(wave=tell_wave[cut], flux=tell_flux[cut])
 
@@ -81,7 +82,9 @@ def applyTelluric(mdl, tell_sp, **kwargs):
         mdl_flux = mdl_flux[cut]
 
         tell_rs = ap.integralResample(tell_wave, tell_flux, mdl_wave)
-        print('Downsampled telluric spectrum resolution to model resolution.')
+
+        # if ap.out['print_report'] == True:
+        #     print('Downsampled telluric spectrum resolution to model resolution.')
 
         #Convolve model and telluric spectrum
         conv_flux = tell_rs * mdl_flux
@@ -96,7 +99,9 @@ def applyTelluric(mdl, tell_sp, **kwargs):
         tell_flux = tell_flux[cut]
 
         mdl_rs  = ap.integralResample(mdl_wave, mdl_flux, tell_wave)
-        print('Downsampled model resolution to telluric spectrum resolution.')
+
+        # if ap.out['print_report'] == True:
+        #     print('Downsampled model resolution to telluric spectrum resolution.')
 
         #Convolve model and telluric spectrum
         conv_flux = mdl_rs * tell_flux

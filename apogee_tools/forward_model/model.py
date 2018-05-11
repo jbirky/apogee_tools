@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 rc('font', family='serif')
 import apogee_tools as ap
+import time
 import os
 
 
@@ -30,7 +31,7 @@ def initialize(**kwargs):
 		# Get APOGEE lsf fiber number
 		fiber = ap.searchVisits(id_name=ap.data['ID'])[3][ap.data['visit']-1]
 
-		return init_param, step_param, init_theta, step_theta, fiber
+		return init_param, step_param, init_theta, step_theta, fiber, tell_sp
 
 	elif instrument == 'NIRSPEC':
 
@@ -38,7 +39,7 @@ def initialize(**kwargs):
 		### DINO'S NIRSPEC READING CODE ###
 
 
-		return init_par, step_par, init_theta, step_theta, fiber, tell_sp
+		return init_param, step_param, init_theta, step_theta, fiber, tell_sp
 
 
 def makeModel(**kwargs):
@@ -62,23 +63,73 @@ def makeModel(**kwargs):
 	# mdl_name = r'Teff = {}, logg = {}, Fe/H = {}, vsini = {}, rv = {}, $\alpha$ = {}'.format(params['teff'], params['logg'], params['fe_h'], params['vsini'], params['rv'], params['alpha'])
 	labels = [params['teff'], params['logg'], params['fe_h']]
 
-	#Interpolate model grids at give teff, logg, fe/h
+	out_str = " ".join(["{}={}".format(key, params[key]) for key in params.keys()])
+	if ap.out['print_report'] == True:
+		print('\n##################################################')
+		print('Making model:', out_str)
+
+
+	# =============================================================
+	# 1. Interpolate model grids at give teff, logg, fe/h
+	# =============================================================
+	
+	t0 = time.time()
+
 	interp_sp = ap.interpolateGrid(labels=labels, res=res, grid=grid)
 	interp_sp.flux = interp_sp.flux/max(interp_sp.flux)
 
-	#Apply radial velocity
-	rv_sp   = ap.rvShiftSpec(interp_sp, rv=params['rv'])
+	t1 = time.time()
 
-	#Apply rotational velocity broadening
-	rot_sp  = ap.applyVsini(rv_sp, vsini=params['vsini'])
+	if ap.out['print_report'] == True:
+		print("[{}s] Interpolated model".format(str(t1-t0)))
 
-	#Apply telluric spectrum
-	tell_sp = ap.applyTelluric(rot_sp, alpha=params['alpha'])
+	# =============================================================
+	# 2. Apply radial velocity
+	# =============================================================
 
-	#Apply APOGEE LSF function
+	rv_sp = ap.rvShiftSpec(interp_sp, rv=params['rv'])
+
+	t2 = time.time()
+
+	if ap.out['print_report'] == True:
+		print("[{}s] Shifted radial velocity".format(str(t2-t1)))
+
+	# =============================================================
+	# 3. Apply rotational velocity broadening
+	# =============================================================
+
+	rot_sp = ap.applyVsini(rv_sp, vsini=params['vsini'])
+
+	t3 = time.time()
+
+	if ap.out['print_report'] == True:
+		print("[{}s] Applied vsini broadening".format(str(t3-t2)))
+
+	# =============================================================
+	# 4. Apply telluric spectrum
+	# =============================================================
+
+	telluric_model = kwargs.get('telluric', ap.getTelluric(cut_rng=[ap.data['orders'][0][0], ap.data['orders'][-1][-1]]))
+	tell_sp = ap.applyTelluric(rot_sp, telluric_model, alpha=params['alpha'])
+
+	t4 = time.time()
+
+	if ap.out['print_report'] == True:
+		print("[{}s] Convolved telluric model".format(str(t4-t3)))
+
+	# =============================================================
+	# 5. Apply APOGEE LSF function
+	# =============================================================
+
 	lsf_sp  = ap.convolveLsf(tell_sp, fiber=fiber)
 
-	# synth_model = ap.Spectrum(wave=lsf_sp.wave, flux=lsf_sp.flux, name=mdl_name)
+	t5 = time.time()
+
+	if ap.out['print_report'] == True:
+		print("[{}s] Applied LSF broadening \n".format(str(t5-t4)))
+
+	# =============================================================
+
 	synth_model = ap.Spectrum(wave=lsf_sp.wave, flux=lsf_sp.flux)
 
 	if plot == True:
@@ -114,30 +165,27 @@ def returnModelFit(data, theta, **kwargs):
 
 	params = kwargs.get('params')
 	fiber  = kwargs.get('fiber', 40)
+	telluric_model = kwargs.get('telluric', ap.getTelluric(cut_rng=[ap.data['orders'][0][0], ap.data['orders'][-1][-1]]))
 
 	# normalize and apply sigma clip to data flux
 	data.mask(sigma=ap.data["sigma_clip"], pixel_buffer=[0,0])
 	data.flux = data.flux/max(data.flux[np.isfinite(data.flux)])
 
 	# synthesize model
-	synth_mdl = ap.makeModel(params=theta, fiber=fiber)
+	synth_mdl = ap.makeModel(params=theta, fiber=fiber, telluric=telluric_model)
 
 	# multiply model by continuum polynomial
 	cont_sp = ap.continuum(data, synth_mdl, bands=ap.data["orders"], deg=ap.fix_param["cont_deg"], norm=True)
 
-	# plt.figure(figsize=[12,5])
-	# plt.plot(data.wave, data.flux)
-	# plt.plot(cont_sp.wave, cont_sp.flux)
-	# plt.show()
-	# plt.close()
-
 	# return chi-squared fit
 	chisq = ap.compareSpectra(data, cont_sp, fit_scale=False)[0]
 
+	plt.figure(figsize=[12,5])
+	plt.plot(data.wave, data.flux)
+	plt.plot(cont_sp.wave, cont_sp.flux, label=str(chisq))
+	plt.legend(loc='upper right')
+	plt.show()
+	plt.close()
+
 	return chisq
-
-
-def fitMCMC(**kwargs):
-
-	return None
 
