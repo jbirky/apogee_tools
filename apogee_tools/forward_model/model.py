@@ -3,9 +3,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
 rc('font', family='serif')
-import apogee_tools as ap
 import time
 import os
+
+import apogee_tools as ap
+import apogee_tools.apogee_hack.spec.lsf as lsf
 
 
 def initialize(**kwargs):
@@ -31,7 +33,11 @@ def initialize(**kwargs):
 		# Get APOGEE lsf fiber number
 		fiber = ap.searchVisits(id_name=ap.data['ID'])[3][ap.data['visit']-1]
 
-		return init_param, step_param, init_theta, step_theta, fiber, tell_sp
+		# Evaluate lsf array
+		xlsf = np.linspace(-7., 7., 43)
+		lsf_array = lsf.eval(xlsf, fiber=[fiber])
+
+		return init_param, step_param, init_theta, step_theta, fiber, tell_sp, lsf_array
 
 	elif instrument == 'NIRSPEC':
 
@@ -54,7 +60,6 @@ def makeModel(**kwargs):
 	"""
 
 	params = kwargs.get('params')
-	fiber  = kwargs.get('fiber', 40)
 	plot   = kwargs.get('plot', False)
 	res    = kwargs.get('res', '300k')
 	grid   = kwargs.get('grid', 'phoenix').lower()
@@ -121,7 +126,23 @@ def makeModel(**kwargs):
 	# 5. Apply APOGEE LSF function
 	# =============================================================
 
-	lsf_sp  = ap.convolveLsf(tell_sp, fiber=fiber)
+	# Specify either lsf array or fiber number. 
+	# Note for multiple iterations of the function specifying the lsf array will be faster.
+
+	if 'lsf' in kwargs:
+		lsf_array  = kwargs.get('lsf')
+		lsf_sp     = ap.convolveLsf(tell_sp, lsf=lsf_array)
+
+	elif ('lsf' not in kwargs) and ('fiber' in kwargs):
+		import apogee_tools.apogee_hack.spec.lsf as lsf
+
+		xlsf 	  = np.linspace(-7., 7., 43)
+		fiber     = kwargs.get('fiber')
+		lsf_array = lsf.eval(xlsf, fiber=fiber)
+		lsf_sp    = ap.convolveLsf(tell_sp, lsf=lsf_array)
+
+	else:
+		print("Error convolving LSF: ap.convolveLsf(tell_sp) requires key word input 'lsf' or 'fiber'.")
 
 	t5 = time.time()
 
@@ -164,7 +185,7 @@ def returnModelFit(data, theta, **kwargs):
 	"""
 
 	params = kwargs.get('params')
-	fiber  = kwargs.get('fiber', 40)
+	lsf    = kwargs.get('lsf')
 	telluric_model = kwargs.get('telluric', ap.getTelluric(cut_rng=[ap.data['orders'][0][0], ap.data['orders'][-1][-1]]))
 
 	# normalize and apply sigma clip to data flux
@@ -172,7 +193,7 @@ def returnModelFit(data, theta, **kwargs):
 	data.flux = data.flux/max(data.flux[np.isfinite(data.flux)])
 
 	# synthesize model
-	synth_mdl = ap.makeModel(params=theta, fiber=fiber, telluric=telluric_model)
+	synth_mdl = ap.makeModel(params=theta, lsf=lsf, telluric=telluric_model)
 
 	# multiply model by continuum polynomial
 	cont_sp = ap.continuum(data, synth_mdl, bands=ap.data["orders"], deg=ap.fix_param["cont_deg"], norm=True)
