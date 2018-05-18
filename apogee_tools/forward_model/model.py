@@ -12,8 +12,9 @@ import apogee_tools.apogee_hack.spec.lsf as lsf
 
 def initialize(**kwargs):
 
-	# Read in configuration parameters
+	t0 = time.time()
 
+	# Read in configuration parameters
 	instrument = ap.data["instrument"]
 
 	# Read initilization and step parameters
@@ -36,6 +37,9 @@ def initialize(**kwargs):
 		# Evaluate lsf array
 		xlsf = np.linspace(-7., 7., 43)
 		lsf_array = lsf.eval(xlsf, fiber=[fiber])
+
+		if ap.out['print_report'] == True:
+			print('\n[{}s] MCMC initilization step complete.'.format(time.time() - t0))
 
 		return init_param, step_param, init_theta, step_theta, fiber, tell_sp, lsf_array
 
@@ -186,6 +190,7 @@ def returnModelFit(data, theta, **kwargs):
 
 	params = kwargs.get('params')
 	lsf    = kwargs.get('lsf')
+	plot   = kwargs.get('plot', False)
 	telluric_model = kwargs.get('telluric', ap.getTelluric(cut_rng=[ap.data['orders'][0][0], ap.data['orders'][-1][-1]]))
 
 	# normalize and apply sigma clip to data flux
@@ -201,12 +206,13 @@ def returnModelFit(data, theta, **kwargs):
 	# return chi-squared fit
 	chisq = ap.compareSpectra(data, cont_sp, fit_scale=False)[0]
 
-	plt.figure(figsize=[12,5])
-	plt.plot(data.wave, data.flux)
-	plt.plot(cont_sp.wave, cont_sp.flux, label=str(chisq))
-	plt.legend(loc='upper right')
-	plt.show()
-	plt.close()
+	if plot == True:
+		plt.figure(figsize=[12,5])
+		plt.plot(data.wave, data.flux)
+		plt.plot(cont_sp.wave, cont_sp.flux, label=str(chisq))
+		plt.legend(loc='upper right')
+		plt.show()
+		plt.close()
 
 	return chisq
 
