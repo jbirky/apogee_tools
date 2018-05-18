@@ -11,7 +11,7 @@ import os
 # MCMC prior and likelihood functions
 # =============================================================
 
-def lnlike(theta, fiber, tell_sp):
+def lnlike(theta, lsf, tell_sp):
 
 	"""
 	Log-likelihood, computed from chi-squared
@@ -28,7 +28,7 @@ def lnlike(theta, fiber, tell_sp):
 	else:
 		print('No Spectrum class to read data for instrument', ap.data['instrument'])
 
-	chisq = ap.returnModelFit(data, theta, fiber=[fiber], telluric=tell_sp)
+	chisq = ap.returnModelFit(data, theta, lsf=lsf, telluric=tell_sp)
 
 	print('\n chisq', chisq, '\n')
 
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 	# Pre-MCMC initialization
 	# =============================================================
 
-	init_param, step_param, init_theta, step_theta, fiber, tell_sp = ap.initialize()
+	init_param, step_param, init_theta, step_theta, fiber, tell_sp, lsf = ap.initialize()
 
 	theta_keys = list(init_theta.keys())
 	theta_vals = list(init_theta.values())
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 	# Testing...
 	# =============================================================
 
-	print(lnprob(init_theta, fiber, tell_sp))
+	print(lnprob(init_theta, lsf, tell_sp))
 
 
 	# =============================================================
