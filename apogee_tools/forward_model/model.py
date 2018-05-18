@@ -39,7 +39,7 @@ def initialize(**kwargs):
 		lsf_array = lsf.eval(xlsf, fiber=[fiber])
 
 		if ap.out['print_report'] == True:
-			print('\n[{}s] MCMC initilization step complete.'.format(time.time() - t0))
+			print('\n[{}s] MCMC initialization step complete.'.format(time.time() - t0))
 
 		return init_param, step_param, init_theta, step_theta, fiber, tell_sp, lsf_array
 
