@@ -34,16 +34,16 @@ class Spectrum():
 
     def __init__(self, **kwargs):
 
-            self.wave  = kwargs.get('wave', [])
-            self.flux  = kwargs.get('flux', [])
-            self.error = kwargs.get('error', [0 for i in range(len(self.wave))])
-            self.model = kwargs.get('model', [])
-            self.sky   = kwargs.get('sky', [])
+            self.wave  = np.array(kwargs.get('wave', []))
+            self.flux  = np.array(kwargs.get('flux', []))
+            self.error = np.array(kwargs.get('error', [0 for i in range(len(self.wave))]))
+            self.model = np.array(kwargs.get('model', []))
+            self.sky   = np.array(kwargs.get('sky', []))
             self.name  = kwargs.get('name', 'Spectrum')  
-            self.param = kwargs.get('param', []) 
+            self.param = np.array(kwargs.get('param', [])) 
 
-            self.mean_flux = np.mean(self.flux)
-            self.std_flux  = np.std(self.flux)  
+            self.mean_flux = np.nanmean(self.flux)
+            self.std_flux  = np.nanstd(self.flux)  
 
     def mask(self, **kwargs):
 
@@ -58,8 +58,8 @@ class Spectrum():
         pixel_buffer = kwargs.get('pixel_buffer', [0,0])
 
         #Find outlier flux and bad pixels 
-        cut_low  = np.where(self.flux <= self.mean_flux - sigma[0]*self.std_flux)[0]
-        cut_high = np.where(self.flux >= self.mean_flux + sigma[1]*self.std_flux)[0]
+        cut_low  = np.where(self.flux < (self.mean_flux - sigma[0]*self.std_flux))[0]
+        cut_high = np.where(self.flux > (self.mean_flux + sigma[1]*self.std_flux))[0]
 
         group_low_cut = []
         group_high_cut = []
@@ -72,18 +72,24 @@ class Spectrum():
 
         cuts = []
         for pixels in group_low_cut:
-            pix1, pixn = pixels[0], pixels[-1]
-            for b in range(pixel_buffer[0]):
-                pixels.append(pix1 - (b+1))
-                pixels.append(pixn + (b+1))
-            cuts.append(pixels)
+            try: # prevent issues at the edges
+                pix1, pixn = pixels[0], pixels[-1]
+                for b in range(pixel_buffer[0]):
+                    pixels.append(pix1 - (b+1))
+                    pixels.append(pixn + (b+1))
+                cuts.append(pixels)
+            except:
+                pass
 
         for pixels in group_high_cut:
-            pix1, pixn = pixels[0], pixels[-1]
-            for b in range(pixel_buffer[1]):
-                pixels.append(pix1 - (b+1))
-                pixels.append(pixn + (b+1))
-            cuts.append(pixels)
+            try: # prevent issues at the edges
+                pix1, pixn = pixels[0], pixels[-1]
+                for b in range(pixel_buffer[1]):
+                    pixels.append(pix1 - (b+1))
+                    pixels.append(pixn + (b+1))
+                cuts.append(pixels)
+            except:
+                pass
 
         cuts = list(itertools.chain(*cuts))
         self.flux[cuts] = np.nan

@@ -155,14 +155,15 @@ def makeModel(**kwargs):
 
 	# =============================================================
 
-	synth_model = ap.Spectrum(wave=lsf_sp.wave, flux=lsf_sp.flux)
+	cut = np.where((lsf_sp.wave > ap.data["orders"][0][0]) & (lsf_sp.wave < ap.data["orders"][-1][1]))[0]
+	synth_model = ap.Spectrum(wave=lsf_sp.wave[cut], flux=lsf_sp.flux[cut])
 
 	if plot == True:
 		xrange = kwargs.get('xrange', [interp_sp.wave[0], interp_sp.wave[-1]])
 		yrange = kwargs.get('yrange', [-.4, 1.1])
 
 		plt.figure(1, figsize=(16,6))  
-		plt.plot(interp_sp.wave, interp_sp.flux, alpha=.7, linewidth=1, label=r'Teff = %s, logg = %s, Fe/H = %s'%(params['teff'], params['logg'], params['z']))
+		plt.plot(interp_sp.wave, interp_sp.flux, alpha=.7, linewidth=1, label=r'Teff = %s, logg = %s, Fe/H = %s'%(params['teff'], params['logg'], params['fe_h']))
 		plt.plot(rv_sp.wave, rv_sp.flux-.15, label=r'RV (%s km/s)'%(params['rv']), alpha=.7, linewidth=1)
 		plt.plot(rot_sp.wave, rot_sp.flux-.3, label=r'RV + rot (%s km/s)'%(params['vsini']), alpha=.7, linewidth=1)
 		plt.plot(tell_sp.wave, tell_sp.flux-.45, label=r'RV + rot + telluric ($\alpha$ = %s)'%(params['alpha']), alpha=.7, linewidth=1)
@@ -194,23 +195,27 @@ def returnModelFit(data, theta, **kwargs):
 	telluric_model = kwargs.get('telluric', ap.getTelluric(cut_rng=[ap.data['orders'][0][0], ap.data['orders'][-1][-1]]))
 
 	# normalize and apply sigma clip to data flux
-	data.mask(sigma=ap.data["sigma_clip"], pixel_buffer=[0,0])
-	data.flux = data.flux/max(data.flux[np.isfinite(data.flux)])
+	data.mask(sigma=ap.data["sigma_clip"], pixel_buffer=ap.data["pixel_buffer"])
+	data.flux = data.flux/np.nanmax(data.flux)
 
 	# synthesize model
 	synth_mdl = ap.makeModel(params=theta, lsf=lsf, telluric=telluric_model)
 
 	# multiply model by continuum polynomial
-	cont_sp = ap.continuum(data, synth_mdl, bands=ap.data["orders"], deg=ap.fix_param["cont_deg"], norm=True)
+	cont_sp = ap.continuum(data, synth_mdl, bands=ap.data["orders"], deg=ap.fix_param["cont_deg"])
 
+	print('data median flux', np.median(data.flux), np.nanmedian(data.flux))
+	print('model median flux', np.median(cont_sp.flux), np.nanmedian(cont_sp.flux))
 	# return chi-squared fit
 	chisq = ap.compareSpectra(data, cont_sp, fit_scale=False)[0]
 
 	if plot == True:
 		plt.figure(figsize=[12,5])
-		plt.plot(data.wave, data.flux)
-		plt.plot(cont_sp.wave, cont_sp.flux, label=str(chisq))
+		plt.plot(data.wave, data.flux, label=str(data.name), color='k', alpha=.7, linewidth=1)
+		plt.plot(cont_sp.wave, cont_sp.flux, label=r'$\chi^2=%s$'%(str(chisq)), color='r', alpha=.7, linewidth=1)
 		plt.legend(loc='upper right')
+		plt.ylabel(r'$F_{\lambda}$ + offset', fontsize=15)
+		plt.xlabel(r'$\lambda$', fontsize=15)
 		plt.show()
 		plt.close()
 

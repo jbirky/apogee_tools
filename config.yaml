@@ -6,7 +6,8 @@ data:
   orders: [[15200,15800],[15860,16425],[16475,16935]] # wave ranges, and orders
   dtype: "ap1d"
   visit: 1
-  sigma_clip: [.3,.01]
+  sigma_clip: [.3,.05]
+  pixel_buffer: [0,2]
 
 # Make sure this config.yaml and run.py files are placed in your input directory
 # I recommend copying config.yaml and run.py to a path external to apogee_tools
