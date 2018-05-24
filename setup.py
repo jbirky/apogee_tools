@@ -13,5 +13,5 @@ setup(
     license="MIT",
     description=("Forward modeling framework for fitting atmospheric models to stellar spectra."),
     long_description=open("README.md").read(),
-    install_requires=["numpy", "pandas", "astropy", "astroquery", "emcee", "matplotlib", "pandas", "PyAstronomy", "scipy"],,
+    install_requires=["numpy", "pandas", "astropy", "astroquery", "emcee", "matplotlib", "pandas", "PyAstronomy", "scipy"],
 )
