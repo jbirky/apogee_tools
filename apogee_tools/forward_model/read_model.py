@@ -157,7 +157,7 @@ def loadModelParameters(*args,**kwargs):
     #Get the path of apogee_tools file
     FULL_PATH  = os.path.realpath(__file__)
     BASE, NAME = os.path.split(FULL_PATH)
-    ModelPath = BASE + '/../../../apogee_tools/libraries/btsettl08_highres/'
+    ModelPath = ap.LIBRARIES + '/%s/%s/'%(ap.model["grid_name"], ap.data["instrument"])
     mfolder   = os.path.normpath(ModelPath)
     #print(mfolder)
     #mfolder = os.path.normpath(SPECTRAL_MODELS[mset]['instruments'][instrument])
@@ -304,8 +304,7 @@ def loadModel(modelset='btsettl08',instrument='APOGEE-RAW',raw=False,sed=False,*
 
     FULL_PATH  = os.path.realpath(__file__)
     BASE, NAME = os.path.split(FULL_PATH)
-    #ModelPath = BASE + '/apogee_tools/libraries/btsettl08_highres/'
-    ModelPath = BASE + '/../../../apogee_tools/libraries/btsettl08_highres/'
+    ModelPath = ap.LIBRARIES + '/%s/%s/'%(ap.model["grid_name"], ap.data["instrument"])
 
 
 # has a filename been passed? check first if it is a model set name
@@ -530,7 +529,7 @@ def _loadModelParameters(*args,**kwargs):
     FULL_PATH  = os.path.realpath(__file__)
     BASE, NAME = os.path.split(FULL_PATH)
     #ModelPath = BASE + '/apogee_tools/libraries/btsettl08_highres/'
-    ModelPath = BASE + '/../../../apogee_tools/libraries/btsettl08_highres/'
+    ModelPath = ap.LIBRARIES + '/%s/%s/'%(ap.model["grid_name"], ap.data["instrument"])
 
     #mfolder = os.path.normpath(SPECTRAL_MODELS[mset]['instruments'][instrument])
     mfolder = ModelPath
