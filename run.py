@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import emcee
 import apogee_tools as ap
 import corner
+import argparse
 import os
 
 
@@ -41,6 +42,10 @@ def lnprior(theta):
 	Specifies a flat prior
 	"""
 
+	# keys = theta.keys()
+	theta_keys = [key for key in ap.init.keys()]
+	if type(theta) == np.ndarray:
+		theta = dict(zip(theta_keys, theta))
 	keys = theta.keys()
 
 	for k in keys:
@@ -52,13 +57,13 @@ def lnprior(theta):
 	return 0.0
 
 
-def lnprob(theta, fiber, tell_sp):
+def lnprob(theta, lsf, tell_sp):
 
 	lnp = lnprior(theta)
 	if not np.isfinite(lnp):
 	    return -np.inf
 
-	return lnp + lnlike(theta, fiber, tell_sp)
+	return lnp + lnlike(theta, lsf, tell_sp)
 
 
 #########################################################################################
@@ -74,6 +79,15 @@ if __name__ == "__main__":
 	if 'config.yaml' not in os.listdir():
 		print('\nError: config.yaml not found in the current working directory. \
 			Using default file found inside apogee_tools.\n')
+
+	# =============================================================
+	# Command line input
+	# =============================================================
+
+	parser = argparse.ArgumentParser(description='Specify plotting directory.')
+	parser.add_argument("plot", action="store", type=str)
+	args = parser.parse_args()
+
 
 	# =============================================================
 	# Pre-MCMC initialization
@@ -95,11 +109,11 @@ if __name__ == "__main__":
 
 	# print(lnprob(init_theta, lsf, tell_sp))
 
-	data = ap.Apogee(id=ap.data['ID'], type=ap.data["dtype"], visit=ap.data['visit'])
-	# mdl = ap.makeModel(params=init_param, lsf=lsf, telluric=tell_sp, plot=True)
-	chi_sq = ap.returnModelFit(data, init_param, lsf=lsf, plot=True)
+	# data = ap.Apogee(id=ap.data['ID'], type=ap.data["dtype"], visit=ap.data['visit'])
+	# # mdl = ap.makeModel(params=init_param, lsf=lsf, telluric=tell_sp, plot=True)
+	# chi_sq = ap.returnModelFit(data, init_param, lsf=lsf, plot=True)
 
-	print(r'$\chi^2$', chi_sq)
+	# print(r'$\chi^2$', chi_sq)
 
 
 	# =============================================================
@@ -110,7 +124,7 @@ if __name__ == "__main__":
 
 		pos = [list(init_theta.values()) + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 
-		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(fiber, tell_sp))
+		sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(lsf, tell_sp))
 		sampler.run_mcmc(pos, nsteps)
 
 		np.save('sampler_chain', sampler.chain[:, :, :])
@@ -124,21 +138,33 @@ if __name__ == "__main__":
 	# Output corner/walker plots
 	# =============================================================
 
+	lbl = ['Teff', 'logg', '[Fe/H]', 'rv', 'vsini', r'$\alpha$']
+
 	if ap.out["corner"] == True:
 
 		try:
-			fig = corner.corner(samples, labels=theta_keys, truths=theta_vals)
+			fig = corner.corner(samples, labels=lbl, truths=theta_vals)
 			fig.savefig("triangle.png")
 
 		except:
 			print('Traingle plot failed.')
 
 
-	if ap.out["walkers"] == True:
+	if 'corner' in args.plot:
+
+		try:
+			samples = np.load('samples.npy')
+			fig = corner.corner(samples, labels=lbl, truths=theta_vals)
+			fig.savefig("triangle.png")
+
+		except:
+			print('Traingle plot failed.')
+
+
+	if (ap.out["walkers"] == True) or ('walkers' in args.plot):
 
 		try:
 			sampler_chain = np.load('sampler_chain.npy')
-			lbl = ['Teff', 'logg', '[Fe/H]', 'rv', 'vsini', r'$\alpha$']
 
 			ndim = len(sampler.chain.T)
 
@@ -155,3 +181,4 @@ if __name__ == "__main__":
 
 		except:
 			print('Corner plot failed.')
+
