@@ -107,13 +107,16 @@ if __name__ == "__main__":
 	# Testing...
 	# =============================================================
 
-	# print(lnprob(init_theta, lsf, tell_sp))
+	if 'make_model' in args.plot:
 
-	# data = ap.Apogee(id=ap.data['ID'], type=ap.data["dtype"], visit=ap.data['visit'])
-	# # mdl = ap.makeModel(params=init_param, lsf=lsf, telluric=tell_sp, plot=True)
-	# chi_sq = ap.returnModelFit(data, init_param, lsf=lsf, plot=True)
+		mdl = ap.makeModel(params=init_param, lsf=lsf, telluric=tell_sp, plot=True)
 
-	# print(r'$\chi^2$', chi_sq)
+	if 'test_fit' in args.plot:
+
+		data = ap.Apogee(id=ap.data['ID'], type=ap.data["dtype"], visit=ap.data['visit'])
+		chi_sq = ap.returnModelFit(data, init_param, lsf=lsf, plot=True)
+
+		print('chi^2', chi_sq)
 
 
 	# =============================================================
