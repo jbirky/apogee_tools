@@ -8,12 +8,12 @@ FULL_PATH  = os.path.realpath(__file__)
 BASE = os.path.split(os.path.split(os.path.split(FULL_PATH)[0])[0])[0]
 AP_PATH = os.environ['APOGEE_DATA'] 
 
-
+import time
 
 def getTelluric(**kwargs):
 
     """
-    Get a telluric spectrum.
+    Get a telluric spectrum
 
     Parameters
     ----------
@@ -98,7 +98,9 @@ def applyTelluric(mdl, tell_sp, **kwargs):
         tell_wave = tell_wave[cut]
         tell_flux = tell_flux[cut]
 
+        t0 = time.time()
         mdl_rs  = ap.integralResample(mdl_wave, mdl_flux, tell_wave)
+        # print('resample time', time.time() - t0)
 
         # if ap.out['print_report'] == True:
         #     print('Downsampled model resolution to telluric spectrum resolution.')

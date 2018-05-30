@@ -19,6 +19,7 @@ _SQRTTWO= numpy.sqrt(2.)
 _WAVEPIX_A= apread.apWave('a',ext=2)
 _WAVEPIX_B= apread.apWave('b',ext=2)
 _WAVEPIX_C= apread.apWave('c',ext=2)
+
 def convolve(wav,spec,
              lsf=None,xlsf=None,dxlsf=None,fiber='combo',
              vmacro=6.):
