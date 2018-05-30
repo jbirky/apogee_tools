@@ -68,6 +68,7 @@ def makeModel(**kwargs):
 	res    = kwargs.get('res', '300k')
 	grid   = kwargs.get('grid', 'phoenix').lower()
 	bands  = kwargs.get('bands', [[15200,15800],[15860,16425],[16475,16935]])
+	method = kwargs.get('method', 'fast')
 
 	# mdl_name = r'Teff = {}, logg = {}, Fe/H = {}, vsini = {}, rv = {}, $\alpha$ = {}'.format(params['teff'], params['logg'], params['fe_h'], params['vsini'], params['rv'], params['alpha'])
 	labels = [params['teff'], params['logg'], params['fe_h']]
@@ -119,7 +120,7 @@ def makeModel(**kwargs):
 	# =============================================================
 
 	telluric_model = kwargs.get('telluric', ap.getTelluric(cut_rng=[ap.data['orders'][0][0], ap.data['orders'][-1][-1]]))
-	tell_sp = ap.applyTelluric(rot_sp, telluric_model, alpha=params['alpha'])
+	tell_sp = ap.applyTelluric(rot_sp, telluric_model, alpha=params['alpha'], method=method)
 
 	t4 = time.time()
 

@@ -66,6 +66,7 @@ def applyTelluric(mdl, tell_sp, **kwargs):
     """
 
     alpha = kwargs.get('alpha', 1)
+    method = kwargs.get('method', 'fast')
     
     mdl_wave  = mdl.wave
     mdl_flux  = mdl.flux
@@ -81,7 +82,7 @@ def applyTelluric(mdl, tell_sp, **kwargs):
         mdl_wave = mdl_wave[cut]
         mdl_flux = mdl_flux[cut]
 
-        tell_rs = ap.integralResample(tell_wave, tell_flux, mdl_wave)
+        tell_rs = ap.integralResample(tell_wave, tell_flux, mdl_wave, method=method)
 
         # if ap.out['print_report'] == True:
         #     print('Downsampled telluric spectrum resolution to model resolution.')
@@ -99,7 +100,7 @@ def applyTelluric(mdl, tell_sp, **kwargs):
         tell_flux = tell_flux[cut]
 
         t0 = time.time()
-        mdl_rs  = ap.integralResample(mdl_wave, mdl_flux, tell_wave)
+        mdl_rs  = ap.integralResample(mdl_wave, mdl_flux, tell_wave, method=method)
         # print('resample time', time.time() - t0)
 
         # if ap.out['print_report'] == True:
