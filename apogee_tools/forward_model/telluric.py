@@ -70,46 +70,47 @@ def applyTelluric(mdl, tell_sp, **kwargs):
     
     mdl_wave  = mdl.wave
     mdl_flux  = mdl.flux
-
     tell_wave = tell_sp.wave
     tell_flux = tell_sp.flux
 
-    #Resample higher res spectrum to lower res spectrum
-    try: #if res tell > res mdl, resample tell to mdl
+    min_wave = min(min(tell_wave), min(mdl_wave))
+    max_wave = max(max(tell_wave), max(mdl_wave))
+    cut1 = np.where((mdl_wave > min_wave) & (mdl_wave < max_wave))[0]
+    cut2 = np.where((tell_wave > min_wave) & (tell_wave < max_wave))[0]
 
-        #cut telluric spectrum wl array to bounds of model wl grid
-        cut = np.where((mdl_wave > tell_wave[0]) & (mdl_wave < tell_wave[-1]))[0]
-        mdl_wave = mdl_wave[cut]
-        mdl_flux = mdl_flux[cut]
+    mdl_wave = mdl_wave[cut1]
+    mdl_flux = mdl_flux[cut1]
+    tell_wave = tell_wave[cut2]
+    tell_flux = tell_flux[cut2]
+
+    if len(mdl_wave) > len(tell_wave): 
+
+        cut3 = np.where((tell_wave > mdl_wave[0]) & (tell_wave < mdl_wave[-1]))[0]
+
+        tell_wave = tell_wave[cut3]
+        tell_flux = tell_flux[cut3]
+
+        mdl_rs  = ap.integralResample(mdl_wave, mdl_flux, tell_wave, method=method)
+
+        #Convolve model and telluric spectrum
+        conv_flux = mdl_rs * tell_flux
+
+        telluric_spec = ap.Spectrum(wave=tell_wave, flux=conv_flux)
+
+    else:
+
+        cut3 = np.where((mdl_wave > tell_wave[0]) & (mdl_wave < tell_wave[-1]))[0]
+
+        mdl_wave = mdl_wave[cut3]
+        mdl_flux = mdl_flux[cut3]
 
         tell_rs = ap.integralResample(tell_wave, tell_flux, mdl_wave, method=method)
-
-        # if ap.out['print_report'] == True:
-        #     print('Downsampled telluric spectrum resolution to model resolution.')
 
         #Convolve model and telluric spectrum
         conv_flux = tell_rs * mdl_flux
 
         telluric_spec = ap.Spectrum(wave=mdl_wave, flux=conv_flux)
 
-    except: #if res mdl > res tell, resample mdl to tell 
-
-        #cut model wl grid wl array to bounds of telluric spectrum
-        cut = np.where((tell_wave > mdl_wave[0]) & (tell_wave < mdl_wave[-1]))[0]
-        tell_wave = tell_wave[cut]
-        tell_flux = tell_flux[cut]
-
-        t0 = time.time()
-        mdl_rs  = ap.integralResample(mdl_wave, mdl_flux, tell_wave, method=method)
-        # print('resample time', time.time() - t0)
-
-        # if ap.out['print_report'] == True:
-        #     print('Downsampled model resolution to telluric spectrum resolution.')
-
-        #Convolve model and telluric spectrum
-        conv_flux = mdl_rs * tell_flux
-
-        telluric_spec = ap.Spectrum(wave=tell_wave, flux=conv_flux)
     
     return telluric_spec
 
