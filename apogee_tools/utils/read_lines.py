@@ -16,11 +16,13 @@ def listLibraries():
 
 def listSpecies(lib):
 
-	hf = h5py.File(ap.LIBRARIES + '/linelists/' + lib + '.hdf5', 'r')
-	species = list(hf.keys())
-	hf.close()
-
-	return species
+    try:
+        hf = h5py.File(ap.LIBRARIES + '/linelists/' + lib + '.hdf5', 'r')
+        species = list(hf.keys())
+        hf.close()
+        return species
+    except: 
+        return []
 
 
 def searchLines(**kwargs):
@@ -28,7 +30,7 @@ def searchLines(**kwargs):
     species = kwargs.get('species')
     rng = kwargs.get('range') #units assumed angstroms
     libraries = kwargs.get('libraries', ['APOGEE_ATOMS'])
-    report = kwargs.get('report', True)
+    report = kwargs.get('report', False)
 
     line_dict = dict([(key, []) for key in species])
 
