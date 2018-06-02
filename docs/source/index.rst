@@ -5,7 +5,7 @@ apogee_tools
 
 .. image:: user/images/blake2010.png
 
-where L is the high resolution model template (parameterized by ``Teff``, ``logg``, and ``[Fe/H]``), K is the rotational broadening kernel (parameterized by ``vsini``), T is telluric spectrum (with variable strength ``alpha``), and LSF is the line spread function of the instrument. Optimal fits and uncertainties are sampled using Markov Chain Monte Carlo, implemented via ``emcee`` (`Foreman-Mackey et al. 2012 <https://arxiv.org/abs/1202.3665>`_).
+where `L` is the high resolution model template (parameterized by ``Teff``, ``logg``, and ``[Fe/H]``), ``v`` is the radial velocity, `K` is the rotational broadening kernel (parameterized by ``vsini``), T is telluric spectrum (with variable strength ``alpha``), and `LSF` is the line spread function of the instrument. Optimal fits and uncertainties are sampled using Markov Chain Monte Carlo, implemented via ``emcee`` (`Foreman-Mackey et al. 2012 <https://arxiv.org/abs/1202.3665>`_).
 
 
 Contributors
