@@ -90,25 +90,12 @@ if __name__ == "__main__":
 
 
 	# =============================================================
-	# Pre-MCMC initialization
-	# =============================================================
-
-	init_param, step_param, init_theta, step_theta, fiber, tell_sp, lsf = ap.initialize()
-
-	theta_keys = list(init_theta.keys())
-	theta_vals = list(init_theta.values())
-
-	ndim = len(init_theta)
-	nsteps = ap.mcmc["nsteps"]
-	nwalkers = ap.mcmc["nwalkers"]
-
-
-	# =============================================================
 	# Testing...
 	# =============================================================
 
 	if 'make_model' in args.plot:
 
+		init_param, step_param, init_theta, step_theta, fiber, tell_sp, lsf = ap.initialize()
 		mdl = ap.makeModel(params=init_param, lsf=lsf, telluric=tell_sp, plot=True)
 
 	if 'test_fit' in args.plot:
@@ -118,12 +105,28 @@ if __name__ == "__main__":
 
 		print('chi^2', chi_sq)
 
+	if 'test_telluric' in args.plot:
+
+		mdl = ap.getModel(params=[3200, 5.0, 0.0], grid='BTSETTL', xrange=[15200,16940])
+		tell_sp = ap.applyTelluric(mdl, ap.getTelluric(), cut_rng=[min(mdl.wave), max(mdl.wave)])
+
+		tell_sp.plot()
+
 
 	# =============================================================
 	# Run MCMC!
 	# =============================================================
 
-	if ap.out["mcmc_sampler"] == True:
+	if (ap.out["mcmc_sampler"] == True) or ('mcmc' in args.plot):
+
+		init_param, step_param, init_theta, step_theta, fiber, tell_sp, lsf = ap.initialize()
+
+		theta_keys = list(init_theta.keys())
+		theta_vals = list(init_theta.values())
+
+		ndim = len(init_theta)
+		nsteps = ap.mcmc["nsteps"]
+		nwalkers = ap.mcmc["nwalkers"]
 
 		pos = [list(init_theta.values()) + 1e-4*np.random.randn(ndim) for i in range(nwalkers)]
 

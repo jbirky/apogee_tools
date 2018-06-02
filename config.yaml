@@ -24,12 +24,14 @@ out:
 # Specify which parameters will be sampled by MCMC
 # otherwise parameters will be fixed at 'init' values
 model:
-  grid_name: "BTSETTL" #directory: phoenix/apogee/order
+  grid_name: "PHOENIX" #directory: phoenix/apogee/order
   theta: ['teff', 'logg', 'fe_h', 'rv', 'vsini', 'alpha']
 
 fix_param: # specify fixed parameters (not sampled by MCMC)
   airmass: 1.0  # airmass of telluric model, either 1.0 or 1.5
   cont_deg: 5   # continuum polynomial degree
+  interp_method: "splat" # or "cannon"
+  resample_method: "fast" # or "splat"
 
 # MCMC tuning
 mcmc:
