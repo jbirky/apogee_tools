@@ -22,28 +22,39 @@ def interpolateGrid(**kwargs):
 	Output : 'interp_sp' : spectrum object of interpolated spectrum
 	"""
 
-	labels     = kwargs.get('labels')
-	resolution = kwargs.get('res', '23k') #23k or 50k
-	grid       = kwargs.get('grid', 'phoenix').lower()
+	method = kwargs.get('interp', 'splat')
+	labels = kwargs.get('labels')
 
-	#stack list into matrix
-	labels  = np.array([labels])
-	nlabels = labels.shape[1]
+	if method == 'cannon':
 
-	pivots = np.load(BASE+'/libraries/%s/cannon_%s/%s_pivots.npy'%(grid.upper(), grid, resolution))
-	scales = np.load(BASE+'/libraries/%s/cannon_%s/%s_scales.npy'%(grid.upper(), grid, resolution))
-	coeffs = np.load(BASE+'/libraries/%s/cannon_%s/%s_coeffs.npy'%(grid.upper(), grid, resolution))
-	wave   = np.load(BASE+'/libraries/%s/cannon_%s/%s_wl.npy'%(grid.upper(), grid, resolution))
+		resolution = kwargs.get('res', '23k') #23k or 50k
+		grid       = kwargs.get('grid', 'phoenix').lower()
 
-	scaled_labels = [(lbl - pivots) / scales for lbl in labels]
+		#stack list into matrix
+		labels  = np.array([labels])
+		nlabels = labels.shape[1]
 
-	label_vecs = [list(_get_lvec(lbl)) for lbl in scaled_labels]
-	label_vecs = np.column_stack(([1 for l in label_vecs], label_vecs))
+		pivots = np.load(BASE+'/libraries/%s/cannon_%s/%s_pivots.npy'%(grid.upper(), grid, resolution))
+		scales = np.load(BASE+'/libraries/%s/cannon_%s/%s_scales.npy'%(grid.upper(), grid, resolution))
+		coeffs = np.load(BASE+'/libraries/%s/cannon_%s/%s_coeffs.npy'%(grid.upper(), grid, resolution))
+		wave   = np.load(BASE+'/libraries/%s/cannon_%s/%s_wl.npy'%(grid.upper(), grid, resolution))
 
-	iflux = np.array(np.dot(coeffs, np.transpose(label_vecs)))
-	iflux = np.transpose(iflux)[0]
+		scaled_labels = [(lbl - pivots) / scales for lbl in labels]
 
-	interp_sp  = ap.Spectrum(wave=wave, flux=iflux, params=labels)
+		label_vecs = [list(_get_lvec(lbl)) for lbl in scaled_labels]
+		label_vecs = np.column_stack(([1 for l in label_vecs], label_vecs))
+
+		iflux = np.array(np.dot(coeffs, np.transpose(label_vecs)))
+		iflux = np.transpose(iflux)[0]
+
+		interp_sp  = ap.Spectrum(wave=wave, flux=iflux, params=labels)
+
+	elif method == 'splat':
+
+		interp_sp = ap.loadModel(teff=labels[0], logg=labels[1], z=labels[2])
+
+	else:
+		print(method, "is not valid. Choose 'splat' or 'cannon' options.")
 	
 	return interp_sp
 

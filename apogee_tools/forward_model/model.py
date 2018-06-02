@@ -85,8 +85,13 @@ def makeModel(**kwargs):
 	
 	t0 = time.time()
 
-	interp_sp = ap.interpolateGrid(labels=labels, res=res, grid=grid)
+	if ap.fix_param["interp_method"] == 'cannon':
+		interp_sp = ap.interpolateGrid(labels=labels, res=res, grid=grid)
+	else:
+		interp_sp = ap.interpolateGrid(labels=labels)
 	interp_sp.flux = interp_sp.flux/max(interp_sp.flux)
+
+	interp_sp.plot()
 
 	t1 = time.time()
 
