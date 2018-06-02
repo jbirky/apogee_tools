@@ -9,6 +9,11 @@ import glob
 import pandas
 import copy
 
+#Get the path of apogee_tools file
+PATH      = os.path.realpath(__file__)
+AP_TOOLS  = os.path.split(os.path.split(PATH)[0])[0]
+LIBRARIES = AP_TOOLS + '/libraries'
+
 # structure to store models that have been read in
 MODELS_READIN = {}
 
@@ -157,7 +162,8 @@ def loadModelParameters(*args,**kwargs):
     #Get the path of apogee_tools file
     FULL_PATH  = os.path.realpath(__file__)
     BASE, NAME = os.path.split(FULL_PATH)
-    ModelPath = ap.LIBRARIES + '/%s/%s/'%(ap.model["grid_name"], ap.data["instrument"])
+    #ModelPath = LIBRARIES + '/%s/%s/'%(ap.model["grid_name"], ap.data["instrument"])
+    ModelPath = BASE + '/../../../apogee_tools/libraries/BTSETTL/APOGEE/'
     mfolder   = os.path.normpath(ModelPath)
     #print(mfolder)
     #mfolder = os.path.normpath(SPECTRAL_MODELS[mset]['instruments'][instrument])
@@ -289,13 +295,6 @@ def loadModel(modelset='btsettl08',instrument='APOGEE-RAW',raw=False,sed=False,*
 # path to model and set local/online
 # by default assume models come from local SPLAT directory
 
-#   REMOVED 10/19/2017
-#    local = kwargs.get('local',True)
-#    online = kwargs.get('online',not local and not checkOnline())
-#    local = not online
-#    kwargs['local'] = local
-#    kwargs['online'] = online
-#    kwargs['url']  = kwargs.get('url',SPLAT_URL)
     kwargs['ismodel'] = True
     kwargs['force']   = kwargs.get('force',False)
     kwargs['folder']  = kwargs.get('folder','./')
@@ -304,7 +303,8 @@ def loadModel(modelset='btsettl08',instrument='APOGEE-RAW',raw=False,sed=False,*
 
     FULL_PATH  = os.path.realpath(__file__)
     BASE, NAME = os.path.split(FULL_PATH)
-    ModelPath = ap.LIBRARIES + '/%s/%s/'%(ap.model["grid_name"], ap.data["instrument"])
+    #ModelPath = ap.LIBRARIES + '/%s/%s/'%(ap.model["grid_name"], ap.data["instrument"])
+    ModelPath = BASE + '/../../../apogee_tools/libraries/BTSETTL/APOGEE/'
 
 
 # has a filename been passed? check first if it is a model set name
@@ -360,9 +360,7 @@ def loadModel(modelset='btsettl08',instrument='APOGEE-RAW',raw=False,sed=False,*
     #kwargs['folder'] = os.path.normpath(SPECTRAL_MODELS[kwargs['modelset']]['instruments'][kwargs['instrument']])
     if not os.path.exists(kwargs['folder']):
         finit = kwargs['folder']
-        kwargs['folder'] = os.path.normpath(SPLAT_PATH+SPECTRAL_MODEL_FOLDER+kwargs['modelset']+'/'+kwargs['instrument']+'/')
-        if not os.path.exists(kwargs['folder']):
-            raise ValueError('\nCould not locate folder {} or {} for model {} and instrument {}; make sure models are properly located'.format(finit,kwargs['folder'],kwargs['modelset'],kwargs['instrument']))
+        raise ValueError('\nCould not locate folder {} or {} for model {} and instrument {}; make sure models are properly located'.format(finit,kwargs['folder'],kwargs['modelset'],kwargs['instrument']))
 
 # preset defaults
     mparam = {}
@@ -445,7 +443,7 @@ def loadModel(modelset='btsettl08',instrument='APOGEE-RAW',raw=False,sed=False,*
 #    if kwargs.get('local',True) == True:
     file = checkLocal(kwargs['filename'])
     if file=='':
-        file = checkLocal(kwargs['filename']+'.gz')
+        file = checkLocal(kwargs['filename']+'.txt')
         if file=='':
             if kwargs['force']: raise NameError('\nCould not find '+kwargs['filename']+' locally\n\n')
             else: sp = _loadInterpolatedModel(**kwargs)
@@ -529,7 +527,8 @@ def _loadModelParameters(*args,**kwargs):
     FULL_PATH  = os.path.realpath(__file__)
     BASE, NAME = os.path.split(FULL_PATH)
     #ModelPath = BASE + '/apogee_tools/libraries/btsettl08_highres/'
-    ModelPath = ap.LIBRARIES + '/%s/%s/'%(ap.model["grid_name"], ap.data["instrument"])
+    #ModelPath = ap.LIBRARIES + '/%s/%s/'%(ap.model["grid_name"], ap.data["instrument"])
+    ModelPath = BASE + '/../../../apogee_tools/libraries/BTSETTL/APOGEE/'
 
     #mfolder = os.path.normpath(SPECTRAL_MODELS[mset]['instruments'][instrument])
     mfolder = ModelPath
@@ -891,19 +890,4 @@ def _loadInterpolatedModel(*args,**kwargs):
 
 
 
-#parameters = {'model': mset, 'instrument': instrument, 'parameter_sets': []}
-##for ms in list(SPECTRAL_MODELS[mset]['default'].keys()):
-##    parameters[ms] = []
-#parameters['teff'] = [3000.]
-#parameters['logg'] = [5.0]
-#parameters['z']    = [0.]}
-
-
-gridparam = loadModelParameters('btsettl08','APOGEE-RAW') 
-#print(gridparam)
-#mdl = loadModel()
-mdl = loadModel(teff = 3050, logg = 4.1, z = 0)
-
-plt.plot(mdl.wave, mdl.flux)
-plt.show()
 
