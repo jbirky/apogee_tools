@@ -614,7 +614,6 @@ class Spectrum():
                     plt.axvline(x=line, linewidth=.3, color=vcolor)
                     plt.text(line, yrange[0] + .03*ysize, round(line,2), rotation=90, ha='right', va='bottom', color='k', fontsize=10)
 
-        
         plt.legend(loc='upper right', fontsize=12)
         
         plt.xlim(xrange)

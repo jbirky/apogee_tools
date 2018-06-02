@@ -91,8 +91,6 @@ def makeModel(**kwargs):
 		interp_sp = ap.interpolateGrid(labels=labels)
 	interp_sp.flux = interp_sp.flux/max(interp_sp.flux)
 
-	interp_sp.plot()
-
 	t1 = time.time()
 
 	if ap.out['print_report'] == True:

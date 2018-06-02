@@ -52,6 +52,7 @@ def interpolateGrid(**kwargs):
 	elif method == 'splat':
 
 		interp_sp = ap.loadModel(teff=labels[0], logg=labels[1], z=labels[2])
+		interp_sp.wave = 10**4*interp_sp.wave
 
 	else:
 		print(method, "is not valid. Choose 'splat' or 'cannon' options.")
