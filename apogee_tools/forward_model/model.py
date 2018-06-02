@@ -164,14 +164,16 @@ def makeModel(**kwargs):
 
 	if plot == True:
 		xrange = kwargs.get('xrange', [interp_sp.wave[0], interp_sp.wave[-1]])
-		yrange = kwargs.get('yrange', [-.4, 1.1])
+		yrange = kwargs.get('yrange', [-.5, 1.1])
 
 		plt.figure(1, figsize=(16,6))  
-		plt.plot(interp_sp.wave, interp_sp.flux, alpha=.7, linewidth=1, label=r'Teff = %s, logg = %s, Fe/H = %s'%(params['teff'], params['logg'], params['fe_h']))
-		plt.plot(rv_sp.wave, rv_sp.flux-.15, label=r'RV (%s km/s)'%(params['rv']), alpha=.7, linewidth=1)
-		plt.plot(rot_sp.wave, rot_sp.flux-.3, label=r'RV + rot (%s km/s)'%(params['vsini']), alpha=.7, linewidth=1)
-		plt.plot(tell_sp.wave, tell_sp.flux-.45, label=r'RV + rot + telluric ($\alpha$ = %s)'%(params['alpha']), alpha=.7, linewidth=1)
-		plt.plot(lsf_sp.wave, lsf_sp.flux-.8, label=r'RV + rot + telluric + lsf', alpha=.7, linewidth=1)
+		plt.plot(interp_sp.wave, interp_sp.flux, alpha=.7, linewidth=1, label=r'$\lambda_{grid}$: %s'%(ap.model["grid_name"]))
+		plt.plot(rv_sp.wave, rv_sp.flux-.15, label=r'$\lambda_{grid}$ * (1+$\frac{rv}{c}$)', alpha=.7, linewidth=1)
+		plt.plot(rot_sp.wave, rot_sp.flux-.3, label=r'$\lambda_{grid}$ * (1+$\frac{rv}{c}$) * vsini', alpha=.7, linewidth=1)
+		plt.plot(tell_sp.wave, tell_sp.flux-.45, label=r'$\lambda_{grid}$ * (1+$\frac{rv}{c}$) * vsini * telluric', alpha=.7, linewidth=1)
+		plt.plot(lsf_sp.wave, lsf_sp.flux-.8, label=r'$\lambda_{grid}$ * (1+$\frac{rv}{c}$) * vsini * telluric * lsf', alpha=.7, linewidth=1)
+		txt = r"Teff=%s, logg=%s, [Fe/H]=%s, rv=%s, vsini=%s, $\alpha$=%s"%(params['teff'], params['logg'], params['fe_h'], params['rv'], params['vsini'], params['alpha'])
+		plt.text(xrange[-1]-20, yrange[0]+.03, txt, ha='right', fontsize=14)
 		plt.xlim(xrange)
 		plt.ylim(yrange)
 		plt.legend(loc='lower left', frameon=False, fontsize=12)
