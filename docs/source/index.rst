@@ -1,7 +1,11 @@
 apogee_tools
 ============
 
-``apogee_tools`` is a forward modeling framework for fitting atmospheric models to stellar spectra.
+``apogee_tools`` is a forward modeling framework for fitting atmospheric models to stellar spectra. Following from `Blake et al. 2010 <https://arxiv.org/abs/1008.3874>`_, we synthesize the model:
+
+.. image:: user/images/blake2010.png
+
+where L is the high resolution model template (parameterized by ``Teff``, ``logg``, and ``[Fe/H]``), K is the rotational broadening kernel (parameterized by ``vsini``), T is telluric spectrum (with variable strength ``alpha``), and LSF is the line spread function of the instrument. Optimal fits and uncertainties are sampled using Markov Chain Monte Carlo, implemented via ``emcee`` (`Foreman-Mackey et al. 2012 <https://arxiv.org/abs/1202.3665>`_).
 
 
 Contributors

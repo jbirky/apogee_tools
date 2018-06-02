@@ -85,8 +85,10 @@
 <li class="toctree-l1"><a class="reference internal" href="model.html">Modelling Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis Tools</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">MCMC Fitting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup">Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pre-mcmc-testing">Pre-MCMC Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-mcmc">Running the MCMC</a></li>
 </ul>
 </li>
 </ul>
@@ -159,8 +161,8 @@
 <p class="first admonition-title">Warning</p>
 <p class="last">These functions are under construction.</p>
 </div>
-<div class="section" id="steps">
-<h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
 <li>Copy the <code class="docutils literal"><span class="pre">config.yaml</span></code> and <code class="docutils literal"><span class="pre">run.py</span></code> from the main directory to an external folder.</li>
 <li>Edit your configuration script <code class="docutils literal"><span class="pre">config.yaml</span></code>, which should look something like below.</li>
@@ -177,7 +179,8 @@
   <span class="n">orders</span><span class="p">:</span> <span class="p">[[</span><span class="mi">15200</span><span class="p">,</span><span class="mi">15800</span><span class="p">],[</span><span class="mi">15860</span><span class="p">,</span><span class="mi">16425</span><span class="p">],[</span><span class="mi">16475</span><span class="p">,</span><span class="mi">16935</span><span class="p">]]</span> <span class="c1"># wave ranges, and orders</span>
   <span class="n">dtype</span><span class="p">:</span> <span class="s2">&quot;ap1d&quot;</span>
   <span class="n">visit</span><span class="p">:</span> <span class="mi">1</span>
-  <span class="n">sigma_clip</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span><span class="o">.</span><span class="mi">01</span><span class="p">]</span>
+  <span class="n">sigma_clip</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span><span class="o">.</span><span class="mi">05</span><span class="p">]</span>
+  <span class="n">pixel_buffer</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
 
 <span class="c1"># Make sure this config.yaml and run.py files are placed in your input directory</span>
 <span class="c1"># I recommend copying config.yaml and run.py to a path external to apogee_tools</span>
@@ -186,9 +189,10 @@
   <span class="n">output</span><span class="p">:</span> <span class="s2">&quot;/home/jess/Desktop/Research/FAST/fit_models/output&quot;</span>
   
 <span class="n">out</span><span class="p">:</span>
-  <span class="n">mcmc_sampler</span><span class="p">:</span> <span class="kc">True</span>
-  <span class="n">corner</span><span class="p">:</span> <span class="kc">True</span>
-  <span class="n">walkers</span><span class="p">:</span> <span class="kc">True</span>
+  <span class="n">mcmc_sampler</span><span class="p">:</span> <span class="kc">False</span>
+  <span class="n">corner</span><span class="p">:</span> <span class="kc">False</span>
+  <span class="n">walkers</span><span class="p">:</span> <span class="kc">False</span>
+  <span class="n">print_report</span><span class="p">:</span> <span class="kc">True</span>
 
 <span class="c1"># Specify which parameters will be sampled by MCMC</span>
 <span class="c1"># otherwise parameters will be fixed at &#39;init&#39; values</span>
@@ -199,6 +203,8 @@
 <span class="n">fix_param</span><span class="p">:</span> <span class="c1"># specify fixed parameters (not sampled by MCMC)</span>
   <span class="n">airmass</span><span class="p">:</span> <span class="mf">1.0</span>  <span class="c1"># airmass of telluric model, either 1.0 or 1.5</span>
   <span class="n">cont_deg</span><span class="p">:</span> <span class="mi">5</span>   <span class="c1"># continuum polynomial degree</span>
+  <span class="n">interp_method</span><span class="p">:</span> <span class="s2">&quot;splat&quot;</span> <span class="c1"># or &quot;cannon&quot;</span>
+  <span class="n">resample_method</span><span class="p">:</span> <span class="s2">&quot;fast&quot;</span> <span class="c1"># or &quot;splat&quot;</span>
 
 <span class="c1"># MCMC tuning</span>
 <span class="n">mcmc</span><span class="p">:</span>
@@ -233,9 +239,42 @@
   <span class="n">alpha</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">Add detailed description of config.yaml script.</p>
+</div>
+<div class="section" id="pre-mcmc-testing">
+<h2>Pre-MCMC Testing<a class="headerlink" href="#pre-mcmc-testing" title="Permalink to this headline">¶</a></h2>
+<p>To test to make sure all of the modeling modules are working, run the following command in terminal:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">make_model</span>
+</pre></div>
+</div>
+<p>which should return something like:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mf">25.732014894485474</span><span class="n">s</span><span class="p">]</span> <span class="n">MCMC</span> <span class="n">initialization</span> <span class="n">step</span> <span class="n">complete</span><span class="o">.</span>
+
+<span class="c1">##################################################</span>
+<span class="n">Making</span> <span class="n">model</span><span class="p">:</span> <span class="n">teff</span><span class="o">=</span><span class="mi">3500</span> <span class="n">logg</span><span class="o">=</span><span class="mf">4.5</span> <span class="n">fe_h</span><span class="o">=</span><span class="mf">0.0</span> <span class="n">rv</span><span class="o">=-</span><span class="mf">4.77</span> <span class="n">vsini</span><span class="o">=</span><span class="mf">5.79</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span>
+
+<span class="p">[</span><span class="mf">0.07615256309509277</span><span class="n">s</span><span class="p">]</span> <span class="n">Interpolated</span> <span class="n">model</span>
+<span class="p">[</span><span class="mf">0.0025053024291992188</span><span class="n">s</span><span class="p">]</span> <span class="n">Shifted</span> <span class="n">radial</span> <span class="n">velocity</span>
+<span class="p">[</span><span class="mf">0.0032796859741210938</span><span class="n">s</span><span class="p">]</span> <span class="n">Applied</span> <span class="n">vsini</span> <span class="n">broadening</span>
+<span class="p">[</span><span class="mf">0.05470013618469238</span><span class="n">s</span><span class="p">]</span> <span class="n">Convolved</span> <span class="n">telluric</span> <span class="n">model</span>
+<span class="p">[</span><span class="mf">0.08379793167114258</span><span class="n">s</span><span class="p">]</span> <span class="n">Applied</span> <span class="n">LSF</span> <span class="n">broadening</span>
+</pre></div>
+</div>
+<img alt="../_images/make_model.png" src="../_images/make_model.png" />
+<p>To test by eye, that your initial MCMC parameters are some close to the data:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">test_fit</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="running-the-mcmc">
+<h2>Running the MCMC<a class="headerlink" href="#running-the-mcmc" title="Permalink to this headline">¶</a></h2>
+<p>Run the MCMC:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">mcmc</span>
+</pre></div>
+</div>
+<p>Plot the outputs:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">walkers</span>
+<span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">corner</span>
+</pre></div>
 </div>
 </div>
 </div>

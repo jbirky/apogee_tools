@@ -151,7 +151,9 @@
             
   <div class="section" id="apogee-tools">
 <h1>apogee_tools<a class="headerlink" href="#apogee-tools" title="Permalink to this headline">¶</a></h1>
-<p><code class="docutils literal"><span class="pre">apogee_tools</span></code> is a forward modeling framework for fitting atmospheric models to stellar spectra.</p>
+<p><code class="docutils literal"><span class="pre">apogee_tools</span></code> is a forward modeling framework for fitting atmospheric models to stellar spectra. Following from <a class="reference external" href="https://arxiv.org/abs/1008.3874">Blake et al. 2010</a>, we synthesize the model:</p>
+<img alt="_images/blake2010.png" src="_images/blake2010.png" />
+<p>where L is the high resolution model template (parameterized by <code class="docutils literal"><span class="pre">Teff</span></code>, <code class="docutils literal"><span class="pre">logg</span></code>, and <code class="docutils literal"><span class="pre">[Fe/H]</span></code>), K is the rotational broadening kernel (parameterized by <code class="docutils literal"><span class="pre">vsini</span></code>), T is telluric spectrum (with variable strength <code class="docutils literal"><span class="pre">alpha</span></code>), and LSF is the line spread function of the instrument. Optimal fits and uncertainties are sampled using Markov Chain Monte Carlo, implemented via <code class="docutils literal"><span class="pre">emcee</span></code> (<a class="reference external" href="https://arxiv.org/abs/1202.3665">Foreman-Mackey et al. 2012</a>).</p>
 <div class="section" id="contributors">
 <h2>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -194,8 +196,10 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="user/mcmc.html">MCMC Fitting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user/mcmc.html#steps">Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/mcmc.html#setup">Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user/mcmc.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/mcmc.html#pre-mcmc-testing">Pre-MCMC Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user/mcmc.html#running-the-mcmc">Running the MCMC</a></li>
 </ul>
 </li>
 </ul>
