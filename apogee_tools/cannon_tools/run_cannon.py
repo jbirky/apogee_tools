@@ -4,6 +4,8 @@ from operator import itemgetter
 from astropy.io import ascii
 from pathlib import Path
 import apogee_tools as ap
+import glob
+import shutil
 
 try:
 	from TheCannon import apogee, dataset, model
@@ -146,6 +148,24 @@ def initializeTrainingSet(**kwargs):
 	return ds
 
 
+def labelToSpec(labels, coeffs):
+
+	nlabels = labels.shape[1]
+
+	scaled_labels = []
+	for i in range(nlabels):
+		p, s = _getPivotsAndScales(labels.T[i])
+		slbl = [(t - p)/s for t in labels.T[i]]
+		scaled_labels.append(slbl)
+
+	label_vec = np.array([_get_lvec(lbl) for lbl in np.array(scaled_labels).T])
+	label_vec = np.insert(label_vec, 0, 1, axis=1)
+
+	synth_fluxes = np.dot(coeffs, label_vec.T).T
+
+	return synth_fluxes
+
+
 def runCannon(ds, **kwargs):
 
 	"""
@@ -212,89 +232,85 @@ def runCannon(ds, **kwargs):
 
 def crossValidate(ds, **kwargs):
 
-    """
-    Cross-validation test of Cannon test spectra
-    Input:  'ds' : dataset object output from initializeTrainingSet()
-    Output: plot training label vs. inferred label left out of set
-            return training label and inferred label
-    """
+	"""
+	Cross-validation test of Cannon test spectra
+	Input:  'ds' : dataset object output from initializeTrainingSet()
+	Output: plot training label vs. inferred label left out of set
+	        return training label and inferred label
+	"""
 
-    # optional
-    label_names = kwargs.get('lbl_names', ['Teff', 'Fe/H'])
-    save_dir = kwargs.get('save_dir', 'cross_validation/')
+	# optional
+	label_names = kwargs.get('lbl_names', ['Teff', 'Fe/H'])
+	save_dir = kwargs.get('save_dir', 'cross_validation/')
 
-    # ds: Data set of all objects (including n); continuum normalized in initializeTrainingSet()
-    wl = ds.wl
-    N = len(ds.tr_ID)
+	sub_dir = ['model_coeff/', 'synth_flux/', 'crv_flux/', 'test_labels/', 'crv_label/']
+	for folder in sub_dir:
+		directory = 'cross_validation/' + folder
+		if not os.path.exists(directory):
+			os.mkdir(directory)
+		else: #clear contents of the directory
+			shutil.rmtree(directory)
+			os.mkdir(directory)
 
-    # Training labels and cross-validated labels
-    trn_labels, crv_labels = [], []
-    
-    ds.set_label_names(label_names) 
-    md, synth_fluxes, tst_labels = ap.runCannon(ds)
-    np.save(save_dir+'model_coeff_fullset', md.coeffs)
-    np.save(save_dir+'synth_flux_fullset', synth_fluxes)
-    np.save(save_dir+'test_labels_fullset', tst_labels)
+	# ds: Data set of all objects (including n); continuum normalized in initializeTrainingSet()
+	wl = ds.wl
+	N = len(ds.tr_ID)
 
-    # Remove nth spectrum from the training set and run Cannon model on the rest of spectra
-    for n in range(N): 
+	# Training labels and cross-validated labels
+	trn_labels, crv_labels = [], []
 
-        tr_ids   = list(ds.tr_ID)
-        tr_flux  = list(ds.tr_flux)
-        tr_ivar  = list(ds.tr_ivar)
-        tr_label = list(ds.tr_label)
+	ds.set_label_names(label_names) 
+	md, synth_fluxes, tst_labels = ap.runCannon(ds)
+	np.save(save_dir+'model_coeff_fullset', md.coeffs)
+	np.save(save_dir+'synth_flux_fullset', synth_fluxes)
+	np.save(save_dir+'test_labels_fullset', tst_labels)
 
-        tr_ids.pop(n)
-        tr_flux.pop(n)
-        tr_ivar.pop(n)
-        tr_label.pop(n)
+	# Remove nth spectrum from the training set and run Cannon model on the rest of spectra
+	for n in range(N): 
 
-        id_minus_n = np.array(tr_ids)
-        fl_minus_n = np.array(tr_flux)
-        vr_minus_n = np.array(tr_ivar)
-        tr_label_minus_n = np.array(tr_label)
+		tr_ids   = list(ds.tr_ID)
+		tr_flux  = list(ds.tr_flux)
+		tr_ivar  = list(ds.tr_ivar)
+		tr_label = list(ds.tr_label)
 
-        ds_minus_n = dataset.Dataset(wl, id_minus_n, fl_minus_n, vr_minus_n, tr_label_minus_n, \
-            id_minus_n, fl_minus_n, vr_minus_n)
+		tr_ids.pop(n)
+		tr_flux.pop(n)
+		tr_ivar.pop(n)
+		tr_label.pop(n)
 
-        ds_minus_n.set_label_names(label_names)       
-        md_minus_n, synth_fl_minus_n, te_label_minus_n = ap.runCannon(ds_minus_n)
+		id_minus_n = np.array(tr_ids)
+		fl_minus_n = np.array(tr_flux)
+		vr_minus_n = np.array(tr_ivar)
+		tr_label_minus_n = np.array(tr_label)
 
-        label_errs = md_minus_n.infer_labels(ds)
-        cross_labels = ds.test_label_vals
-        
-        # Find cross-validation label
-        crv_label_n = cross_labels[n]
-        crv_labels.append(crv_label_n)
-        
-        np.save(save_dir+'model_coeff_'+str(n), md_minus_n.coeffs)
-        np.save(save_dir+'synth_flux_'+str(n), synth_fl_minus_n)
-        np.save(save_dir+'test_labels_'+str(n), te_label_minus_n)
-        np.save(save_dir+'crv_label_'+str(n), crv_label_n)
+		ds_minus_n = dataset.Dataset(wl, id_minus_n, fl_minus_n, vr_minus_n, tr_label_minus_n, \
+		    id_minus_n, fl_minus_n, vr_minus_n)
 
-        print('Labeled [%s/%s] sources.\n'%(n+1, N))
+		ds_minus_n.set_label_names(label_names)       
+		md_minus_n, synth_fl_minus_n, te_label_minus_n = ap.runCannon(ds_minus_n)
 
-    trn_labels = ds.tr_label
+		label_errs = md_minus_n.infer_labels(ds)
+		cross_labels = ds.test_label_vals
 
-    return trn_labels, tst_labels, crv_labels
+		# Find cross-validation label
+		crv_label_n = cross_labels[n]
+		crv_labels.append(crv_label_n)
 
+		# Get flux of cross-validated spectrum
+		lvec_n = np.insert(_get_lvec(crv_label_n), 0, 1)
+		synth_fl_n = np.dot(md_minus_n.coeffs, np.transpose(lvec_n))
 
-def labelToSpec(labels, coeffs):
+		np.save(save_dir+'model_coeff/model_coeff_'+str(n), md_minus_n.coeffs)
+		np.save(save_dir+'synth_flux/synth_flux_'+str(n), synth_fl_minus_n)
+		np.save(save_dir+'crv_flux/crv_flux_'+str(n), synth_fl_n)
+		np.save(save_dir+'test_labels/test_labels_'+str(n), te_label_minus_n)
+		np.save(save_dir+'crv_label/crv_label_'+str(n), crv_label_n)
 
-	nlabels = labels.shape[1]
+		print('Labeled [%s/%s] sources.\n'%(n+1, N))
 
-	scaled_labels = []
-	for i in range(nlabels):
-		p, s = _getPivotsAndScales(labels.T[i])
-		slbl = [(t - p)/s for t in labels.T[i]]
-		scaled_labels.append(slbl)
+	trn_labels = ds.tr_label
 
-	label_vec = np.array([_get_lvec(lbl) for lbl in np.array(scaled_labels).T])
-	label_vec = np.insert(label_vec, 0, 1, axis=1)
-
-	synth_fluxes = np.dot(coeffs, label_vec.T).T
-
-	return synth_fluxes
+	return trn_labels, tst_labels, crv_labels
 
 
 def synthesizeFlux(ds, **kwargs):
