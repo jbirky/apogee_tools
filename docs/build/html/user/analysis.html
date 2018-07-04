@@ -204,7 +204,7 @@
     <span class="p">[</span><span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;CO2&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">,</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;OH&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Search a wavelegth region for certain species of atoms/molecules (returns a dictionary):</p>
+<p>Search a wavelegth region for certain species of atoms/molecules (returns a dictionary), for example to search the wavelength region between 15200 and 15210 <cite>A</cite>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">lines</span> <span class="o">=</span> <span class="n">ap</span><span class="o">.</span><span class="n">searchLines</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;OH&#39;</span><span class="p">,</span> <span class="s1">&#39;Fe I&#39;</span><span class="p">],</span> <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mi">15200</span><span class="p">,</span><span class="mi">15210</span><span class="p">],</span> \
            <span class="n">libraries</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;NIST&#39;</span><span class="p">,</span> <span class="s1">&#39;APOGEE_ATOMS&#39;</span><span class="p">,</span> <span class="s1">&#39;APOGEE_MOLEC&#39;</span><span class="p">,</span> <span class="s1">&#39;HITEMP&#39;</span><span class="p">])</span>
 

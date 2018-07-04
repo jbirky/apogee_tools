@@ -24,7 +24,7 @@ Pre-MCMC Testing
 
 To test to make sure all of the modeling modules are working, run the following command in terminal::
 
-	python run.py make_model
+	$ python run.py make_model
 
 which should return something like::
 
@@ -44,7 +44,7 @@ which should return something like::
 
 To test by eye, that your initial MCMC parameters are some close to the data::
 
-	python run.py test_fit
+	$ python run.py test_fit
 
 
 Running the MCMC
@@ -52,9 +52,9 @@ Running the MCMC
 
 Run the MCMC::
 
-	python run.py mcmc
+	$ python run.py mcmc
 
 Plot the outputs::
 
-	python run.py walkers
-	python run.py corner
+	$ python run.py walkers
+	$ python run.py corner

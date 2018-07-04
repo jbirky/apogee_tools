@@ -243,7 +243,7 @@
 <div class="section" id="pre-mcmc-testing">
 <h2>Pre-MCMC Testing<a class="headerlink" href="#pre-mcmc-testing" title="Permalink to this headline">¶</a></h2>
 <p>To test to make sure all of the modeling modules are working, run the following command in terminal:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">make_model</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ python run.py make_model
 </pre></div>
 </div>
 <p>which should return something like:</p>
@@ -261,19 +261,19 @@
 </div>
 <img alt="../_images/make_model.png" src="../_images/make_model.png" />
 <p>To test by eye, that your initial MCMC parameters are some close to the data:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">test_fit</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ python run.py test_fit
 </pre></div>
 </div>
 </div>
 <div class="section" id="running-the-mcmc">
 <h2>Running the MCMC<a class="headerlink" href="#running-the-mcmc" title="Permalink to this headline">¶</a></h2>
 <p>Run the MCMC:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">mcmc</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ python run.py mcmc
 </pre></div>
 </div>
 <p>Plot the outputs:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">walkers</span>
-<span class="n">python</span> <span class="n">run</span><span class="o">.</span><span class="n">py</span> <span class="n">corner</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ python run.py walkers
+$ python run.py corner
 </pre></div>
 </div>
 </div>

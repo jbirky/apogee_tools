@@ -88,11 +88,22 @@ Some plotting examples:
 Mask outlying flux
 ~~~~~~~~~~~~~~~~~~
 
-Specify number of standard deviations above and below the mean of the flux to cut (``sigma = [lower cuttoff, upper cutoff]``), and the number pixels to buffer each side of the cut (``pixel_buffer = [lower mask pixel buffer, upper mask pixel buffer]``):
+You may want to apply a mask to your spectrum for flux that lies above/below some standard deviation level. To choose what standard deviation cut you want to make, you can read a spectrum in and plot several standard deviation levels as follows:
 
 .. code-block:: python
 
-	>> data.mask(sigma=[3,2], pixel_buffer=[0,3])
+	>> data = ap.Apogee(id='2M01195227+8409327', type='ap1d')
+	>> data.plot(sigma_levels=np.round(np.arange(-1,1,.2),2), xrange=ap.data["orders"][0], \
+	>>           yrange=[data.mean_flux - data.std_flux, data.mean_flux + data.std_flux])
+
+.. image:: images/sigma_levels.png
+
+Specify number of standard deviations above and below the mean of the flux to cut (``sigma = [lower cuttoff, upper cutoff]``), and the number pixels to buffer each side of the cut (``pixel_buffer = [lower mask pixel buffer, upper mask pixel buffer]``). For example to mask your spectrum, and plot:
+
+.. code-block:: python
+
+	>> data.mask(sigma=[-.5,.2], pixel_buffer=[0,3])
+	>> data.plot()
 
 Chi-squared comparison
 ~~~~~~~~~~~~~~~~~~~~~~
