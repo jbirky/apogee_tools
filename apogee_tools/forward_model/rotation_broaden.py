@@ -65,7 +65,7 @@ def lsf_rotate(deltaV, Vsini, epsilon = False, velgrid = False):
 
 	if npts % 2 == 0: 
 		npts = npts +1
-	nwid = npts / 2.
+	nwid = npts // 2.
 	x    = (np.arange(npts)- nwid)
 	x    = x * deltaV / Vsini 
 
@@ -112,14 +112,19 @@ def broaden(wave, flux, vbroad, rotate=False, gaussian=True):
 		kern = lsf_rotate(vres, vbroad)
  
 	elif gaussian: 
-		x    = np.arange(np.ceil(20.*vbroad/vres)+1)
+		if np.ceil(20.*vbroad/vres) % 2 == 0:
+			x    = np.arange(np.ceil(20.*vbroad/vres)+1)
+		else:
+			x    = np.arange(np.ceil(20.*vbroad/vres))
 		x    = (x / np.max(x)-0.5)*20.
-		kern = np.exp(-0.5*x**2)
- 
-	else: 
-		x    = np.arange(np.ceil(20.*vbroad/vres)+1)*10.
-		kern = np.exp(-0.5*x**2)
-
+		
+		kern = np.exp(-0.5*x**2) 
+	else:
+		if np.ceil(20.*vbroad/vres) % 2 == 0:
+			x    = np.arange(np.ceil(20.*vbroad/vres)+1)*10.
+		else:
+			x    = np.arange(np.ceil(20.*vbroad/vres))*10.
+			
 	kern     = kern/np.sum(kern)
 
 	return np.convolve(flux, kern, 'same')
