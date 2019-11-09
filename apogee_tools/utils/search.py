@@ -83,8 +83,25 @@ def download(star_id, **kwargs):
     Download star by 2MASS name
     @Jessica Birky
 
-    Input:  'star_id' : 2MASS name
-            'type'    : aspcap, apstar, or apvisit
+    modified by Dino Hsu on Nov 18, 2019
+
+    Input:  
+
+    'star_id'   : (str) 2MASS name
+    'type'      : (str) can be: 'ap1d', 'aspcap', 'apstar', or 'apvisit'
+    'dr'        : (str) data release; default: dr15
+    'dir'       : (str) the path to save the files; default is the path for apogee_data
+    'ap_path'   : (str) the path for allVisit and allStar files; default is the path for apogee_data
+
+    Example
+    -------
+    >>> import apogee_tools as ap
+    >>> APOGEE_ID = '2M05351427-0524246'
+    >>> ap.download(APOGEE_ID, type='ap1d', 
+                    dir='/PATH_TO_STORE_DATS/', 
+                    ap_path='/PATH_TO_THE_ALLVISIT_OR_ALLSTAR_FILE/')
+
+
     """
 
     dr = kwargs.get('rel', 'dr15')
