@@ -18,6 +18,8 @@ def convolveLsf(spec, **kwargs):
 	lsf_array = kwargs.get('lsf')
 
 	lsf_flux = lsf.convolve(spec.wave, spec.flux, xlsf=xlsf, lsf=lsf_array, vmacro=None)
-	lsf_spec = ap.Spectrum(wave=np.array(apStarWavegrid()), flux=np.array(lsf_flux[0]), name=spec.name)
+	#lsf_spec = ap.Spectrum(wave=np.array(apStarWavegrid()), flux=np.array(lsf_flux[0]), name=spec.name)
+	lsf_spec = ap.Spectrum(wave=np.array(apStarWavegrid()), flux=np.array(lsf_flux[0]))
+
 
 	return lsf_spec

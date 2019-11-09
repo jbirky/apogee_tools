@@ -197,11 +197,11 @@ class Spectrum():
                'pixel_buffer' : [lower mask pixel buffer, upper mask pixel buffer]
         """
 
-        sigma = kwargs.get('sigma', [-2,1])
+        sigma = kwargs.get('sigma', [2,1])
         pixel_buffer = kwargs.get('pixel_buffer', [0,0])
 
         #Find outlier flux and bad pixels 
-        cut_low  = np.where(self.flux < (self.mean_flux + sigma[0]*self.std_flux))[0]
+        cut_low  = np.where(self.flux < (self.mean_flux - sigma[0]*self.std_flux))[0]
         cut_high = np.where(self.flux > (self.mean_flux + sigma[1]*self.std_flux))[0]
 
         group_low_cut = []
@@ -254,7 +254,7 @@ class Spectrum():
         rv_wave = ap.rvShift(self.wave, rv=rv)
         
         # Set up plot
-        fig = plt.figure(figsize=kwargs.get('figsize', [16,4]))                                                               
+        fig = plt.figure(figsize=(16,4))                                                               
         ax  = fig.add_subplot(1,1,1) 
 
         # Plot masked spectrum
@@ -355,6 +355,7 @@ class Spectrum():
                                 plt.axvline(x=feature, linewidth=.3, color=line_colors[cindex])
 
                             plt.text(feature, ypos-.2, lines, rotation=90, ha='center', color='k', fontsize=8)
+
                 cindex += 1
 
         # Plot plain vertical lines
@@ -372,12 +373,6 @@ class Spectrum():
                 for line in lines:
                     plt.axvline(x=line, linewidth=.3, color=vcolor)
                     plt.text(line, yrange[0] + .03*ysize, round(line,2), rotation=90, ha='right', va='bottom', color='k', fontsize=10)
-
-        if 'sigma_levels' in kwargs:
-            sigma_levels = kwargs.get('sigma_levels')
-
-            for level in sigma_levels:
-                plt.axhline(y=self.mean_flux + level*self.std_flux, linestyle='--', c=np.random.rand(3,), label=r'$%s \sigma$'%(str(level)), linewidth=1)
 
         plt.legend(loc='upper right', fontsize=12)
         

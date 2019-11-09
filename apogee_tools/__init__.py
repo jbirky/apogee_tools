@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 import yaml 
-
 # Get directories of apogee_tools 
 PATH 	  = os.path.realpath(__file__)
 AP_TOOLS  = os.path.split(os.path.split(PATH)[0])[0]
@@ -12,14 +11,16 @@ LIBRARIES = AP_TOOLS + '/libraries'
 # Read configuration file
 try: # open from the current working directory
 	f = open("config.yaml")
-	config = yaml.load(f)
+	#onfig = yaml.load(f)
+	config=  yaml.load(f, Loader=yaml.FullLoader)
 	f.close()
 
 except: # otherwise read file from inside apogee_tools
 	conf_path = os.path.split(os.path.split(os.path.realpath(__file__))[0])[0] + '/config.yaml'
 
 	f = open(conf_path)
-	config = yaml.load(f)
+	#config = yaml.load(f)
+	config=  yaml.load(f, Loader=yaml.FullLoader)
 	f.close()
 
 data = config["data"]

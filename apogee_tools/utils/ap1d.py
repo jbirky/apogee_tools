@@ -67,7 +67,9 @@ def get_1dspec_urls(apogee_id, **kwargs):
 
     #download visit spectrum
     print('Downloading apVisit files for {}'.format(apogee_id))
-    ap.download(apogee_id, type='apvisit',  dir=os.environ['APOGEE_DATA']+'/apvisit_data/') #apogee_tools should not download if the file exists
+    ap_path = kwargs.get('dir', os.environ['APOGEE_DATA'])
+
+    ap.download(apogee_id, type='apvisit',  dir=ap_path+'/apvisit_data/') #apogee_tools should not download if the file exists
     
     nvisit=kwargs.get('nvisit','all')
     frame_id=kwargs.get('frame_id', 'all')

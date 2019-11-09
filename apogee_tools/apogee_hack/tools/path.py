@@ -39,7 +39,9 @@ if _APOGEE_DATA is None:
         warnings.warn("APOGEE_DATA environment variable is deprecated in favor of SDSS_LOCAL_SAS_MIRROR; please update your environment",DeprecationWarning)
 
 # Fix for environment variables
-os.environ["RESULTS_VERS"] = "l30e.2"
+#os.environ["RESULTS_VERS"] = "l30e.2"
+#os.environ["APOGEE_APOKASC_REDUX"] = "v6.2a"
+os.environ["RESULTS_VERS"] = "l31c.2"
 os.environ["APOGEE_APOKASC_REDUX"] = "v6.2a"
 # Fix for environment variables
 
@@ -57,6 +59,7 @@ _DR10REDUX='v304'
 _DR11REDUX='v402'
 _DR12REDUX='v603'
 _DR13REDUX='l30e.2'
+_DR15REDUX='l31c.2'
 _CURRENTREDUX='current'
 if _APOGEE_REDUX is None:
     _APOGEE_REDUX= _DR12REDUX
@@ -130,6 +133,9 @@ def allStarPath(dr=None,_old=False):
                                 _redux_dr(dr=dr),'allStar-%s.fits' % redux)
         elif dr == '13':
             return os.path.join(specReduxPath,'r6','stars','l30e',
+                                _redux_dr(dr=dr),'allStar-%s.fits' % redux)
+        elif dr == '15':
+            return os.path.join(specReduxPath,'r8','stars','l30e',
                                 _redux_dr(dr=dr),'allStar-%s.fits' % redux)
         elif dr == 'current':
             return os.path.join(specReduxPath,'current','stars','l25_6d',
@@ -774,6 +780,9 @@ def apWavePath(chip,dr=None):
     elif dr == '13' or dr == 'current':
         return os.path.join(specReduxPath,'r6','cal','wave',
                             'apWave-%s-02420038.fits' % chip)
+    elif dr == '15' or dr == 'current':
+        return os.path.join(specReduxPath,'r8','cal','wave',
+                            'apWave-%s-02420038.fits' % chip)
     
 def apLSFPath(chip,dr=None):
     """
@@ -799,6 +808,9 @@ def apLSFPath(chip,dr=None):
                             'apLSF-%s-02490024.fits' % chip)
     elif dr == '13' or dr == 'current':
         return os.path.join(specReduxPath,'r6','cal','lsf',
+                            'apLSF-%s-05440020.fits' % chip)
+    elif dr == '15' or dr == 'current':
+        return os.path.join(specReduxPath,'r8','cal','lsf',
                             'apLSF-%s-05440020.fits' % chip)
     
 def apogeeSpectroReduxDirPath(dr=None):
@@ -875,6 +887,7 @@ def _default_dr():
     elif _APOGEE_REDUX == _DR11REDUX: dr= '11'
     elif _APOGEE_REDUX == _DR12REDUX: dr= '12'
     elif _APOGEE_REDUX == _DR13REDUX: dr= '13'
+    elif _APOGEE_REDUX == _DR15REDUX: dr= '15'
     elif _APOGEE_REDUX == _CURRENTREDUX: dr= 'current'
     else: raise IOError('No default dr available for APOGEE_REDUX %s, need to set it by hand' % _APOGEE_REDUX)
     return dr
@@ -885,6 +898,7 @@ def _redux_dr(dr=None):
     elif dr == '11': return _DR11REDUX
     elif dr == '12': return _DR12REDUX
     elif dr == '13': return _DR13REDUX
+    elif dr == '15': return _DR15REDUX
     elif dr == 'current': return _CURRENTREDUX
     else: raise IOError('No reduction available for DR%s, need to set it by hand' % dr)
 

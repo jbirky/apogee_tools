@@ -13,16 +13,16 @@ To download APOGEE spectrum by 2MASS name and data type ``aspcap``, or ``apstar`
 
 .. code-block:: python
 
-	>> import apogee_tools as ap
-	>> ap.download('2M03425325+2326495', type='aspcap')
-	>> ap.download('2M03425325+2326495', type='apstar')
+	import apogee_tools as ap
+	ap.download('2M03425325+2326495', type='aspcap')
+	ap.download('2M03425325+2326495', type='apstar')
 
 For data type ``apvisit`` or ``ap1d``: 
 
 .. code-block:: python
 
-	>> ap.download('2M03425325+2326495', type='apvisit')
-	>> ap.download('2M03425325+2326495', type='ap1d', visit=1, frame=1)
+	ap.download('2M03425325+2326495', type='apvisit')
+	ap.download('2M03425325+2326495', type='ap1d', visit=1, frame=1)
 
 Note: ``type='apvisit'`` will download the spectra for all visits observed, while ``type='ap1d'`` will download only the visit specified (and if not specified, will default to ``visit=1``, ``frame=1``).
 
@@ -39,13 +39,13 @@ Once the data for a source has been downloaded, read aspcap or apStar files by s
 
 .. code-block:: python
 
-	>> data = ap.Apogee(id='2M03425325+2326495', type='aspcap')
+	data = ap.Apogee(id='2M03425325+2326495', type='aspcap')
 
 Or for single visit spectrum, indicate the index of the visit number at the end:
 
 .. code-block:: python
 
-	>> data = ap.Apogee(id='2M03425325+2326495', type='apvisit', visit=1)
+	data = ap.Apogee(id='2M03425325+2326495', type='apvisit', visit=1)
 
 
 Search the APOGEE catalog
@@ -55,16 +55,16 @@ Example search--will search the ``allStar-l30e.2.fits`` you downloaded:
 
 .. code-block:: python
 
-	>> params = ['TEFF', 'LOGG', 'M_H']
-	>> ranges = [[-10000,4000], [0,5], [-2,2]]
-	>> source_table = ap.multiParamSearch(par=params, select=ranges, dir='/path_to/')
+	params = ['TEFF', 'LOGG', 'M_H']
+	ranges = [[-10000,4000], [0,5], [-2,2]]
+	source_table = ap.multiParamSearch(par=params, select=ranges, dir='/path_to/')
 
 Look up aspcap parameters in ``allStar-l30e.2.fits`` for specific list of 2MASS IDs:
 
 .. code-block:: python
 
-	>> tm_ids = ['2M01195227+8409327']
-	>> ap_dict = ap.returnAspcapTable(tm_ids, params=['TEFF', 'LOGG', 'M_H', 'SNR'], save=False)
+	tm_ids = ['2M01195227+8409327']
+	ap_dict = ap.returnAspcapTable(tm_ids, params=['TEFF', 'LOGG', 'M_H', 'SNR'], save=False)
 
 
 Plot data
@@ -74,36 +74,25 @@ Some plotting examples:
 
 .. code-block:: python
 
-	>> data = ap.Apogee(id='2M03290406+3117075', type='aspcap')
+	data = ap.Apogee(id='2M03290406+3117075', type='aspcap')
 
 	# plot spectrum
-	>> data.plot()
+	data.plot()
 
 	# plot aspcap model and noise:
-	>> data.plot(items=['spec', 'model', 'noise'], save=True)
+	data.plot(items=['spec', 'model', 'noise'], save=True)
 
 	# plot indentified lines (from Souto 2016):
-	>> data.plot(items=['spec', 'lines'], xrange=[15200,15500], yrange=[.6,1.2])
+	data.plot(items=['spec', 'lines'], xrange=[15200,15500], yrange=[.6,1.2])
 
 Mask outlying flux
 ~~~~~~~~~~~~~~~~~~
 
-You may want to apply a mask to your spectrum for flux that lies above/below some standard deviation level. To choose what standard deviation cut you want to make, you can read a spectrum in and plot several standard deviation levels as follows:
+Specify number of standard deviations above and below the mean of the flux to cut (``sigma = [lower cuttoff, upper cutoff]``), and the number pixels to buffer each side of the cut (``pixel_buffer = [lower mask pixel buffer, upper mask pixel buffer]``):
 
 .. code-block:: python
 
-	>> data = ap.Apogee(id='2M01195227+8409327', type='ap1d')
-	>> data.plot(sigma_levels=np.round(np.arange(-1,1,.2),2), xrange=ap.data["orders"][0], \
-	>>           yrange=[data.mean_flux - data.std_flux, data.mean_flux + data.std_flux])
-
-.. image:: images/sigma_levels.png
-
-Specify number of standard deviations above and below the mean of the flux to cut (``sigma = [lower cuttoff, upper cutoff]``), and the number pixels to buffer each side of the cut (``pixel_buffer = [lower mask pixel buffer, upper mask pixel buffer]``). For example to mask your spectrum, and plot:
-
-.. code-block:: python
-
-	>> data.mask(sigma=[-.5,.2], pixel_buffer=[0,3])
-	>> data.plot()
+	data.mask(sigma=[3,2], pixel_buffer=[0,3])
 
 Chi-squared comparison
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -112,7 +101,7 @@ Compare two spectra; return ``chi`` (chi-squared value between data and mdl), ``
 
 .. code-block:: python
 
-	>> chi, norm_data, scaled_mdl = ap.compareSpectra(data, mdl)
+	chi, norm_data, scaled_mdl = ap.compareSpectra(data, mdl)
 
 
 NIRSPEC Data
