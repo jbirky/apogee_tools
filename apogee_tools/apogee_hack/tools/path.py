@@ -847,8 +847,14 @@ def apWavePath(chip,dr=None):
     elif dr == '12':
         return os.path.join(specReduxPath,'r5','cal','wave',
                             'apWave-%s-02420038.fits' % chip)
-    elif dr == '13' or dr == 'current':
+    elif dr == '13':
         return os.path.join(specReduxPath,'r6','cal','wave',
+                            'apWave-%s-02420038.fits' % chip)
+    elif dr == '14':
+        return os.path.join(specReduxPath,'r8','cal','wave',
+                            'apWave-%s-02420038.fits' % chip)
+    elif dr == '15' or dr == 'current':
+        return os.path.join(specReduxPath,'r8','cal','wave',
                             'apWave-%s-02420038.fits' % chip)
     
 def apLSFPath(chip,dr=None):

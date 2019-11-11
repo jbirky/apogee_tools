@@ -13,6 +13,7 @@ from apogee_tools.apogee_hack.tools import path
 _DR10_URL= 'http://data.sdss3.org/sas/dr10'
 _DR12_URL= 'http://data.sdss3.org/sas/dr12'
 _DR13_URL= 'http://data.sdss.org/sas/dr13'
+_DR14_URL= 'http://data.sdss.org/sas/dr15'
 _DR15_URL= 'http://data.sdss.org/sas/dr15'
 _PROPRIETARY_URL= 'https://data.sdss.org/sas/apogeework'
 _MAX_NTRIES= 2
