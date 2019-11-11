@@ -17,7 +17,7 @@ _DR15_URL= 'http://data.sdss.org/sas/dr15'
 _PROPRIETARY_URL= 'https://data.sdss.org/sas/apogeework'
 _MAX_NTRIES= 2
 _ERASESTR= "                                                                                "
-def allStar(dr=None):
+def allStar(dr=None,mjd=58104):
     """
     NAME:
        allStar
@@ -25,15 +25,17 @@ def allStar(dr=None):
        download the allStar file
     INPUT:
        dr= return the path corresponding to this data release (general default)
+       mjd= (58104) MJD of version for monthly internal pipeline runs
     OUTPUT:
        (none; just downloads)
     HISTORY:
        2014-11-26 - Written - Bovy (IAS)
        2015-08-17 - Adjusted for new path (mv old to new) - Bovy (UofT)
+       2018-01-22 - Edited for new monthly pipeline runs - Bovy (UofT)
     """
     if dr is None: dr= path._default_dr()
     # First make sure the file doesn't exist
-    filePath= path.allStarPath(dr=dr)
+    filePath= path.allStarPath(dr=dr,mjd=mjd)
     if os.path.exists(filePath): return None
     # Check whether we can find it in its old place
     oldFilePath= path.allStarPath(dr=dr,_old=True)
@@ -123,7 +125,75 @@ def rcsample(dr=None):
     _download_file(downloadPath,filePath,dr,verbose=False)
     return None
 
-def aspcapStar(loc_id,apogee_id,dr=None):
+def astroNN(dr=None):
+    """
+    NAME:
+       astroNN
+    PURPOSE:
+       download the astroNN file
+    INPUT:
+       dr= return the path corresponding to this data release (general default)
+    OUTPUT:
+       (none; just downloads)
+    HISTORY:
+       2018-10-20 - Written - Bovy (UofT)
+    """
+    if dr is None: dr= path._default_dr()
+    # First make sure the file doesn't exist
+    filePath= path.astroNNPath(dr=dr)
+    if os.path.exists(filePath): return None
+    # Create the file path
+    downloadPath= 'https://github.com/henrysky/astroNN_spectra_paper_figures/raw/master/astroNN_apogee_dr14_catalog.fits'
+    _download_file(downloadPath,filePath,dr,verbose=True)
+    return None
+
+def astroNNDistances(dr=None):
+    """
+    NAME:
+       astroNNDistances
+    PURPOSE:
+       download the astroNN distances file
+    INPUT:
+       dr= return the path corresponding to this data release (general default)
+    OUTPUT:
+       (none; just downloads)
+    HISTORY:
+       2018-02-15 - Written - Bovy (UofT)
+    """
+    if dr is None: dr= path._default_dr()
+    # First make sure the file doesn't exist
+    filePath= path.astroNNDistancesPath(dr=dr)
+    if os.path.exists(filePath): return None
+    # Create the file path
+    downloadPath= 'https://github.com/henrysky/astroNN_gaia_dr2_paper/raw/'\
+        'master/apogee_dr14_nn_dist.fits'
+    _download_file(downloadPath,filePath,dr,verbose=True)
+    return None
+
+def astroNNAges(dr=None):
+    """
+    NAME:
+       astroNNAges
+    PURPOSE:
+       download the astroNN ages file
+    INPUT:
+       dr= return the path corresponding to this data release (general default)
+    OUTPUT:
+       (none; just downloads)
+    HISTORY:
+       2018-02-16 - Written - Bovy (UofT)
+    """
+    if dr is None: dr= path._default_dr()
+    # First make sure the file doesn't exist
+    filePath= path.astroNNAgesPath(dr=dr)
+    if os.path.exists(filePath): return None
+    # Create the file path
+    downloadPath= 'http://www.astro.ljmu.ac.uk/~astjmack/APOGEEGaiaAges/'\
+                  'astroNNBayes_ages_goodDR14.fits'
+    _download_file(downloadPath,filePath,dr,verbose=True)
+    return None
+
+def aspcapStar(loc_id,apogee_id,telescope='apo25m',dr=None):
     """
     NAME:
        aspcapStar
@@ -132,15 +202,17 @@ def aspcapStar(loc_id,apogee_id,dr=None):
     INPUT:
        loc_id - location ID
        apogee_id - APOGEE ID of the star
+       telescope= telescope used ('apo25m' [default], 'apo1m', 'lco25m')
        dr= return the path corresponding to this data release (general default)
     OUTPUT:
        (none; just downloads)
     HISTORY:
        2014-11-25 - Written - Bovy (IAS)
+       2018-01-22 - Edited for new post-DR14 path structure - Bovy (UofT)
     """
     if dr is None: dr= path._default_dr()
     # First make sure the file doesn't exist
-    filePath= path.aspcapStarPath(loc_id,apogee_id,dr=dr)
+    filePath= path.aspcapStarPath(loc_id,apogee_id,dr=dr,telescope=telescope)
     if os.path.exists(filePath): return None
     # Create the file path    
     downloadPath= filePath.replace(os.path.join(path._APOGEE_DATA,
@@ -149,7 +221,7 @@ def aspcapStar(loc_id,apogee_id,dr=None):
     _download_file(downloadPath,filePath,dr)
     return None
 
-def apStar(loc_id,apogee_id,dr=None):
+def apStar(loc_id,apogee_id,telescope='apo25m',dr=None):
     """
     NAME:
        apStar
@@ -158,15 +230,17 @@ def apStar(loc_id,apogee_id,dr=None):
     INPUT:
        loc_id - location ID
        apogee_id - APOGEE ID of the star
+       telescope= telescope used ('apo25m' [default], 'apo1m', 'lco25m')
        dr= return the path corresponding to this data release (general default)
     OUTPUT:
        (none; just downloads)
     HISTORY:
        2015-01-13 - Written - Bovy (IAS)
+       2018-01-22 - Edited for new post-DR14 path structure - Bovy (UofT)
     """
     if dr is None: dr= path._default_dr()
     # First make sure the file doesn't exist
-    filePath= path.apStarPath(loc_id,apogee_id,dr=dr)
+    filePath= path.apStarPath(loc_id,apogee_id,dr=dr,telescope=telescope)
     if os.path.exists(filePath): return None
     # Create the file path    
     downloadPath= filePath.replace(os.path.join(path._APOGEE_DATA,
@@ -175,23 +249,26 @@ def apStar(loc_id,apogee_id,dr=None):
     _download_file(downloadPath,filePath,dr)
     return None
 
-def apVisit(loc_id, mjd, fiberid, dr=None):
+def apVisit(plateid, mjd, fiberid, telescope='apo25m', dr=None):
     """
     NAME: apVisit
     PURPOSE: download a single apVisit file
     INPUT:
-       loc_id = 4-digit location ID (field for 1m targets)
+       plateid = 4-digit plate ID
        mjd = 5-digit MJD
        fiberid = 3-digit fiber ID
+       telescope= ('apo25m') Telescope at which this plate has been observed ('apo25m' for standard APOGEE-N, 'apo1m' for the 1m telescope)
        dr = return the path corresponding to this data release (general default)
     OUTPUT: (none; just downloads)
     HISTORY: 2016-11 - Meredith Rawls
+       2019-01-28 - Added telescope keyword, clarified that it's plateid that's needed - Bovy (UofT)
        TODO: automatically find all apVisit files for a given apogee ID and download them
     """
     if dr is None:
         dr = path._default_dr()
     # First make sure the file doesn't exist
-    filePath = path.apVisitPath(loc_id, mjd, fiberid, dr=dr)
+    filePath = path.apVisitPath(plateid, mjd, fiberid,
+                                telescope=telescope,dr=dr)
     if os.path.exists(filePath):
         return None
     # Create the file path    
@@ -601,11 +678,18 @@ def _download_file(downloadPath,filePath,dr,verbose=False,spider=False):
         except subprocess.CalledProcessError as e:
             if not downloading: #Assume KeyboardInterrupt
                 raise
+            elif 'exit status 5' in str(e):
+                raise IOError("Download failed because of wget SSL certification error; you can turn off SSL certification checking by setting the option\n\ncheck_certificate = off\n\nin the file $HOME/.wgetrc (create this if it does not exist)")
             elif ntries > _MAX_NTRIES:
                 raise IOError('File %s does not appear to exist on the server (as %s) ...' % (os.path.basename(filePath),downloadPath))
             elif not 'exit status 4' in str(e):
                 interrupted= True
             os.remove(tmp_savefilename)
+        except OSError as e:
+            if e.errno == os.errno.ENOENT:
+                raise OSError("Automagically downloading catalogs and data files requires the wget program; please install wget and try again...")
+            else:
+                raise
         finally:
             if os.path.exists(tmp_savefilename):
                 os.remove(tmp_savefilename)
@@ -623,6 +707,8 @@ def _base_url(dr,rc=False):
     if dr == '10': return _DR10_URL
     elif dr == '12': return _DR12_URL
     elif dr == '13': return _DR13_URL
+    elif dr == '14': return _DR14_URL
+    elif dr == '15': return _DR15_URL
     else: return _PROPRIETARY_URL
 
 def _dr_string(dr):
