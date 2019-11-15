@@ -11,7 +11,9 @@ db_path = os.environ['APOGEE_DATA']
 AP_PATH = db_path
 
 data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
-    'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits', 'dr14':'allStar-l31c.2.fits', 'dr15':'allStar-l31c.2.fits'} 
+                 'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits', \
+                 'dr14':'allStar-l31c.2.fits', 'dr15':'allStar-l31c.2.fits', \
+                 'dr16':'allStar-l31c.2.fits',} 
 
 
 def searchStars(**kwargs):
@@ -42,7 +44,7 @@ def searchStars(**kwargs):
     asp_id     = hdu[1].data['ASPCAP_ID'][condition]
     loc_id     = hdu[1].data['LOCATION_ID'][condition]
 
-    print(ap_id, loc_id)
+    #print(ap_id, loc_id)
 
     return ap_id, loc_id[0]
 
@@ -61,6 +63,8 @@ def searchVisits(**kwargs):
     ap_id   = kwargs.get('id_name')
     ap_path = kwargs.get('ap_path', AP_PATH)
 
+    #print(ap_id, ap_path)
+
     #Read the database file
     hdu = fits.open(ap_path + '/allVisit-l31c.2.fits')
 
@@ -69,6 +73,7 @@ def searchVisits(**kwargs):
 
     search = data['APOGEE_ID']
     pos = np.where(search == ap_id)
+    #print('POS', pos)
 
     plates = data['PLATE'][pos]
     mjds = data['MJD'][pos]
@@ -127,7 +132,10 @@ def download(star_id, **kwargs):
     if not os.path.exists(dl_dir):
         os.makedirs(dl_dir)
 
-    key = {'dr13': ['r6','l30e','l30e.2'], 'dr14': ['r8','l31c','l31c.2'], 'dr15': ['r8','l31c','l31c.2']}
+    key = {'dr13': ['r6','l30e','l30e.2'], 
+           'dr14': ['r8','l31c','l31c.2'], 
+           'dr15': ['r8','l31c','l31c.2'], 
+           'dr16': ['r12','l31c','l31c.2'],}
 
     if d_type == 'aspcap':
 
