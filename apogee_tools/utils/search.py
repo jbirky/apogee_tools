@@ -10,10 +10,10 @@ import wget
 db_path = os.environ['APOGEE_DATA'] 
 AP_PATH = db_path
 
-data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
-                 'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits', \
+data_releases = {'dr10':'allStar-v304.fits',   'dr11':'allStar-v402.fits', \
+                 'dr12':'allStar-v603.fits',   'dr13':'allStar-l30e.2.fits', \
                  'dr14':'allStar-l31c.2.fits', 'dr15':'allStar-l31c.2.fits', \
-                 'dr16':'allStar-l31c.2.fits',} 
+                 'dr16':'allStar-r12-l33.fits',} 
 
 
 def searchStars(**kwargs):
@@ -62,11 +62,19 @@ def searchVisits(**kwargs):
 
     ap_id   = kwargs.get('id_name')
     ap_path = kwargs.get('ap_path', AP_PATH)
+    ap_dr   = kwargs.get('ap_dr', 15)
+
+    #print(ap_id, ap_path, ap_dr)
+
+    if   ap_dr == 13: allvisitFile = 'allVisit-l31c.2.fits'
+    elif ap_dr == 14: allvisitFile = 'allVisit-l31c.2.fits'
+    elif ap_dr == 15: allvisitFile = 'allVisit-l31c.2.fits'
+    elif ap_dr == 16: allvisitFile = 'allVisit-r12-l33.fits'
 
     #print(ap_id, ap_path)
 
     #Read the database file
-    hdu = fits.open(ap_path + '/allVisit-l31c.2.fits')
+    hdu = fits.open(ap_path + '/%s'%allvisitFile)
 
     keys = hdu[1].header
     data = hdu[1].data
@@ -76,10 +84,18 @@ def searchVisits(**kwargs):
     #print('POS', pos)
 
     plates = data['PLATE'][pos]
-    mjds = data['MJD'][pos]
+    mjds   = data['MJD'][pos]
     fibers = data['FIBERID'][pos]
+    if ap_dr == 16:
+        telescopes = data['TELESCOPE'][pos]
+        fields     = data['FIELD'][pos]
 
-    return ap_id, plates, mjds, fibers
+    #print(ap_id, plates, mjds, fibers, telescopes, fields)
+
+    if ap_dr == 16: 
+        return ap_id, plates, mjds, fibers, telescopes, fields
+    else: 
+        return ap_id, plates, mjds, fibers
 
 
 def download(star_id, **kwargs):
@@ -109,7 +125,7 @@ def download(star_id, **kwargs):
 
     """
 
-    dr = kwargs.get('rel', 'dr15')
+    dr = kwargs.get('dr', 'dr15')
 
     # Datatypes to download
     d_type = kwargs.get('type','aspcap').lower()
@@ -135,7 +151,7 @@ def download(star_id, **kwargs):
     key = {'dr13': ['r6','l30e','l30e.2'], 
            'dr14': ['r8','l31c','l31c.2'], 
            'dr15': ['r8','l31c','l31c.2'], 
-           'dr16': ['r12','l31c','l31c.2'],}
+           'dr16': ['r12','l33','l33'],}
 
     if d_type == 'aspcap':
 
@@ -233,8 +249,13 @@ def download(star_id, **kwargs):
         Name format for the file: apVisit-APOGEE_ID-NVISIT.fits
         """
 
-        ap_id, plates, mjds, fibers = searchVisits(id_name=star_id, ap_path=ap_path)
+        if dr == 16:
+            ap_id, plates, mjds, fibers, telescopes, fields = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+        else:
+            ap_id, plates, mjds, fibers = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+        #print(ap_id, plates, mjds, fibers)
         nVisits = len(plates)
+        data_release = 'dr%s'%dr
         
         if len(ap_id) != 0:
 
@@ -242,48 +263,70 @@ def download(star_id, **kwargs):
             for v in range(nVisits):
 
                 #Look up plate, mjd and fiber numbers from allVisit-l30e.2.fits file
-                plate, mjd, fiber = str(plates[v]), str(mjds[v]), str(fibers[v])
+                if dr == 16:
+                    plate, mjd, fiber, telescope, field = str(plates[v]).strip(), str(mjds[v]).strip(), str(fibers[v]).strip(), str(telescopes[v]).strip(), str(fields[v]).strip()
+                    #print(dr, 'dr%s'%dr, plate, mjd, fiber, telescope, field)
+                else: 
+                    plate, mjd, fiber = str(plates[v]).strip(), str(mjds[v]).strip(), str(fibers[v]).strip()
+                #print(dr, 'dr%s'%dr, plate, mjd, fiber, key[data_release][0])
                 
                 #make sure fiber string has proper number of zeros 
                 fiber = fiber.zfill(3)
 
-                dl_name   = 'apVisit-{}-{}-{}-{}.fits'.format(key[dr][0], plate, mjd, fiber)
+                dl_name   = 'apVisit-{}-{}-{}-{}.fits'.format(key[data_release][0], plate, mjd, fiber)
                 save_name = 'apVisit-{}-{}.fits'.format(star_id, str(v+1))
-                print("https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(str(dr), key[dr][0], plate, mjd, dl_name))
+                #print("https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(data_release, key[data_release][0], plate, mjd, dl_name))
                 #check if file has already been downloaded
                 if save_name not in os.listdir(dl_dir):
-                    print(os.listdir(dl_dir))
+                    #print(os.listdir(dl_dir))
                     #1. Try downloading from the 2.5m survey
+
+                    if data_release == 'dr16':
+                        main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/visit/{}/{}/{}/{}/{}".format(data_release, key[data_release][0], telescope, field, plate, mjd, dl_name)
+                        print('Downloading {} from {} {} survey.'.format(ap_id, data_release, telescope))
+                        wget.download(main_url, dl_dir+dl_name)
+                        os.rename(dl_dir+dl_name, dl_dir+save_name)
+                        return 0
+                    else:
+                        dl_name   = 'apVisit-{}-{}-{}.fits'.format(key[data_release][0], mjd, star_id)
+
                     if plate != 'Mdwarfs':
-                        print('Downloading {} from {} 2.5m survey.'.format(ap_id, dr))
-                        main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(str(dr), key[dr][0], plate, mjd, dl_name)
+                        print('Downloading {} from {} 2.5m survey.'.format(ap_id, data_release))
+                        main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(data_release, key[data_release][0], plate, mjd, dl_name)
                         #download_file = 
+                        print(main_url)
                         wget.download(main_url, dl_dir+dl_name)
                         os.rename(dl_dir+dl_name, dl_dir+save_name)
                         #os.system("wget {} -O {}/{}".format(main_url, dl_dir, save_name))
+                        return 0
                     else:
-                        dl_name   = 'apVisit-{}-{}-{}.fits'.format(key[dr][0], mjd, star_id)
+                        dl_name   = 'apVisit-{}-{}-{}.fits'.format(key[data_release][0], mjd, star_id)
 
                     #2. If not in main survey, try downloading from the 1m survey
                     if save_name not in os.listdir(dl_dir):
                         print(star_id + ' not found in APOGEE 2.5m survey.')
-                        print('Downloading {} from {} 1.0m survey.'.format(ap_id, dr))
-                        anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo1m/{}/{}/{}".format(str(dr), key[dr][0], plate, mjd, dl_name)
+                        print('Downloading {} from {} 1.0m survey.'.format(ap_id, data_release))
+                        anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo1m/{}/{}/{}".format(data_release, key[data_release][0], plate, mjd, dl_name)
                         #download_file = 
                         wget.download(anc_url)
                         os.rename(dl_name, save_name)
                         #os.system("wget {} -O {}/{}".format(anc_url, dl_dir, save_name))
+                        return 0
 
                     #3. If not in main or Mdwarf ancilliary survey, return error message
                     if save_name not in os.listdir(dl_dir):
                         print(dl_name + ' could not be found in {} or {} \n'.format(main_url, anc_url))
+                        return 1
                     else:
                         print('{} successfully downloaded as {}. \n'.format(dl_name, save_name))
+                        return 0
                 else:
                     print('Already have file for ' + star_id)
+                    return 0
 
         else:
-            print(star_id + ' does not exist in ' + dr)
+            print(star_id + ' does not exist in ' + data_release)
+            return 1
 
 
     if d_type == 'ap1d':
