@@ -89,11 +89,12 @@ def searchVisits(**kwargs):
     if ap_dr == 16:
         telescopes = data['TELESCOPE'][pos]
         fields     = data['FIELD'][pos]
+        files      = data['FILE'][pos]
 
     #print(ap_id, plates, mjds, fibers, telescopes, fields)
 
     if ap_dr == 16: 
-        return ap_id, plates, mjds, fibers, telescopes, fields
+        return ap_id, plates, mjds, fibers, telescopes, fields, files
     else: 
         return ap_id, plates, mjds, fibers
 
@@ -250,7 +251,7 @@ def download(star_id, **kwargs):
         """
 
         if dr == 16:
-            ap_id, plates, mjds, fibers, telescopes, fields = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+            ap_id, plates, mjds, fibers, telescopes, fields, files = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
         else:
             ap_id, plates, mjds, fibers = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
         #print(ap_id, plates, mjds, fibers)
@@ -264,7 +265,7 @@ def download(star_id, **kwargs):
 
                 #Look up plate, mjd and fiber numbers from allVisit-l30e.2.fits file
                 if dr == 16:
-                    plate, mjd, fiber, telescope, field = str(plates[v]).strip(), str(mjds[v]).strip(), str(fibers[v]).strip(), str(telescopes[v]).strip(), str(fields[v]).strip()
+                    plate, mjd, fiber, telescope, field, Filename = str(plates[v]).strip(), str(mjds[v]).strip(), str(fibers[v]).strip(), str(telescopes[v]).strip(), str(fields[v]).strip(), str(files[v]).strip()
                     #print(dr, 'dr%s'%dr, plate, mjd, fiber, telescope, field)
                 else: 
                     plate, mjd, fiber = str(plates[v]).strip(), str(mjds[v]).strip(), str(fibers[v]).strip()
@@ -282,8 +283,12 @@ def download(star_id, **kwargs):
                     #1. Try downloading from the 2.5m survey
 
                     if data_release == 'dr16':
+                        dl_name = Filename
                         main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/visit/{}/{}/{}/{}/{}".format(data_release, key[data_release][0], telescope, field, plate, mjd, dl_name)
+                        if telescope == 'apo1m':
+                            main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/visit/{}/{}/{}/{}".format(data_release, key[data_release][0], telescope, field, plate, dl_name)      
                         print('Downloading {} from {} {} survey.'.format(ap_id, data_release, telescope))
+                        print('Downloading from: %s'%main_url)
                         wget.download(main_url, dl_dir+dl_name)
                         os.rename(dl_dir+dl_name, dl_dir+save_name)
                         return 0
