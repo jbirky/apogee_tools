@@ -168,14 +168,22 @@ def _aspcapPixelLimits(dr=None):
   return aspcapBlu_start,aspcapGre_start,aspcapRed_start,aspcapTotal
 
 # Wavegrid parameters used in apStarWavegrid and pix2wv
-_LOG10LAMBDA0= 4.179 
-_DLOG10LAMBDA= 6.*10.**-6.
-_NLAMBDA= 8575
+_LOG10LAMBDA0 = 4.179 
+_DLOG10LAMBDA = 6.e-6
+_NLAMBDA      = 8575
+
+logw0         = 4.179
+dlogw         = 6.e-6
+nw_apStar     = 8575
 
 def apStarWavegrid():
-    return 10.**numpy.arange(_LOG10LAMBDA0,
-                             _LOG10LAMBDA0+_NLAMBDA*_DLOG10LAMBDA,
-                             _DLOG10LAMBDA)
+    # This is the old way
+    #return 10.**numpy.arange(_LOG10LAMBDA0,
+    #                         _LOG10LAMBDA0+_NLAMBDA*_DLOG10LAMBDA,
+    #                         _DLOG10LAMBDA)
+
+    # This is the new way
+    return 10.**(logw0+numpy.arange(nw_apStar)*dlogw)
 
 def paramIndx(param):
     """

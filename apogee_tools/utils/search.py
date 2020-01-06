@@ -31,11 +31,11 @@ def searchStars(**kwargs):
     """
 
     searchval = kwargs.get('id_name')
-    release   = kwargs.get('rel', 'dr15')
     ap_path   = kwargs.get('ap_path', AP_PATH)
+    ap_dr     = kwargs.get('ap_dr', 16)
 
     #Read the database file
-    hdu        = fits.open(ap_path + '/' + data_releases[release])
+    hdu        = fits.open(ap_path + '/{}'.format(data_releases['dr16']))
     keys       = hdu[1].header
     search_par = kwargs.get('SearchPar', 'APOGEE_ID')
     t          = hdu[1].data[search_par]
@@ -43,10 +43,16 @@ def searchStars(**kwargs):
     ap_id      = hdu[1].data['APOGEE_ID'][condition]
     asp_id     = hdu[1].data['ASPCAP_ID'][condition]
     loc_id     = hdu[1].data['LOCATION_ID'][condition]
+    filename   = hdu[1].data['FILE'][condition]
+    telescope  = hdu[1].data['TELESCOPE'][condition]
+    field      = hdu[1].data['FIELD'][condition]
 
-    #print(ap_id, loc_id)
+    #print(ap_dr, ap_id, loc_id, filename, field)
 
-    return ap_id, loc_id[0]
+    if ap_dr == 16:
+        return ap_id[0], filename[0], telescope[0], field[0], loc_id[0]
+    else:
+        return ap_id[0], loc_id[0]
 
 
 def searchVisits(**kwargs):
@@ -62,7 +68,7 @@ def searchVisits(**kwargs):
 
     ap_id   = kwargs.get('id_name')
     ap_path = kwargs.get('ap_path', AP_PATH)
-    ap_dr   = kwargs.get('ap_dr', 15)
+    ap_dr   = kwargs.get('ap_dr', 16)
 
     #print(ap_id, ap_path, ap_dr)
 
@@ -127,6 +133,7 @@ def download(star_id, **kwargs):
     """
 
     dr = kwargs.get('dr', 'dr15')
+    #print('Data Release:', dr)
 
     # Datatypes to download
     d_type = kwargs.get('type','aspcap').lower()
@@ -154,21 +161,42 @@ def download(star_id, **kwargs):
            'dr15': ['r8','l31c','l31c.2'], 
            'dr16': ['r12','l33','l33'],}
 
+    data_release = 'dr%s'%dr
+
     if d_type == 'aspcap':
 
         """
         Name format for the file: aspcapStar-r8-l31c.2-APOGEE_ID.fits
         """
 
-        fname = 'aspcapStar-{}-{}-{}.fits'.format(key[dr][0], key[dr][2], star_id)
+        if data_release == 'dr16':
+            fname     = 'aspcapStar-{}-{}.fits'.format(key[data_release][0], star_id)
+            save_name = 'aspcap-{}.fits'.format(star_id)
+        else:
+            fname = 'aspcapStar-{}-{}-{}.fits'.format(key[data_release][0], key[data_release][2], star_id)
+            save_name = 'aspcap-{}.fits'.format(star_id)
 
         #check if file has already been downloaded
-        if fname not in os.listdir(dl_dir):
+        if save_name not in os.listdir(dl_dir):
 
             #Look up location id from allStar-l30e.2.fits file
-            ap_id, loc_id = searchStars(id_name=star_id, rel=dr, ap_path=ap_path)
+            #ap_id, loc_id = searchStars(id_name=star_id, rel=dr, ap_path=ap_path)
+            if dr == 16:
+                ap_id, plates, mjds, fibers, telescopes, fields, files = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+            else:
+                ap_id, plates, mjds, fibers = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
 
             if len(ap_id) != 0:  
+
+                if data_release == 'dr16':
+                    dl_name = fname
+                    main_url = "https://{}.sdss.org/sas/{}/apogee/spectro/aspcap/{}/{}/{}/{}/{}".format(data_release, data_release, key[data_release][0], key[data_release][1], telescopes[0], fields[0], dl_name)
+                    print('Downloading {} from {} {} survey.'.format(ap_id, data_release, telescopes[0]))
+                    print('Downloading from: %s'%main_url)
+                    wget.download(main_url, dl_dir+dl_name)
+                    os.rename(dl_dir+dl_name, dl_dir+save_name)
+                    return 0
+
                 #1. Try downloading from the 2.5m survey
                 print('Downloading {} from {} 2.5m survey.'.format(ap_id, dr))
                 cwd = os.getcwd()
@@ -206,14 +234,33 @@ def download(star_id, **kwargs):
         """
         Name format for the file: apStar-r8-APOGEE_ID.fits
         """
-
-        fname = 'apStar-r8-'+star_id+'.fits'
+        
+        if data_release == 'dr16':
+            fname     = 'apStar-{}-{}.fits'.format(key[data_release][0], star_id)
+            save_name = 'apStar-{}.fits'.format(star_id)
+        else:
+            fname = 'apStar-{}-{}.fits'.format(key[data_release][0], star_id)
+            save_name = 'apStar-{}.fits'.format(star_id)
         
         #check if file has already been downloaded
-        if fname not in os.listdir(dl_dir):
+        if save_name not in os.listdir(dl_dir):
 
             #Look up location id from allStar-l30e.2.fits file
-            ap_id, loc_id = searchStars(id_name=star_id, ap_path=ap_path)
+            if dr == 16:
+                ap_id, filename, telescope, field, loc_id = searchStars(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+            else:
+                ap_id, loc_id = searchStars(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+
+            if len(ap_id) != 0:  
+
+                if data_release == 'dr16':
+                    dl_name = fname
+                    main_url = "https://{}.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/{}".format(data_release, data_release, key[data_release][0], telescope, field, dl_name)
+                    print('Downloading {} from {} {} survey.'.format(ap_id, data_release, telescope[0]))
+                    print('Downloading from: %s'%main_url)
+                    wget.download(main_url, dl_dir+dl_name)
+                    os.rename(dl_dir+dl_name, dl_dir+save_name)
+                    return 0
 
             if len(ap_id) != 0:
                 #1. Try downloading from the 2.5m survey
@@ -256,7 +303,6 @@ def download(star_id, **kwargs):
             ap_id, plates, mjds, fibers = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
         #print(ap_id, plates, mjds, fibers)
         nVisits = len(plates)
-        data_release = 'dr%s'%dr
         
         if len(ap_id) != 0:
 
