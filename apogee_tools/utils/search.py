@@ -223,10 +223,10 @@ def download(star_id, **kwargs):
                 else:
                     print(fname + ' successfully downloaded. \n')
             else:
-                print(star_id + ' does not exist in ' + dr)
+                print('{} does not exist in {}'.format(star_id, dr))
 
         else:
-            print('Already have file for ' + star_id)
+            print('Already have aspcap file for {}'.format(star_id))
 
 
     if d_type == 'apstar': 
@@ -285,10 +285,10 @@ def download(star_id, **kwargs):
                 else:
                     print(fname + ' successfully downloaded. \n')
             else:
-                print(star_id + ' does not exist in ' + dr)
+                print('{} does not exist in {}'.format(star_id, dr))
 
         else:
-            print('Already have file for ' + star_id)
+            print('Already have apstar file for {}'.format(star_id))
 
 
     if d_type == 'apvisit': 
@@ -378,12 +378,12 @@ def download(star_id, **kwargs):
                         #return 0
                         continue
                 else:
-                    print('Already have file for ' + star_id)
+                    print('Already have apvisit file for {} visit {}'.format(star_id, str(v+1)))
                     #return 0
                     continue
 
         else:
-            print(star_id + ' does not exist in ' + data_release)
+            print('{} does not exist in {}'.format(star_id, data_release))
             return 1
 
 
