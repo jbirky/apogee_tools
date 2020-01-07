@@ -308,6 +308,7 @@ def download(star_id, **kwargs):
 
             #Download individual visit .fits files
             for v in range(nVisits):
+                #print(v)
 
                 #Look up plate, mjd and fiber numbers from allVisit-l30e.2.fits file
                 if dr == 16:
@@ -324,6 +325,7 @@ def download(star_id, **kwargs):
                 save_name = 'apVisit-{}-{}.fits'.format(star_id, str(v+1))
                 #print("https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(data_release, key[data_release][0], plate, mjd, dl_name))
                 #check if file has already been downloaded
+                #print(dl_dir)
                 if save_name not in os.listdir(dl_dir):
                     #print(os.listdir(dl_dir))
                     #1. Try downloading from the 2.5m survey
@@ -337,7 +339,8 @@ def download(star_id, **kwargs):
                         print('Downloading from: %s'%main_url)
                         wget.download(main_url, dl_dir+dl_name)
                         os.rename(dl_dir+dl_name, dl_dir+save_name)
-                        return 0
+                        #return 0
+                        continue
                     else:
                         dl_name   = 'apVisit-{}-{}-{}.fits'.format(key[data_release][0], mjd, star_id)
 
@@ -349,7 +352,8 @@ def download(star_id, **kwargs):
                         wget.download(main_url, dl_dir+dl_name)
                         os.rename(dl_dir+dl_name, dl_dir+save_name)
                         #os.system("wget {} -O {}/{}".format(main_url, dl_dir, save_name))
-                        return 0
+                        #return 0
+                        continue
                     else:
                         dl_name   = 'apVisit-{}-{}-{}.fits'.format(key[data_release][0], mjd, star_id)
 
@@ -362,7 +366,8 @@ def download(star_id, **kwargs):
                         wget.download(anc_url)
                         os.rename(dl_name, save_name)
                         #os.system("wget {} -O {}/{}".format(anc_url, dl_dir, save_name))
-                        return 0
+                        #return 0
+                        continue
 
                     #3. If not in main or Mdwarf ancilliary survey, return error message
                     if save_name not in os.listdir(dl_dir):
@@ -370,10 +375,12 @@ def download(star_id, **kwargs):
                         return 1
                     else:
                         print('{} successfully downloaded as {}. \n'.format(dl_name, save_name))
-                        return 0
+                        #return 0
+                        continue
                 else:
                     print('Already have file for ' + star_id)
-                    return 0
+                    #return 0
+                    continue
 
         else:
             print(star_id + ' does not exist in ' + data_release)
