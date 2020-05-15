@@ -882,6 +882,9 @@ def apLSFPath(chip,dr=None):
     elif dr == '13' or dr == 'current':
         return os.path.join(specReduxPath,'r6','cal','lsf',
                             'apLSF-%s-05440020.fits' % chip)
+    elif dr == '14':
+        return os.path.join(specReduxPath,'r8','cal','lsf',
+                            'apLSF-%s-05440020.fits' % chip)
     
 def apogeeSpectroReduxDirPath(dr=None):
     """
