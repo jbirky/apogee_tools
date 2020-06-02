@@ -857,7 +857,7 @@ def apWavePath(chip,dr=None):
         return os.path.join(specReduxPath,'r8','cal','wave',
                             'apWave-%s-02420038.fits' % chip)
     
-def apLSFPath(chip,dr=None):
+def apLSFPath(chip,dr='13'):
     """
     NAME:
        apLSFPath

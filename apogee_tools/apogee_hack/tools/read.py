@@ -710,7 +710,7 @@ def modelSpec(lib='GK',teff=4500,logg=2.5,metals=0.,
         out[5320:]= hdulist[4].data[metalsIndx,loggIndx,teffIndx]
         return out
 
-def apWave(chip,ext=2,dr=None):
+def apWave(chip,ext=2,dr='13'):
     """
     NAME:
        apWave
