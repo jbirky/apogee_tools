@@ -32,7 +32,7 @@ def searchStars(**kwargs):
 
     searchval = kwargs.get('id_name')
     ap_path   = kwargs.get('ap_path', AP_PATH)
-    ap_dr     = kwargs.get('ap_dr', 16)
+    ap_dr     = kwargs.get('ap_dr', 17)
 
     #Read the database file
     hdu        = fits.open(ap_path + '/{}'.format(data_releases['dr17']))
@@ -49,7 +49,7 @@ def searchStars(**kwargs):
 
     #print(ap_dr, ap_id, loc_id, filename, field)
 
-    if ap_dr == 16:
+    if ap_dr >= 16:
         return ap_id[0], filename[0], telescope[0], field[0], loc_id[0]
     else:
         return ap_id[0], loc_id[0]
@@ -133,7 +133,7 @@ def download(star_id, **kwargs):
 
     """
 
-    dr = kwargs.get('dr', 'dr16')
+    dr = kwargs.get('dr', 'dr17')
     #print('Data Release:', dr)
 
     # Datatypes to download
