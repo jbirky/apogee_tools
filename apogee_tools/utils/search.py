@@ -237,7 +237,7 @@ def download(star_id, **kwargs):
         Name format for the file: apStar-r8-APOGEE_ID.fits
         """
         
-        if data_release == 'dr16':
+        if dr >= 16:
             fname     = 'apStar-{}-{}.fits'.format(key[data_release][0], star_id)
             save_name = 'apStar-{}.fits'.format(star_id)
         else:
