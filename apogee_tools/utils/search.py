@@ -13,7 +13,7 @@ AP_PATH = db_path
 data_releases = {'dr10':'allStar-v304.fits',   'dr11':'allStar-v402.fits', \
                  'dr12':'allStar-v603.fits',   'dr13':'allStar-l30e.2.fits', \
                  'dr14':'allStar-l31c.2.fits', 'dr15':'allStar-l31c.2.fits', \
-                 'dr16':'allStar-r12-l33.fits',} 
+                 'dr16':'allStar-r12-l33.fits', 'dr17':'allStar-dr17-synspec.fits'} 
 
 
 def searchStars(**kwargs):
@@ -35,7 +35,7 @@ def searchStars(**kwargs):
     ap_dr     = kwargs.get('ap_dr', 16)
 
     #Read the database file
-    hdu        = fits.open(ap_path + '/{}'.format(data_releases['dr16']))
+    hdu        = fits.open(ap_path + '/{}'.format(data_releases['dr17']))
     keys       = hdu[1].header
     search_par = kwargs.get('SearchPar', 'APOGEE_ID')
     t          = hdu[1].data[search_par]
@@ -68,7 +68,7 @@ def searchVisits(**kwargs):
 
     ap_id   = kwargs.get('id_name')
     ap_path = kwargs.get('ap_path', AP_PATH)
-    ap_dr   = kwargs.get('ap_dr', 16)
+    ap_dr   = kwargs.get('ap_dr', 17)
 
     #print(ap_id, ap_path, ap_dr)
 
@@ -76,6 +76,7 @@ def searchVisits(**kwargs):
     elif ap_dr == 14: allvisitFile = 'allVisit-l31c.2.fits'
     elif ap_dr == 15: allvisitFile = 'allVisit-l31c.2.fits'
     elif ap_dr == 16: allvisitFile = 'allVisit-r12-l33.fits'
+    elif ap_dr == 17: allvisitFile = 'allVisit-dr17-synspec.fits'
 
     #print(ap_id, ap_path)
 
@@ -92,14 +93,14 @@ def searchVisits(**kwargs):
     plates = data['PLATE'][pos]
     mjds   = data['MJD'][pos]
     fibers = data['FIBERID'][pos]
-    if ap_dr == 16:
+    if ap_dr >= 16:
         telescopes = data['TELESCOPE'][pos]
         fields     = data['FIELD'][pos]
         files      = data['FILE'][pos]
 
     #print(ap_id, plates, mjds, fibers, telescopes, fields)
 
-    if ap_dr == 16: 
+    if ap_dr >= 16: 
         return ap_id, plates, mjds, fibers, telescopes, fields, files
     else: 
         return ap_id, plates, mjds, fibers
@@ -132,7 +133,7 @@ def download(star_id, **kwargs):
 
     """
 
-    dr = kwargs.get('dr', 'dr15')
+    dr = kwargs.get('dr', 'dr16')
     #print('Data Release:', dr)
 
     # Datatypes to download
@@ -159,7 +160,8 @@ def download(star_id, **kwargs):
     key = {'dr13': ['r6','l30e','l30e.2'], 
            'dr14': ['r8','l31c','l31c.2'], 
            'dr15': ['r8','l31c','l31c.2'], 
-           'dr16': ['r12','l33','l33'],}
+           'dr16': ['r12','l33','l33'],
+           'dr17': ['dr17','l33','l33']}
 
     data_release = 'dr%s'%dr
 
@@ -169,7 +171,7 @@ def download(star_id, **kwargs):
         Name format for the file: aspcapStar-r8-l31c.2-APOGEE_ID.fits
         """
 
-        if data_release == 'dr16':
+        if dr >= 16:
             fname     = 'aspcapStar-{}-{}.fits'.format(key[data_release][0], star_id)
             save_name = 'aspcap-{}.fits'.format(star_id)
         else:
@@ -181,14 +183,14 @@ def download(star_id, **kwargs):
 
             #Look up location id from allStar-l30e.2.fits file
             #ap_id, loc_id = searchStars(id_name=star_id, rel=dr, ap_path=ap_path)
-            if dr == 16:
+            if dr >= 16:
                 ap_id, plates, mjds, fibers, telescopes, fields, files = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
             else:
                 ap_id, plates, mjds, fibers = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
 
             if len(ap_id) != 0:  
 
-                if data_release == 'dr16':
+                if dr >= 16:
                     dl_name = fname
                     main_url = "https://{}.sdss.org/sas/{}/apogee/spectro/aspcap/{}/{}/{}/{}/{}".format(data_release, data_release, key[data_release][0], key[data_release][1], telescopes[0], fields[0], dl_name)
                     print('Downloading {} from {} {} survey.'.format(ap_id, data_release, telescopes[0]))
@@ -246,14 +248,14 @@ def download(star_id, **kwargs):
         if save_name not in os.listdir(dl_dir):
 
             #Look up location id from allStar-l30e.2.fits file
-            if dr == 16:
+            if dr >= 16:
                 ap_id, filename, telescope, field, loc_id = searchStars(id_name=star_id, ap_path=ap_path, ap_dr=dr)
             else:
                 ap_id, loc_id = searchStars(id_name=star_id, ap_path=ap_path, ap_dr=dr)
 
             if len(ap_id) != 0:  
 
-                if data_release == 'dr16':
+                if dr >= 16:
                     dl_name = fname
                     main_url = "https://{}.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/{}".format(data_release, data_release, key[data_release][0], telescope, field, dl_name)
                     print('Downloading {} from {} {} survey.'.format(ap_id, data_release, telescope[0]))
@@ -296,8 +298,8 @@ def download(star_id, **kwargs):
         """
         Name format for the file: apVisit-APOGEE_ID-NVISIT.fits
         """
-
-        if dr == 16:
+        
+        if dr >= 16:
             ap_id, plates, mjds, fibers, telescopes, fields, files = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
         else:
             ap_id, plates, mjds, fibers = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
@@ -311,7 +313,7 @@ def download(star_id, **kwargs):
                 #print(v)
 
                 #Look up plate, mjd and fiber numbers from allVisit-l30e.2.fits file
-                if dr == 16:
+                if dr >= 16:
                     plate, mjd, fiber, telescope, field, Filename = str(plates[v]).strip(), str(mjds[v]).strip(), str(fibers[v]).strip(), str(telescopes[v]).strip(), str(fields[v]).strip(), str(files[v]).strip()
                     #print(dr, 'dr%s'%dr, plate, mjd, fiber, telescope, field)
                 else: 
@@ -330,7 +332,7 @@ def download(star_id, **kwargs):
                     #print(os.listdir(dl_dir))
                     #1. Try downloading from the 2.5m survey
 
-                    if data_release == 'dr16':
+                    if dr >= 16:
                         dl_name = Filename
                         main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/visit/{}/{}/{}/{}/{}".format(data_release, key[data_release][0], telescope, field, plate, mjd, dl_name)
                         if telescope == 'apo1m':

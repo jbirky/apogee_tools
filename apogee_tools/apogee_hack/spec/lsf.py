@@ -8,21 +8,21 @@ import math
 import numpy
 from scipy import special, interpolate, sparse, ndimage
 import scipy.sparse.linalg
-#import fitsio
+import fitsio
 import apogee_tools.apogee_hack.tools.read as apread
 import apogee_tools.apogee_hack.tools.path as appath
 from apogee_tools.apogee_hack.tools.download import _download_file
 from apogee_tools.apogee_hack.spec.plot import apStarWavegrid
-import time
 
 _SQRTTWO= numpy.sqrt(2.)
 # Load wavelength solutions
 _WAVEPIX_A= apread.apWave('a',ext=2)
 _WAVEPIX_B= apread.apWave('b',ext=2)
 _WAVEPIX_C= apread.apWave('c',ext=2)
+
 def convolve(wav,spec,
              lsf=None,xlsf=None,dxlsf=None,fiber='combo',
-             vmacro=6., apwave=None):
+             vmacro=6.):
     """
     NAME:
        convolve
@@ -42,54 +42,37 @@ def convolve(wav,spec,
     HISTORY:
        2015-03-14 - Written - Bovy (IAS)
     """
-    # Parse LSF input     XXXX THIS PART TAKES FOREVER!
-    start = time.time()
+    # Parse LSF input
     if lsf is None:
         xlsf= numpy.linspace(-7.,7.,43)
-        lsf= eval(xlsf,fiber=fiber, wav=apwave)
-    if not isinstance(lsf,sparse.dia_matrix):
+        lsf= eval(xlsf,fiber=fiber)
+    if not isinstance(lsf, sparse.dia_matrix):
         lsf= sparsify(lsf)
     if dxlsf is None:
         dx= xlsf[1]-xlsf[0]
     else:
         dx= dxlsf
-    #print('Seconds EVAL: %s'%(time.time()-start))
-    #start2 = time.time()
-    hires= int(round(1./dx))
-    if apwave is None:
-        apwave = apStarWavegrid()
-    l10wav= numpy.log10(apwave)
-    dowav= l10wav[1]-l10wav[0]
-    tmpwav= 10.**numpy.arange(l10wav[0],l10wav[-1]+dowav/hires,dowav/hires)
-    tmp= numpy.empty(len(l10wav)*hires)   
-    # Setup vmacro
-    if not vmacro is None and isinstance(vmacro,float):
-        sigvm= vmacro/3./10.**5./numpy.log(10.)*hires/dowav\
-            /2./numpy.sqrt(2.*numpy.log(2.))
+
+    hires  = int(round(1./dx))
+    l10wav = numpy.log10(apStarWavegrid())
+    dowav  = l10wav[1]-l10wav[0]
+    tmpwav = 10.**numpy.arange(l10wav[0],l10wav[-1]+dowav/hires,dowav/hires)
+    tmp    = numpy.empty(len(l10wav)*hires)   
+
     # Interpolate the input spectrum, starting from a polynomial baseline
-    if len(spec.shape) == 1: spec= numpy.reshape(spec,(1,len(spec)))
-    nspec= spec.shape[0]
-    tmp= numpy.empty((nspec,len(tmpwav)))
+    if len(spec.shape) == 1: 
+        spec = numpy.reshape(spec,(1,len(spec)))
+    nspec = spec.shape[0]
+    tmp   = numpy.empty((nspec,len(tmpwav)))
     for ii in range(nspec):
-        baseline= numpy.polynomial.Polynomial.fit(wav,spec[ii],4)
-        ip= interpolate.InterpolatedUnivariateSpline(wav,
-                                                     spec[ii]/baseline(wav),
-                                                     k=3)
-        tmp[ii]= baseline(tmpwav)*ip(tmpwav)
-    # Add macroturbulence
-    if not vmacro is None and isinstance(vmacro,float):
-        tmp= ndimage.gaussian_filter1d(tmp,sigvm,mode='constant',axis=1)
-    elif not vmacro is None: 
-        # Use sparse representations to quickly calculate the convolution
-        tmp= sparse.csr_matrix(tmp)
-        if isinstance(vmacro,numpy.ndarray):
-            vmacro= sparsify(vmacro)
-        tmp= vmacro.dot(tmp.T).T
-    if not isinstance(lsf,sparse.csr_matrix):
-        # Use sparse representations to quickly calculate the convolution
-        tmp= sparse.csr_matrix(tmp)
-    #start2 = time.time()
-    #print('Seconds Total: %s'%(time.time()-start2))
+        baseline = numpy.polynomial.Polynomial.fit(wav,spec[ii], 4)
+        ip       = interpolate.InterpolatedUnivariateSpline(wav,
+                                                            spec[ii]/baseline(wav),
+                                                            k=3)
+        tmp[ii]  = baseline(tmpwav)*ip(tmpwav)
+
+    # Use sparse representations to quickly calculate the convolution
+    tmp= sparse.csr_matrix(tmp)
     return lsf.dot(tmp.T).T.toarray()[:,::hires]
 
 def sparsify(lsf):
@@ -144,7 +127,7 @@ def dummy(dx=1./3.,sparse=False):
     if sparse: out= sparsify(out)
     return out
 
-def eval(x,fiber='combo',sparse=False,wav=None):
+def eval(x,fiber='combo',sparse=False):
     """
     NAME:
        eval
@@ -170,38 +153,32 @@ def eval(x,fiber='combo',sparse=False,wav=None):
     # Are the x unit pixels or a fraction 1/hires thereof?
     hires= int(round(1./(x[1]-x[0])))
     # Setup output
-    if wav is None: wav = apStarWavegrid()
+    wav= apStarWavegrid()
     l10wav= numpy.log10(wav)
     dowav= l10wav[1]-l10wav[0]
     # Hi-res wavelength for output
     hireswav= 10.**numpy.arange(l10wav[0],l10wav[-1]+dowav/hires,dowav/hires)
     out= numpy.zeros((len(hireswav),len(x)))
     for chip in ['a','b','c']:
-        start2 = time.time()
         # Get pixel array for this chip, use fiber[0] for consistency if >1 fib
         pix= wave2pix(hireswav,chip,fiber[0])
-        #print('Seconds1: %s'%(time.time()-start2))
-        #start3 = time.time()
         dx= numpy.roll(pix,-hires,)-pix
         dx[-1]= dx[-1-hires]
         dx[-2]= dx[-2-hires]
         dx[-3]= dx[-3-hires]
         xs= numpy.tile(x,(len(hireswav),1))\
-            *numpy.tile(dx,(len(x),1)).T # nwav,nx       
-        gd= True^numpy.isnan(pix)
+            *numpy.tile(dx,(len(x),1)).T # nwav,nx     
+        gd= numpy.bitwise_xor(True, numpy.isnan(pix))
         # Read LSF file for this chip
         lsfpars= apread.apLSF(chip,ext=0)
-        #print('Seconds2: %s'%(time.time()-start3))
-        #start4 = time.time()
         # Loop through the fibers
         for fib in fiber:
             out[gd]+= raw(xs[gd],pix[gd],lsfpars[:,300-fib])
-        #print('Seconds3: %s'%(time.time()-start4))
     out[out<0.]= 0.
     out/= numpy.tile(numpy.sum(out,axis=1),(len(x),1)).T
     if sparse: out= sparsify(out)
     return out
-
+    
 def raw(x,xcenter,params):
     """
     NAME:
@@ -434,93 +411,5 @@ def pix2wave(pix,chip,fiber=300):
     out[pix > 2047]= numpy.nan
     return out
 
-def _load_precomp(dr=None,fiber='combo',sparse=True):
-    """Load a precomputed LSF"""
-    if dr is None: dr= appath._default_dr()
-    if dr is 'current':
-        warnings.warn("Preloaded LSFs for current DR not yet available, falling back on DR12 files")
-        dr= '12'
-    fileDir= os.path.dirname(appath.apLSFPath('a',dr=dr))
-    filePath= os.path.join(fileDir,'apogee-lsf-dr%s-%s.fits' % (dr,fiber))
-    # Download the file if necessary
-    if not os.path.exists(filePath):
-        dlink= \
-            filePath.replace(fileDir,'https://zenodo.org/record/16147/files')
-        _download_file(dlink,filePath,dr)
-    x= numpy.linspace(-7.,7.,43)
-    elsf= fitsread(filePath)
-    if sparse:
-        return (x,sparsify(elsf))
-    else:
-        return (x,elsf)
-
-def deconvolve(spec,specerr,
-               lsf=None,eps=2500.,smooth=None):
-    """
-    NAME:
-       deconvolve
-    PURPOSE:
-       deconvolve the LSF
-    INPUT:
-       spec - spectrum (nwave)
-       specerr - spectrum uncertainty array (nwave)
-       lsf= (None) LSF to deconvolve, needs to be specified in non-sparse format
-       eps= (2500.) smoothness parameter
-       smooth= (None) if set to a resolution, smooth with a FWHM resolution of 'smooth' and return the spectrum on the apStar wavelength grid
-    OUTPUT:
-       high-resolution deconvolved spectrum or smoothed deconvolved spectrum on apStar wavelength grid is smooth= is set
-    HISTORY:
-       2015-04-24 - Written - Bovy (IAS)
-    """
-    # Parse LSF input
-    if lsf is None:
-        raise ValueError("lsf= keyword with LSF in non-sparse format required for apogee.spec.lsf.deconvolve")
-    if isinstance(lsf,sparse.dia_matrix):
-        raise ValueError("lsf= keyword with LSF needs to be in non-sparse format")
-    lsf[numpy.isnan(lsf)]= 0.
-    # How much higher resolution is the LSF than the data?
-    hires= int(round(lsf.shape[0]/8575.))
-    # Setup output
-    out= numpy.zeros(lsf.shape[0])
-    # Loop through the detectors and analyze each one separately
-    for sindx, eindx in zip([140,3450,6250],[3370,6200,8450]):
-        # Get the LSF for this detector
-        slsf= sparsify(lsf[hires*sindx:hires*eindx])
-        # Parse the spectrum and its error for this detector, normalize
-        tspec= numpy.ones((eindx-sindx)*hires)
-        tinvspecerr= numpy.zeros((eindx-sindx)*hires)
-        norm= numpy.nanmean(spec[sindx:eindx])
-        tspec[::hires]= spec[sindx:eindx]/norm
-        tinvspecerr[::hires]= norm/specerr[sindx:eindx]
-        # Deal with NaNs
-        tinvspecerr[numpy.isnan(tspec)]= 0.
-        tspec[numpy.isnan(tspec)]= 1.
-        # Set up the necessary sparse matrices
-        Cinv= sparse.diags([tinvspecerr**2.],[0])
-        CinvL= Cinv.dot(slsf)
-        LTCinvL= (slsf.T).dot(CinvL)
-        # P smoothness matrix
-        diags1= -numpy.ones(slsf.shape[1])
-        diags1[-1]= 0.
-        diags2= numpy.ones(slsf.shape[1]-1)
-        P= sparse.diags([diags1,diags2],[0,1])
-        A= LTCinvL+eps*(P.T).dot(P)
-        # b
-        Cinvs= Cinv.dot(tspec)
-        b= (slsf.T).dot(Cinvs)
-        tmp= scipy.sparse.linalg.bicg(A,b)
-        if tmp[1] == 0:
-            tmp= tmp[0]
-        else:
-            raise RuntimeError("Deconvolution did not converge")
-        out[sindx*hires:eindx*hires]= tmp*norm
-    if not smooth is None:
-        wav= apStarWavegrid()
-        l10wav= numpy.log10(wav)
-        dowav= l10wav[1]-l10wav[0]
-        sigvm= hires/dowav/smooth/numpy.log(10.)\
-            /2./numpy.sqrt(2.*numpy.log(2.))
-        out= ndimage.gaussian_filter1d(out,sigvm,mode='constant')[::hires]
-    return out
 
 

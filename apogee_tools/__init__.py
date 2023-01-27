@@ -7,7 +7,7 @@ PATH 	  = os.path.realpath(__file__)
 AP_TOOLS  = os.path.split(os.path.split(PATH)[0])[0]
 LIBRARIES = AP_TOOLS + '/libraries'
 
-
+"""
 # Read configuration file
 try: # open from the current working directory
 	f = open("config.yaml")
@@ -35,7 +35,7 @@ step = config["step"]
 prior = config["prior"]
 
 instrument = data["instrument"]
-
+"""
 
 from .core import Spectrum, Apogee, Nirspec, ModelGrid
 
