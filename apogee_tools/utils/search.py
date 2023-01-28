@@ -5,12 +5,15 @@ import apogee_tools as ap
 from astropy.table import Table
 from astropy.io import fits, ascii
 from astroquery.simbad import Simbad
+import wget
 
 db_path = os.environ['APOGEE_DATA'] 
 AP_PATH = db_path
 
-data_releases = {'dr10':'allStar-v304.fits', 'dr11':'allStar-v402.fits', \
-    'dr12':'allStar-v603.fits', 'dr13':'allStar-l30e.2.fits', 'dr14':'allStar-l31c.2.fits'} 
+data_releases = {'dr10':'allStar-v304.fits',   'dr11':'allStar-v402.fits', \
+                 'dr12':'allStar-v603.fits',   'dr13':'allStar-l30e.2.fits', \
+                 'dr14':'allStar-l31c.2.fits', 'dr15':'allStar-l31c.2.fits', \
+                 'dr16':'allStar-r12-l33.fits', 'dr17':'allStar-dr17-synspec.fits'} 
 
 
 def searchStars(**kwargs):
@@ -28,10 +31,11 @@ def searchStars(**kwargs):
     """
 
     searchval = kwargs.get('id_name')
-    release   = kwargs.get('rel', 'dr14')
+    ap_path   = kwargs.get('ap_path', AP_PATH)
+    ap_dr     = kwargs.get('ap_dr', 17)
 
     #Read the database file
-    hdu        = fits.open(AP_PATH + '/' + data_releases[release])
+    hdu        = fits.open(ap_path + '/{}'.format(data_releases['dr17']))
     keys       = hdu[1].header
     search_par = kwargs.get('SearchPar', 'APOGEE_ID')
     t          = hdu[1].data[search_par]
@@ -39,10 +43,16 @@ def searchStars(**kwargs):
     ap_id      = hdu[1].data['APOGEE_ID'][condition]
     asp_id     = hdu[1].data['ASPCAP_ID'][condition]
     loc_id     = hdu[1].data['LOCATION_ID'][condition]
+    filename   = hdu[1].data['FILE'][condition]
+    telescope  = hdu[1].data['TELESCOPE'][condition]
+    field      = hdu[1].data['FIELD'][condition]
 
-    print(ap_id, loc_id)
+    #print(ap_dr, ap_id, loc_id, filename, field)
 
-    return ap_id, loc_id[0]
+    if ap_dr >= 16:
+        return ap_id[0], filename[0], telescope[0], field[0], loc_id[0]
+    else:
+        return ap_id[0], loc_id[0]
 
 
 def searchVisits(**kwargs):
@@ -56,22 +66,44 @@ def searchVisits(**kwargs):
     Output: 'ap_id', 'plates', 'mjds', 'fibers' : info needed to download visit spectra
     """
 
-    ap_id = kwargs.get('id_name')
+    ap_id   = kwargs.get('id_name')
+    ap_path = kwargs.get('ap_path', AP_PATH)
+    ap_dr   = kwargs.get('ap_dr', 17)
+
+    #print(ap_id, ap_path, ap_dr)
+
+    if   ap_dr == 13: allvisitFile = 'allVisit-l31c.2.fits'
+    elif ap_dr == 14: allvisitFile = 'allVisit-l31c.2.fits'
+    elif ap_dr == 15: allvisitFile = 'allVisit-l31c.2.fits'
+    elif ap_dr == 16: allvisitFile = 'allVisit-r12-l33.fits'
+    elif ap_dr == 17: allvisitFile = 'allVisit-dr17-synspec.fits'
+
+    #print(ap_id, ap_path)
 
     #Read the database file
-    hdu = fits.open(AP_PATH + '/allVisit-l31c.2.fits')
+    hdu = fits.open(ap_path + '/%s'%allvisitFile)
 
     keys = hdu[1].header
     data = hdu[1].data
 
     search = data['APOGEE_ID']
     pos = np.where(search == ap_id)
+    #print('POS', pos)
 
     plates = data['PLATE'][pos]
-    mjds = data['MJD'][pos]
+    mjds   = data['MJD'][pos]
     fibers = data['FIBERID'][pos]
+    if ap_dr >= 16:
+        telescopes = data['TELESCOPE'][pos]
+        fields     = data['FIELD'][pos]
+        files      = data['FILE'][pos]
 
-    return ap_id, plates, mjds, fibers
+    #print(ap_id, plates, mjds, fibers, telescopes, fields)
+
+    if ap_dr >= 16: 
+        return ap_id, plates, mjds, fibers, telescopes, fields, files
+    else: 
+        return ap_id, plates, mjds, fibers
 
 
 def download(star_id, **kwargs):
@@ -80,18 +112,39 @@ def download(star_id, **kwargs):
     Download star by 2MASS name
     @Jessica Birky
 
-    Input:  'star_id' : 2MASS name
-            'type'    : aspcap, apstar, or apvisit
+    modified by Dino Hsu on Nov 18, 2019
+
+    Input:  
+
+    'star_id'   : (str) 2MASS name
+    'type'      : (str) can be: 'ap1d', 'aspcap', 'apstar', or 'apvisit'
+    'dr'        : (str) data release; default: dr15
+    'dir'       : (str) the path to save the files; default is the path for apogee_data
+    'ap_path'   : (str) the path for allVisit and allStar files; default is the path for apogee_data
+
+    Example
+    -------
+    >>> import apogee_tools as ap
+    >>> APOGEE_ID = '2M05351427-0524246'
+    >>> ap.download(APOGEE_ID, type='ap1d', 
+                    dir='/PATH_TO_STORE_DATS/', 
+                    ap_path='/PATH_TO_THE_ALLVISIT_OR_ALLSTAR_FILE/')
+
+
     """
 
-    dr = kwargs.get('rel', 'dr14')
+    dr = kwargs.get('dr', 'dr17')
+    #print('Data Release:', dr)
 
     # Datatypes to download
     d_type = kwargs.get('type','aspcap').lower()
 
     # Get download directory; create if it doesn't already exist
     default_dir = AP_PATH + '/%s_data/' %(d_type)
-    dl_dir = kwargs.get('dir', default_dir)
+    ## download to external drive
+    #default_dir = '/Volumes/LaCie/apogee/apvisit/'
+    dl_dir  = kwargs.get('dir', default_dir)
+    ap_path = kwargs.get('ap_path', AP_PATH)
 
     # Make sure id is in the proper 2MASS format
     if '+' in star_id:
@@ -104,7 +157,13 @@ def download(star_id, **kwargs):
     if not os.path.exists(dl_dir):
         os.makedirs(dl_dir)
 
-    key = {'dr13': ['r6','l30e','l30e.2'], 'dr14': ['r8','l31c','l31c.2']}
+    key = {'dr13': ['r6','l30e','l30e.2'], 
+           'dr14': ['r8','l31c','l31c.2'], 
+           'dr15': ['r8','l31c','l31c.2'], 
+           'dr16': ['r12','l33','l33'],
+           'dr17': ['dr17','l33','l33']}
+
+    data_release = 'dr%s'%dr
 
     if d_type == 'aspcap':
 
@@ -112,26 +171,53 @@ def download(star_id, **kwargs):
         Name format for the file: aspcapStar-r8-l31c.2-APOGEE_ID.fits
         """
 
-        fname = 'aspcapStar-{}-{}-{}.fits'.format(key[dr][0], key[dr][2], star_id)
+        if dr >= 16:
+            fname     = 'aspcapStar-{}-{}.fits'.format(key[data_release][0], star_id)
+            save_name = 'aspcap-{}.fits'.format(star_id)
+        else:
+            fname = 'aspcapStar-{}-{}-{}.fits'.format(key[data_release][0], key[data_release][2], star_id)
+            save_name = 'aspcap-{}.fits'.format(star_id)
 
         #check if file has already been downloaded
-        if fname not in os.listdir(dl_dir):
+        if save_name not in os.listdir(dl_dir):
 
             #Look up location id from allStar-l30e.2.fits file
-            ap_id, loc_id = searchStars(id_name=star_id, rel=dr)
+            #ap_id, loc_id = searchStars(id_name=star_id, rel=dr, ap_path=ap_path)
+            if dr >= 16:
+                ap_id, plates, mjds, fibers, telescopes, fields, files = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+            else:
+                ap_id, plates, mjds, fibers = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
 
             if len(ap_id) != 0:  
+
+                if dr >= 16:
+                    dl_name = fname
+                    main_url = "https://{}.sdss.org/sas/{}/apogee/spectro/aspcap/{}/{}/{}/{}/{}".format(data_release, data_release, key[data_release][0], key[data_release][1], telescopes[0], fields[0], dl_name)
+                    print('Downloading {} from {} {} survey.'.format(ap_id, data_release, telescopes[0]))
+                    print('Downloading from: %s'%main_url)
+                    wget.download(main_url, dl_dir+dl_name)
+                    os.rename(dl_dir+dl_name, dl_dir+save_name)
+                    return 0
+
                 #1. Try downloading from the 2.5m survey
                 print('Downloading {} from {} 2.5m survey.'.format(ap_id, dr))
-                main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/{}/{}".format(dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname)
-                os.system("wget {} -P {}" .format(main_url, dl_dir)) 
+                cwd = os.getcwd()
+                main_url = "https://{}.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/{}/{}".format(dr, dr, key[dr][0], key[dr][1], key[dr][2], loc_id, fname)
+                os.chdir(dl_dir)
+                os.system("curl -O {}".format(main_url))
+                #os.system("wget {} -P {}" .format(main_url, dl_dir))
+                os.chdir(cwd) 
                 
                 #2. If not in main survey, try downloading from the 1m survey
                 if fname not in os.listdir(dl_dir):
                     print(star_id + ' not found in APOGEE 2.5m survey.')
                     print('Downloading {} from {} 1.0m survey.'.format(ap_id, dr))
+                    cwd = os.getcwd()
                     anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/Mdwarfs/{}".format(dr, key[dr][0], key[dr][1], key[dr][2], fname)
-                    os.system("wget {} -P {}" .format(anc_url, dl_dir)) 
+                    os.chdir(dl_dir)
+                    os.system("curl -O {}".format(anc_url))
+                    #os.system("wget {} -P {}" .format(anc_url, dl_dir))
+                    os.chdir(cwd)
                 
                 #3. If not in main or Mdwarf ancilliary survey, return error message
                 if fname not in os.listdir(dl_dir):
@@ -139,38 +225,61 @@ def download(star_id, **kwargs):
                 else:
                     print(fname + ' successfully downloaded. \n')
             else:
-                print(star_id + ' does not exist in ' + dr)
+                print('{} does not exist in {}'.format(star_id, dr))
 
         else:
-            print('Already have file for ' + star_id)
+            print('Already have aspcap file for {}'.format(star_id))
 
 
     if d_type == 'apstar': 
 
         """
-        Name format for the file: apStar-r6-APOGEE_ID.fits
+        Name format for the file: apStar-r8-APOGEE_ID.fits
         """
-
-        fname = 'apStar-r8-'+star_id+'.fits'
+        
+        if dr >= 16:
+            fname     = 'apStar-{}-{}.fits'.format(key[data_release][0], star_id)
+            save_name = 'apStar-{}.fits'.format(star_id)
+        else:
+            fname = 'apStar-{}-{}.fits'.format(key[data_release][0], star_id)
+            save_name = 'apStar-{}.fits'.format(star_id)
         
         #check if file has already been downloaded
-        if fname not in os.listdir(dl_dir):
+        if save_name not in os.listdir(dl_dir):
 
             #Look up location id from allStar-l30e.2.fits file
-            ap_id, loc_id = searchStars(id_name=star_id)
+            if dr >= 16:
+                ap_id, filename, telescope, field, loc_id = searchStars(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+            else:
+                ap_id, loc_id = searchStars(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+
+            if len(ap_id) != 0:  
+
+                if dr >= 16:
+                    dl_name = fname
+                    main_url = "https://{}.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/{}/{}/{}".format(data_release, data_release, key[data_release][0], telescope, field, dl_name)
+                    print('Downloading {} from {} {} survey.'.format(ap_id, data_release, telescope[0]))
+                    print('Downloading from: %s'%main_url)
+                    wget.download(main_url, dl_dir+dl_name)
+                    os.rename(dl_dir+dl_name, dl_dir+save_name)
+                    return 0
 
             if len(ap_id) != 0:
                 #1. Try downloading from the 2.5m survey
                 print('Downloading {} from {} 2.5m survey.'.format(ap_id, dr))
-                main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/apo25m/{}/{}".format(dr, key[dr][0], loc_id, fname)
-                os.system("wget {} -P {}" .format(main_url, dl_dir))
+                cwd = os.getcwd()
+                main_url = "https://{}.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/apo25m/{}/{}".format(dr, dr, key[dr][0], loc_id, fname)
+                os.chdir(dl_dir)
+                os.system("curl -O {}".format(main_url))
+                #os.system("wget -P {} {}" .format(main_url, dl_dir))
+                os.chdir(cwd)
                 
                 #2. If not in main survey, try downloading from the 1m survey
                 if fname not in os.listdir(dl_dir):
                     print(star_id + ' not found in APOGEE 2.5m survey.')
                     print('Downloading {} from {} 1.0m survey.'.format(ap_id, dr))
                     anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/stars/apo1m/Mdwarfs/{}".format(dr, key[dr][0], fname)
-                    os.system("wget {} -P {}" .format(anc_url, dl_dir)) 
+                    os.system("wget -P {} {}" .format(anc_url, dl_dir)) 
                     
                 #3. If not in main or Mdwarf ancilliary survey, return error message
                 if fname not in os.listdir(dl_dir):
@@ -178,10 +287,10 @@ def download(star_id, **kwargs):
                 else:
                     print(fname + ' successfully downloaded. \n')
             else:
-                print(star_id + ' does not exist in ' + dr)
+                print('{} does not exist in {}'.format(star_id, dr))
 
         else:
-            print('Already have file for ' + star_id)
+            print('Already have apstar file for {}'.format(star_id))
 
 
     if d_type == 'apvisit': 
@@ -189,51 +298,95 @@ def download(star_id, **kwargs):
         """
         Name format for the file: apVisit-APOGEE_ID-NVISIT.fits
         """
-
-        ap_id, plates, mjds, fibers = searchVisits(id_name=star_id)
+        
+        if dr >= 16:
+            ap_id, plates, mjds, fibers, telescopes, fields, files = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+        else:
+            ap_id, plates, mjds, fibers = searchVisits(id_name=star_id, ap_path=ap_path, ap_dr=dr)
+        #print(ap_id, plates, mjds, fibers)
         nVisits = len(plates)
-
+        
         if len(ap_id) != 0:
 
             #Download individual visit .fits files
             for v in range(nVisits):
+                #print(v)
 
                 #Look up plate, mjd and fiber numbers from allVisit-l30e.2.fits file
-                plate, mjd, fiber = str(plates[v]), str(mjds[v]), str(fibers[v])
-
+                if dr >= 16:
+                    plate, mjd, fiber, telescope, field, Filename = str(plates[v]).strip(), str(mjds[v]).strip(), str(fibers[v]).strip(), str(telescopes[v]).strip(), str(fields[v]).strip(), str(files[v]).strip()
+                    #print(dr, 'dr%s'%dr, plate, mjd, fiber, telescope, field)
+                else: 
+                    plate, mjd, fiber = str(plates[v]).strip(), str(mjds[v]).strip(), str(fibers[v]).strip()
+                #print(dr, 'dr%s'%dr, plate, mjd, fiber, key[data_release][0])
+                
                 #make sure fiber string has proper number of zeros 
                 fiber = fiber.zfill(3)
 
-                dl_name   = 'apVisit-{}-{}-{}-{}.fits'.format(key[dr][0], plate, mjd, fiber)
+                dl_name   = 'apVisit-{}-{}-{}-{}.fits'.format(key[data_release][0], plate, mjd, fiber)
                 save_name = 'apVisit-{}-{}.fits'.format(star_id, str(v+1))
-                
+                #print("https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(data_release, key[data_release][0], plate, mjd, dl_name))
                 #check if file has already been downloaded
+                #print(dl_dir)
                 if save_name not in os.listdir(dl_dir):
+                    #print(os.listdir(dl_dir))
                     #1. Try downloading from the 2.5m survey
-                    if plate != 'Mdwarfs':
-                        print('Downloading {} from {} 2.5m survey.'.format(ap_id, dr))
-                        main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(str(dr), key[dr][0], plate, mjd, dl_name)
-                        os.system("wget {} -O {}/{}".format(main_url, dl_dir, save_name))
+
+                    if dr >= 16:
+                        dl_name = Filename
+                        main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/visit/{}/{}/{}/{}/{}".format(data_release, key[data_release][0], telescope, field, plate, mjd, dl_name)
+                        if telescope == 'apo1m':
+                            main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/visit/{}/{}/{}/{}".format(data_release, key[data_release][0], telescope, field, plate, dl_name)      
+                        print('Downloading {} from {} {} survey.'.format(ap_id, data_release, telescope))
+                        print('Downloading from: %s'%main_url)
+                        wget.download(main_url, dl_dir+dl_name)
+                        os.rename(dl_dir+dl_name, dl_dir+save_name)
+                        #return 0
+                        continue
                     else:
-                        dl_name   = 'apVisit-{}-{}-{}.fits'.format(key[dr][0], mjd, star_id)
+                        dl_name   = 'apVisit-{}-{}-{}.fits'.format(key[data_release][0], mjd, star_id)
+
+                    if plate != 'Mdwarfs':
+                        print('Downloading {} from {} 2.5m survey.'.format(ap_id, data_release))
+                        main_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo25m/{}/{}/{}".format(data_release, key[data_release][0], plate, mjd, dl_name)
+                        #download_file = 
+                        print(main_url)
+                        wget.download(main_url, dl_dir+dl_name)
+                        os.rename(dl_dir+dl_name, dl_dir+save_name)
+                        #os.system("wget {} -O {}/{}".format(main_url, dl_dir, save_name))
+                        #return 0
+                        continue
+                    else:
+                        dl_name   = 'apVisit-{}-{}-{}.fits'.format(key[data_release][0], mjd, star_id)
 
                     #2. If not in main survey, try downloading from the 1m survey
                     if save_name not in os.listdir(dl_dir):
                         print(star_id + ' not found in APOGEE 2.5m survey.')
-                        print('Downloading {} from {} 1.0m survey.'.format(ap_id, dr))
-                        anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo1m/{}/{}/{}".format(str(dr), key[dr][0], plate, mjd, dl_name)
-                        os.system("wget {} -O {}/{}".format(anc_url, dl_dir, save_name))
+                        print('Downloading {} from {} 1.0m survey.'.format(ap_id, data_release))
+                        anc_url = "https://data.sdss.org/sas/{}/apogee/spectro/redux/{}/apo1m/{}/{}/{}".format(data_release, key[data_release][0], plate, mjd, dl_name)
+                        #download_file = 
+                        wget.download(anc_url)
+                        os.rename(dl_name, save_name)
+                        #os.system("wget {} -O {}/{}".format(anc_url, dl_dir, save_name))
+                        #return 0
+                        continue
 
                     #3. If not in main or Mdwarf ancilliary survey, return error message
                     if save_name not in os.listdir(dl_dir):
                         print(dl_name + ' could not be found in {} or {} \n'.format(main_url, anc_url))
+                        return 1
                     else:
                         print('{} successfully downloaded as {}. \n'.format(dl_name, save_name))
+                        #return 0
+                        continue
                 else:
-                    print('Already have file for ' + star_id)
+                    print('Already have apvisit file for {} visit {}'.format(star_id, str(v+1)))
+                    #return 0
+                    continue
 
         else:
-            print(star_id + ' does not exist in ' + dr)
+            print('{} does not exist in {}'.format(star_id, data_release))
+            return 1
 
 
     if d_type == 'ap1d':
@@ -250,7 +403,7 @@ def download(star_id, **kwargs):
         dl_dir = kwargs.get('dir', default_dir)
         
         print('Retrieving files for {}, VISIT{}, FRAME{}... \n'.format(star_id, visit, frame))
-        urls = ap.get_1dspec_urls(star_id, nvisit=visit, frame_id=frame)
+        urls = ap.get_1dspec_urls(star_id, nvisit=visit, frame_id=frame, dir=ap_path)
         chips = ['a', 'b', 'c']
 
         try:
@@ -265,7 +418,8 @@ def download(star_id, **kwargs):
                     print('Already have file {}'.format(dl_name))
                 elif save_name not in os.listdir(dl_dir):
                     print('Downloading {} to apogee_data/ap1d_data/{} \n'.format(url_list[i], save_name))
-                    os.system("wget {} -O {}/{}".format(url_list[i], dl_dir, save_name))
+                    #os.system("wget {} -O {}/{}".format(url_list[i], dl_dir, save_name))
+                    wget.download(url_list[i], dl_dir+dl_name)
                 else:
                     print('Unable to download file {}'.format(dl_fname))
                 

@@ -51,7 +51,7 @@ Search what line libraries are available, and what lists of elements/molecules a
    	>> ap.listSpecies('HITEMP')
    	   ['CO', 'CO2', 'H2O', 'NO', 'OH']
 
-Search a wavelegth region for certain species of atoms/molecules (returns a dictionary), for example to search the wavelength region between 15200 and 15210 `A`:
+Search a wavelegth region for certain species of atoms/molecules (returns a dictionary):
 
 .. code-block:: python
 

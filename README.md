@@ -1,6 +1,6 @@
 # apogee_tools
 
-Forward modeling tools for [APOGEE](http://www.sdss.org/dr13/irspec/) VLM star spectra. Project is currently under construction, but documentation for working modules can be found at [read the docs](http://apogee-tools.readthedocs.io/).
+Forward modeling tools for [APOGEE](http://www.sdss.org/dr15/irspec/) VLM star spectra. Project is currently under construction, but documentation for working modules can be found at [read the docs](http://apogee-tools.readthedocs.io/).
 
 ### Contributors:
 
@@ -9,4 +9,4 @@ Forward modeling tools for [APOGEE](http://www.sdss.org/dr13/irspec/) VLM star s
 * Adam Burgasser, PI (UCSD)
 * Dino Chih-Chun Hsu (UCSD)
 * Elizabeth Moreno (Guanajuato)
-* Chris Theissen (BU)
+* Chris Theissen (UCSD)

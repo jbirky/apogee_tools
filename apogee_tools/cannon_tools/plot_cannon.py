@@ -130,8 +130,8 @@ def plotCannonModels(ds, te_flux, te_labels, **kwargs):
         mdl  = ap.Spectrum(wave=wl, flux=te_flux[i])
         chi  = ap.compareSpectra(data, mdl, fit_scale=False)[0]
         
-        ax.plot(wl, tr_flux[i], color='k', linewidth=1)
-        ax.plot(wl, te_flux[i], color='r', linewidth=1)
+        ax.plot(wl, tr_flux[i], color='k')
+        ax.plot(wl, te_flux[i], color='r')
         
         par_str1 = [r'${} = {} \pm {}$'.format(lbl_names[k], round(te_label[i][k],sigfig[k]), te_label_unc[0]) for k in range(nparam)]
         can_lbl  = r'$Cannon: $ {}'.format(', '.join(par_str1))
