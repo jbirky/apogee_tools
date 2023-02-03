@@ -12,31 +12,36 @@ except ImportError:
 import warnings
 from periodictable import elements
 try:
-    # Need to have allStar
-    filePath= appath.allStarPath()
+    # Need to have allStar, use lite version when available (simpler to only do this for DR17)
+    if appath._APOGEE_REDUX in ['l33', 'dr17']:
+        lite = False
+    else:
+        lite = True 
+    filePath= appath.allStarPath(lite=lite)
     if not os.path.exists(filePath):
-        download.allStar()
-    indexArrays= fitsread(appath.allStarPath(),3)
+        download.allStar(lite=lite)
+    indexArrays= fitsread(appath.allStarPath(lite=lite),3)
 except ValueError:
     _INDEX_ARRAYS_LOADED= False
 else:
     _INDEX_ARRAYS_LOADED= True
     if type(indexArrays['PARAM_SYMBOL'][0,0]) == numpy.dtype(bytes):
-        _PARAM_SYMBOL= [index.strip().lower().decode("utf-8")  
+        _PARAM_SYMBOL= [index.strip().lower().decode("utf-8")
                         for index in indexArrays['PARAM_SYMBOL'].flatten()]
-        _ELEM_SYMBOL= [index.strip().lower().decode("utf-8") 
+        _ELEM_SYMBOL= [index.strip().lower().decode("utf-8")
                        for index in indexArrays['ELEM_SYMBOL'].flatten()]
     else:
-        _PARAM_SYMBOL= [index.strip().lower()  
+        _PARAM_SYMBOL= [index.strip().lower()
                         for index in indexArrays['PARAM_SYMBOL'].flatten()]
         _ELEM_SYMBOL= [index.strip().lower()
                        for index in indexArrays['ELEM_SYMBOL'].flatten()]
     _ELEM_NUMBER_DICT= dict((elem,
                              elements.__dict__[elem.capitalize()].number)
-                            for elem in _ELEM_SYMBOL 
-                            if elem != 'ci' and elem != 'tiii')
+                            for elem in _ELEM_SYMBOL
+                            if elem != 'ci' and elem != 'tiii' and elem != 'c13')
     _ELEM_NUMBER_DICT['CI']= elements.__dict__['C'].number
     _ELEM_NUMBER_DICT['TiII']= elements.__dict__['Ti'].number
+    _ELEM_NUMBER_DICT['C13'] = elements.__dict__['C'].number
 
 
 # DR12 abundance uncertainty coefficients  as a function of Teff, [M/H], SNR
@@ -118,24 +123,26 @@ apStarInds = {'10':{'blue':(322,3242),'green':(3648,6048),'red':(6412,8306)},
               '12':{'blue':(322,3242),'green':(3648,6048),'red':(6412,8306)},
               '13':{'blue':(246,3274),'green':(3585,6080),'red':(6344,8335)},
               '14':{'blue':(246,3274),'green':(3585,6080),'red':(6344,8335)},
+              '16':{'blue':(246,3274),'green':(3585,6080),'red':(6344,8335)},
+              '17':{'blue':(246,3274),'green':(3585,6080),'red':(6344,8335)},
               'current':{'blue':(246,3274),'green':(3585,6080),'red':(6344,8335)}
              }
 
 def _apStarPixelLimits(dr=None):
   """
-  NAME: 
+  NAME:
       _apStarPixelLimits
   PURPOSE:
-      return the apStar pixel bounds for each detector for the chosen data 
+      return the apStar pixel bounds for each detector for the chosen data
       release by unpacking apStarInds.
   INPUT
-      dr - string referring to data release, e.g. '12' 
+      dr - string referring to data release, e.g. '12'
   OUTPUT:
       bounds of blue, green and red detectors.
   HISTORY:
       2018-02-05 - Written - Price-Jones (UofT)
   """
-  if dr is None: 
+  if dr is None:
     dr=appath._default_dr()
   inds = apStarInds[dr]
   apStarBlu_lo,apStarBlu_hi = inds['blue']
@@ -145,15 +152,15 @@ def _apStarPixelLimits(dr=None):
 
 def _aspcapPixelLimits(dr=None):
   """
-  NAME: 
+  NAME:
       _aspcapPixelLimits
   PURPOSE:
-      return the ASPCAP pixel bounds for each detector for the chosen data 
+      return the ASPCAP pixel bounds for each detector for the chosen data
       release by unpacking apStarInds.
   INPUT
-      dr - string referring to data release, e.g. '12' 
+      dr - string referring to data release, e.g. '12'
   OUTPUT:
-      starting pixel of the blue, green and red detectors, as well as the 
+      starting pixel of the blue, green and red detectors, as well as the
       total spectrum length in pixels
   HISTORY:
       2018-02-05 - Written - Price-Jones (UofT)
@@ -168,29 +175,21 @@ def _aspcapPixelLimits(dr=None):
   return aspcapBlu_start,aspcapGre_start,aspcapRed_start,aspcapTotal
 
 # Wavegrid parameters used in apStarWavegrid and pix2wv
-_LOG10LAMBDA0 = 4.179 
-_DLOG10LAMBDA = 6.e-6
-_NLAMBDA      = 8575
-
-logw0         = 4.179
-dlogw         = 6.e-6
-nw_apStar     = 8575
+_LOG10LAMBDA0= 4.179
+_DLOG10LAMBDA= 6.*10.**-6.
+_NLAMBDA= 8575
 
 def apStarWavegrid():
-    # This is the old way
-    #return 10.**numpy.arange(_LOG10LAMBDA0,
-    #                         _LOG10LAMBDA0+_NLAMBDA*_DLOG10LAMBDA,
-    #                         _DLOG10LAMBDA)
-
-    # This is the new way
-    return 10.**(logw0+numpy.arange(nw_apStar)*dlogw)
+    return 10.**numpy.arange(_LOG10LAMBDA0,
+                             _LOG10LAMBDA0+_NLAMBDA*_DLOG10LAMBDA,
+                             _DLOG10LAMBDA)
 
 def paramIndx(param):
     """
     NAME:
        paramIndx
     PURPOSE:
-       return the index into the PARAM/FPARAM  arrays corresponding to a given stellar parameter 
+       return the index into the PARAM/FPARAM  arrays corresponding to a given stellar parameter
     INPUT:
        param - the stellar parameter (one of TEFF,LOGG,LOG10VDOP,METALS,C,N,ALPHA)
     OUTPUT:
@@ -200,7 +199,7 @@ def paramIndx(param):
     """
     if not _INDEX_ARRAYS_LOADED: raise ImportError("paramIndx function cannot be used, because the allStar file could not be properly loaded")
     if param.lower() == 'alpha': return _PARAM_SYMBOL.index('o mg si s ca ti')
-    else: 
+    else:
         try:
             return _PARAM_SYMBOL.index(param.lower())
         except ValueError:
@@ -248,7 +247,7 @@ def sigma_XH(elem,Teff=4500.,M_H=0.,SNR=100.,dr=None):
     NAME:
        sigma_XH
     PURPOSE:
-       return uncertainty in a given element at specified effective 
+       return uncertainty in a given element at specified effective
        temperature, metallicity and signal to noise ratio (functional form
        taken from Holtzman et al 2015)
     INPUT:
@@ -322,7 +321,7 @@ def toAspcapGrid(spec,dr=None):
        2015-02-17 - Written - Bovy (IAS)
        2018-02-05 - Updated to account for changing detector ranges - Price-Jones (UofT)
     """
-    apStarBlu_lo,apStarBlu_hi,apStarGre_lo,apStarGre_hi,apStarRed_lo,apStarRed_hi = _apStarPixelLimits(dr=dr)    
+    apStarBlu_lo,apStarBlu_hi,apStarGre_lo,apStarGre_hi,apStarRed_lo,apStarRed_hi = _apStarPixelLimits(dr=dr)
     aspcapBlu_start,aspcapGre_start,aspcapRed_start,aspcapTotal = _aspcapPixelLimits(dr=dr)
     if len(spec.shape) == 2: # (nspec,nwave)
         out= numpy.zeros((spec.shape[0],aspcapTotal),dtype=spec.dtype)
@@ -354,7 +353,7 @@ def toApStarGrid(spec,dr=None):
        2015-02-17 - Written - Bovy (IAS)
        2018-02-05 - Updated to account for changing detector ranges - Price-Jones (UofT)
     """
-    apStarBlu_lo,apStarBlu_hi,apStarGre_lo,apStarGre_hi,apStarRed_lo,apStarRed_hi = _apStarPixelLimits(dr=dr)    
+    apStarBlu_lo,apStarBlu_hi,apStarGre_lo,apStarGre_hi,apStarRed_lo,apStarRed_hi = _apStarPixelLimits(dr=dr)
     aspcapBlu_start,aspcapGre_start,aspcapRed_start,aspcapTotal = _aspcapPixelLimits(dr=dr)
     if len(spec.shape) == 2: # (nspec,nwave)
         out= numpy.zeros((spec.shape[0],8575),dtype=spec.dtype)
@@ -460,14 +459,14 @@ def wv2pix(wv,apStarWavegrid=False,dr=None):
             pixels = apStar_pixel_interp(wv)
         else:
             warnings.warn("wavelength outside allowed wavelength range",RuntimeWarning)
-            return numpy.nan 
+            return numpy.nan
     elif isinstance(wv,tuple):
         if wv[0] >= wvs[0] and wv[1] <= wvs[-1]:
             wvlist = numpy.arange(wv[0],wv[1],wv[2])
             pixels = apStar_pixel_interp(wvlist)
         else:
             warnings.warn("wavelength bounds outside allowed wavelength range",RuntimeWarning)
-            return numpy.nan       
+            return numpy.nan
     elif isinstance(wv,(list,numpy.ndarray)):
         if isinstance(wv,list):
           wv = numpy.array(wv)
@@ -486,9 +485,9 @@ def wv2pix(wv,apStarWavegrid=False,dr=None):
     if apStarWavegrid:
         return pixels.astype(int)
 
-    # If on aspcapStarWavegrid, convert appropriately    
+    # If on aspcapStarWavegrid, convert appropriately
     elif not apStarWavegrid:
-        apStarBlu_lo,apStarBlu_hi,apStarGre_lo,apStarGre_hi,apStarRed_lo,apStarRed_hi = _apStarPixelLimits(dr=dr)    
+        apStarBlu_lo,apStarBlu_hi,apStarGre_lo,apStarGre_hi,apStarRed_lo,apStarRed_hi = _apStarPixelLimits(dr=dr)
         aspcapBlu_start,aspcapGre_start,aspcapRed_start,aspcapTotal = _aspcapPixelLimits(dr=dr)
         # find where pixel list matches detectors
         blue = numpy.where((pixels >= apStarBlu_lo) & (pixels < apStarBlu_hi))

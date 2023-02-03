@@ -28,7 +28,18 @@ try:
                       for v in esutil.__version__.split('.')]
 except ImportError:
     _ESUTIL_LOADED= False
-import fitsio
+try:
+    import fitsio
+    fitsread= fitsio.read
+    fitswrite=fitsio.write
+    headerread=fitsio.read_header
+    _FITSIO_LOADED = True
+except ImportError:
+    import astropy.io.fits as pyfits
+    fitsread= pyfits.getdata
+    fitswrite=pyfits.writeto
+    headerread=pyfits.getheader
+    _FITSIO_LOADED = False
 import tqdm
 from apogee_tools.apogee_hack.tools import path, paramIndx, download
 _ERASESTR= "                                                                                "
@@ -740,16 +751,18 @@ def apLSF(chip,ext=0,dr=None):
     INPUT:
        chip - chip 'a', 'b', or 'c'
        ext= (0) extension to read
-       dr= return the path corresponding to this data release      
+       dr= return the path corresponding to this data release
     OUTPUT:
        contents of HDU ext
     HISTORY:
        2015-03-12 - Written - Bovy (IAS)
     """
+    
     filePath= path.apLSFPath(chip,dr=dr)
     if not os.path.exists(filePath):
         download.apLSF(chip,dr=dr)
-    data= fitsio.read(filePath,ext)
+    data= fitsread(filePath,ext)
+
     return data
 
 def mainIndx(data):
@@ -825,3 +838,4 @@ def remove_duplicates(data):
         tindx[hisnr]= False
         tdata['RA'][nm2[tindx]]= -9999
     return tdata[tdata['RA'] != -9999]
+

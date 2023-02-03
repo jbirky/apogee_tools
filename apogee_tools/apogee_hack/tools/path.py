@@ -252,7 +252,9 @@ def rcsamplePath(dr=None,_old=False):
         elif _APOGEE_REDUX == 'v603': dr= '12'
         elif _APOGEE_REDUX == 'l30e.2': dr= '13'
         elif _APOGEE_REDUX == 'l31c.2': dr= '14'
-        elif _APOGEE_REDUX == 'current': 
+        elif _APOGEE_REDUX == 'l33': dr= '16'
+        elif _APOGEE_REDUX == 'dr17': dr= '17'
+        elif _APOGEE_REDUX == 'current':
             return os.path.join(_APOGEE_DATA,'apogee-rc-current.fits')
         else: raise IOError('No RC catalog available for the %s reduction' % _APOGEE_REDUX)
     if _old:
@@ -360,7 +362,9 @@ def obslogPath(year=None):
     """
     if year is None:
         if _APOGEE_REDUX == 'v402': year= 2
-        elif _APOGEE_REDUX == 'v603': year= 3
+        elif _APOGEE_REDUX == 'v603' or _APOGEE_REDUX == 'l30e.2': year= 3
+        elif _APOGEE_REDUX == 'l31c.2': year= 5
+        elif _APOGEE_REDUX == 'l33': year=7
         else: raise IOError('No default year available for APOGEE_REDUX %s, need to set it by hand' % _APOGEE_REDUX)
     if year == 1 or year == 2:
         return os.path.join(_APOGEE_DATA,
@@ -912,6 +916,9 @@ def apLSFPath(chip,dr='13'):
     elif dr == '14':
         return os.path.join(specReduxPath,'r8','cal','lsf',
                             'apLSF-%s-05440020.fits' % chip)
+    elif dr == '17':
+        return os.path.join(specReduxPath,'cal','lsf',
+                            'apLSF-%s-32900046.fits' % chip) # Is this the right one?
     
 def apogeeSpectroReduxDirPath(dr=None):
     """
@@ -931,8 +938,8 @@ def apogeeSpectroReduxDirPath(dr=None):
         return os.path.join(_APOGEE_DATA,'apogeework',
                             'apogee','spectro','redux')
     elif dr.lower() == '17':
-        return os.path.join(_APOGEE_DATA,'apogee',
-                            'spectro','aspcap','dr17')
+        return os.path.join(_APOGEE_DATA,'dr17', 'apogee',
+                            'spectro','redux','dr17')
     else:
         return os.path.join(_APOGEE_DATA,'dr%s' % dr,
                             'apogee','spectro','redux')
