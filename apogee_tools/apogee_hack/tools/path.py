@@ -157,7 +157,7 @@ def allVisitPath(dr=None,_old=False,mjd=58104):
     PURPOSE:
        returns the path of the relevant file
     INPUT:
-       dr= return the path corresponding to this data release       
+       dr= return the path corresponding to this data release
        mjd= (58104) MJD of version for monthly internal pipeline runs
     OUTPUT:
        path string
@@ -174,6 +174,8 @@ def allVisitPath(dr=None,_old=False,mjd=58104):
     if _old:
         return os.path.join(_APOGEE_DATA,
                             'allVisit-%s.fits' % redux)
+    if dr is 'current':
+        return allStarPath(dr=dr,_old=_old).replace('allStar','allVisit')
     else:
         return allStarPath(dr=dr,_old=_old,mjd=mjd).replace('allStar','allVisit')
 
