@@ -10,10 +10,10 @@ import wget
 db_path = os.environ['APOGEE_DATA'] 
 AP_PATH = db_path
 
-data_releases = {'dr10':'allStar-v304.fits',   'dr11':'allStar-v402.fits', \
-                 'dr12':'allStar-v603.fits',   'dr13':'allStar-l30e.2.fits', \
-                 'dr14':'allStar-l31c.2.fits', 'dr15':'allStar-l31c.2.fits', \
-                 'dr16':'allStar-r12-l33.fits', 'dr17':'allStar-dr17-synspec.fits'} 
+data_releases = {'dr10':'allStar-v304.fits',    'dr11':'allStar-v402.fits', \
+                 'dr12':'allStar-v603.fits',    'dr13':'allStar-l30e.2.fits', \
+                 'dr14':'allStar-l31c.2.fits',  'dr15':'allStar-l31c.2.fits', \
+                 'dr16':'allStar-r12-l33.fits', 'dr17':'allStar-dr17-synspec_rev1.fits'} 
 
 
 def searchStars(**kwargs):
@@ -76,7 +76,7 @@ def searchVisits(**kwargs):
     elif ap_dr == 14: allvisitFile = 'allVisit-l31c.2.fits'
     elif ap_dr == 15: allvisitFile = 'allVisit-l31c.2.fits'
     elif ap_dr == 16: allvisitFile = 'allVisit-r12-l33.fits'
-    elif ap_dr == 17: allvisitFile = 'allVisit-dr17-synspec.fits'
+    elif ap_dr == 17: allvisitFile = 'allVisit-dr17-synspec_rev1.fits'
 
     #print(ap_id, ap_path)
 

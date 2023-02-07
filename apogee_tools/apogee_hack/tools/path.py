@@ -55,6 +55,7 @@ _DR14REDUX='l31c.2'
 _DR16REDUX='l33'
 _DR17REDUX='dr17'
 _CURRENTREDUX='current'
+
 if _APOGEE_REDUX is None:
     _APOGEE_REDUX= _DR12REDUX
 if _APOGEE_APOKASC_REDUX is None:
@@ -271,6 +272,12 @@ def rcsamplePath(dr=None,_old=False):
                                 'cat','apogee-rc-DR%s.fits' % dr)
         elif dr == '14':
             return os.path.join(_APOGEE_DATA,'dr14','apogee','vac','apogee-rc',
+                                'cat','apogee-rc-DR%s.fits' % dr)
+        elif dr == '16':
+            return os.path.join(_APOGEE_DATA,'dr16','apogee','vac','apogee-rc',
+                                'cat','apogee-rc-DR%s.fits' % dr)
+        elif dr == '17':
+            return os.path.join(_APOGEE_DATA,'dr17','apogee','vac','apogee-rc',
                                 'cat','apogee-rc-DR%s.fits' % dr)
 
 def astroNNPath(dr=None):
