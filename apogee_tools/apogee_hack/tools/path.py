@@ -880,21 +880,27 @@ def apWavePath(chip,dr=None):
     """
     if dr is None: dr= _default_dr()
     specReduxPath= apogeeSpectroReduxDirPath(dr=dr)
-    if dr == '10':
+    if str(dr).lower() == '10':
         return os.path.join(specReduxPath,'r3','cal','wave',
-                            'apWave-%s-02420038.fits' % chip)
-    elif dr == '12':
+                            'apWave-%s-02420038.fits' % chip) # Needs to be updated probably
+    elif str(dr).lower() == '12':
         return os.path.join(specReduxPath,'r5','cal','wave',
-                            'apWave-%s-02420038.fits' % chip)
-    elif dr == '13':
+                            'apWave-%s-02420038.fits' % chip) # Needs to be updated probably
+    elif str(dr).lower() == '13':
         return os.path.join(specReduxPath,'r6','cal','wave',
-                            'apWave-%s-02420038.fits' % chip)
-    elif dr == '14':
+                            'apWave-%s-02420038.fits' % chip) # Needs to be updated probably
+    elif str(dr).lower() == '14':
         return os.path.join(specReduxPath,'r8','cal','wave',
-                            'apWave-%s-02420038.fits' % chip)
-    elif dr == '15' or dr == 'current':
+                            'apWave-%s-02420038.fits' % chip) # Needs to be updated probably
+    elif str(dr).lower() == '15':
         return os.path.join(specReduxPath,'r8','cal','wave',
-                            'apWave-%s-02420038.fits' % chip)
+                            'apWave-%s-02420038.fits' % chip) # Needs to be updated probably
+    elif str(dr).lower() == '16':
+        return os.path.join(specReduxPath,'r8','cal','wave',
+                            'apWave-%s-02420038.fits' % chip) # Needs to be updated probably
+    elif str(dr).lower() == '17' or str(dr).lower() == 'current':
+        return os.path.join(specReduxPath,'dr17','cal','wave',
+                            'apWave-%s-31690004.fits' % chip)
     
 def apLSFPath(chip,dr='13'):
     """
@@ -912,19 +918,19 @@ def apLSFPath(chip,dr='13'):
     """
     if dr is None: dr= _default_dr()
     specReduxPath= apogeeSpectroReduxDirPath(dr=dr)
-    if dr == '10':
+    if str(dr).lower() == '10':
         return os.path.join(specReduxPath,'r3','cal','lsf',
                             'apLSF-%s-02490024.fits' % chip)
-    elif dr == '12':
+    elif str(dr).lower() == '12':
         return os.path.join(specReduxPath,'r5','cal','lsf',
                             'apLSF-%s-02490024.fits' % chip)
-    elif dr == '13' or dr == 'current':
+    elif str(dr).lower() == '13':
         return os.path.join(specReduxPath,'r6','cal','lsf',
                             'apLSF-%s-05440020.fits' % chip)
-    elif dr == '14':
+    elif str(dr).lower() == '14':
         return os.path.join(specReduxPath,'r8','cal','lsf',
                             'apLSF-%s-05440020.fits' % chip)
-    elif dr == '17':
+    elif str(dr).lower() == '17' or dr == 'current':
         return os.path.join(specReduxPath,'cal','lsf',
                             'apLSF-%s-32900046.fits' % chip) # Is this the right one?
     
@@ -942,10 +948,10 @@ def apogeeSpectroReduxDirPath(dr=None):
        2014-11-25 - Written - Bovy (IAS)
     """
     if dr is None: dr= _default_dr()
-    if dr.lower() == 'current':
+    if str(dr).lower() == 'current':
         return os.path.join(_APOGEE_DATA,'apogeework',
                             'apogee','spectro','redux')
-    elif dr.lower() == '17':
+    elif str(dr).lower() == '17':
         return os.path.join(_APOGEE_DATA,'dr17', 'apogee',
                             'spectro','redux','dr17')
     else:
@@ -966,10 +972,10 @@ def apogeeSpectroASPCAPDirPath(dr=None):
        2018-01-22 - Written - Bovy (UofT)
     """
     if dr is None: dr= _default_dr()
-    if dr.lower() == 'current':
+    if str(dr).lower() == 'current':
         return os.path.join(_APOGEE_DATA,'apogeework',
                             'apogee','spectro','aspcap')
-    elif dr.lower() == '17':
+    elif str(dr).lower() == '17':
         return os.path.join(_APOGEE_DATA,'dr%s' % dr,
                             'apogee','spectro','aspcap', 'dr17')
     else:
@@ -991,14 +997,14 @@ def apogeeModelSpectroLibraryDirPath(dr=None,lib='GK'):
        2015-01-20 - Written - Bovy (IAS)
     """
     if dr is None: dr= _default_dr()
-    if dr == '12':
+    if str(dr).lower() == '12':
         if lib.lower() == 'gk':
             return os.path.join('speclib','asset','kurucz_filled',
                                 'solarisotopes','asGK_131216_lsfcombo5v6')
         elif lib.lower() == 'f':
             return os.path.join('speclib','asset','kurucz_filled',
                                 'solarisotopes','asF_131216_lsfcombo5v6')
-    elif dr == 'current':
+    elif str(dr).lower() == 'current':
         if lib.lower() == 'msgk':
             return os.path.join('speclib','moog','kurucz_filled',
                                 'solarisotopes','msGK_140529_lsfcombo5v6')
@@ -1018,7 +1024,7 @@ def apogeeModelAtmosphereLibraryDirPath(dr=None,lib='kurucz_filled'):
        2015-02-13 - Written - Bovy (IAS)
     """
     if dr is None: dr= _default_dr()
-    if dr == '12' or dr == 'current':
+    if str(dr).lower() == '12' or str(dr).lower() == 'current':
         if lib.lower() == 'kurucz_filled':
             return os.path.join('speclib','kurucz_filled')
         elif 'marcs' in lib.lower():
