@@ -55,7 +55,6 @@ _DR14REDUX='l31c.2'
 _DR16REDUX='l33'
 _DR17REDUX='dr17'
 _CURRENTREDUX='current'
-
 if _APOGEE_REDUX is None:
     _APOGEE_REDUX= _DR12REDUX
 if _APOGEE_APOKASC_REDUX is None:
@@ -1053,14 +1052,14 @@ def _default_dr():
 
 def _redux_dr(dr=None):
     if dr is None: dr= _default_dr()
-    if dr == '10': return _DR10REDUX
-    elif dr == '11': return _DR11REDUX
-    elif dr == '12': return _DR12REDUX
-    elif dr == '13': return _DR13REDUX
-    elif dr == '14': return _DR14REDUX
-    elif dr == '16': return _DR16REDUX
-    elif dr == '17': return _DR17REDUX
-    elif dr == 'current': return _CURRENTREDUX
+    if str(dr) == '10': return _DR10REDUX
+    elif str(dr) == '11': return _DR11REDUX
+    elif str(dr) == '12': return _DR12REDUX
+    elif str(dr) == '13': return _DR13REDUX
+    elif str(dr) == '14': return _DR14REDUX
+    elif str(dr) == '16': return _DR16REDUX
+    elif str(dr) == '17': return _DR17REDUX
+    elif str(dr) == 'current': return _CURRENTREDUX
     else: raise IOError('No reduction available for DR%s, need to set it by hand' % dr)
 
 # Functions that give the correct string values for model atmosphere files
