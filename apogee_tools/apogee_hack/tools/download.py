@@ -709,15 +709,15 @@ def _download_file(downloadPath,filePath,dr,verbose=False,spider=False):
     return None
 
 def _base_url(dr,rc=False):
-    if dr == '10': return _DR10_URL
-    elif dr == '12': return _DR12_URL
-    elif dr == '13': return _DR13_URL
-    elif dr == '14': return _DR14_URL
-    elif dr == '15': return _DR15_URL
-    elif dr == '16': return _DR16_URL
-    elif dr == '17': return _DR17_URL
+    if str(dr).lower() == '10': return _DR10_URL
+    elif str(dr).lower() == '12': return _DR12_URL
+    elif str(dr).lower() == '13': return _DR13_URL
+    elif str(dr).lower() == '14': return _DR14_URL
+    elif str(dr).lower() == '15': return _DR15_URL
+    elif str(dr).lower() == '16': return _DR16_URL
+    elif str(dr).lower() == '17': return _DR17_URL
     else: return _PROPRIETARY_URL
 
 def _dr_string(dr):
-    if dr == 'current': return 'apogeework'
+    if str(dr).lower() == 'current': return 'apogeework'
     else: return 'dr%s' % dr

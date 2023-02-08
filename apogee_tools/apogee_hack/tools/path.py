@@ -121,28 +121,28 @@ def allStarPath(dr=None,lite=False,_old=False,mjd=58104):
                             'allStar-%s.fits' % redux)
     else:
         specReduxPath= apogeeSpectroReduxDirPath(dr=dr)
-        if dr == '10':
+        if str(dr).lower() == '10':
             return os.path.join(specReduxPath,'r3','s3','a3',
                                 _redux_dr(dr=dr),'allStar-%s.fits' % redux)
-        elif dr == '12':
+        elif str(dr).lower() == '12':
             return os.path.join(specReduxPath,'r5','stars','l25_6d',
                                 _redux_dr(dr=dr),'allStar-%s.fits' % redux)
-        elif dr == '13':
+        elif str(dr).lower() == '13':
             return os.path.join(specReduxPath,'r6','stars','l30e',
                                 _redux_dr(dr=dr),'allStar-%s.fits' % redux)
-        elif dr == '14':
+        elif str(dr).lower() == '14':
             return os.path.join(specReduxPath,'r8','stars','l31c',
                                 _redux_dr(dr=dr),'allStar-%s.fits' % redux)
-        elif dr == '16':
+        elif str(dr).lower() == '16':
             # Think this specReduxPath should work for all DR, but just in case
             specReduxPath= apogeeSpectroASPCAPDirPath(dr=dr)
             return os.path.join(specReduxPath,'r12','l33',
                     'allStar%s-r12-%s.fits' % ('Lite' if lite else '',redux))
-        elif dr == '17':
+        elif str(dr).lower() == '17':
             specReduxPath= apogeeSpectroASPCAPDirPath(dr=dr)
             return os.path.join(specReduxPath,'synspec_rev1',
                     'allStar%s-dr17-synspec_rev1.fits' % ('Lite' if lite else ''))
-        elif dr == 'current':
+        elif str(dr).lower() == 'current':
             specASPCAPPath= apogeeSpectroASPCAPDirPath(dr=dr)
             if not isinstance(mjd, str) and mjd >= 58297:
                 return os.path.join(specASPCAPPath,'r10','l31c',
@@ -169,12 +169,13 @@ def allVisitPath(dr=None,_old=False,mjd=58104):
        2012-05-30 - Edited for ASPCAP - Bovy (IAS)
        2018-01-22 - Edited for new monthly pipeline runs - Bovy (UofT)
     """
+
     if dr is None: dr= _default_dr()
     redux= _redux_dr(dr=dr)
     if _old:
         return os.path.join(_APOGEE_DATA,
                             'allVisit-%s.fits' % redux)
-    if dr is 'current':
+    if str(dr).lower() in ['17', 'current']:
         return allStarPath(dr=dr,_old=_old).replace('allStar','allVisit')
     else:
         return allStarPath(dr=dr,_old=_old,mjd=mjd).replace('allStar','allVisit')
