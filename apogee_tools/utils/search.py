@@ -81,7 +81,10 @@ def searchVisits(**kwargs):
     #print(ap_id, ap_path)
 
     #Read the database file
-    hdu = fits.open(ap_path + '/%s'%allvisitFile)
+    try:
+        hdu = fits.open(ap_path + '/%s'%allvisitFile)
+    except:
+        raise Exception('No allVisit file found. Try running: "ap.apogee_hack.tools.download.allVisit(dr=your_data_release)"')
 
     keys = hdu[1].header
     data = hdu[1].data
